@@ -1,11 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { SearchBar } from '@/components/ui/search-bar';
 import { WalletButton } from '@/components/ui/wallet-button';
-import { Bell, Settings } from 'lucide-react';
+import { NotificationModal } from '@/components/common/notification-modal';
 
 const NAV_ITEMS = [
   { label: 'Borrow', href: '/', scrollTo: 'borrow-section' },
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 export function Header() {
   const pathname = usePathname();
   const { connected } = useWallet();
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: typeof NAV_ITEMS[0]) => {
     if (item.scrollTo) {
@@ -75,14 +77,10 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
             {connected && (
-              <>
-                <button className="p-2 hover:bg-surface rounded-[12px] transition-colors">
-                  <Bell className="w-5 h-5 text-text-secondary" />
-                </button>
-                <button className="p-2 hover:bg-surface rounded-[12px] transition-colors">
-                  <Settings className="w-5 h-5 text-text-secondary" />
-                </button>
-              </>
+              <NotificationModal
+                open={notificationOpen}
+                onOpenChange={setNotificationOpen}
+              />
             )}
             <WalletButton />
           </div>
