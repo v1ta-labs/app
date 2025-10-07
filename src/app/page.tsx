@@ -1,103 +1,218 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { AppLayout } from '@/components/layout';
+import { HeroSection } from '@/components/home/hero-section';
+import { MysticalBranches } from '@/components/home/mystical-branches';
+import { BorrowInterface } from '@/components/borrow/borrow-interface';
+
+export default function HomePage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const borrowSectionRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // Portal animation - grows and fades (slower progression)
+  const portalScale = useTransform(scrollYProgress, [0.15, 0.4, 0.6], [0, 1.8, 0.5]);
+  const portalOpacity = useTransform(scrollYProgress, [0.15, 0.4, 0.6], [0, 1, 0]);
+
+  // Borrow component - scales from center (slower, more dramatic)
+  const borrowScale = useTransform(scrollYProgress, [0.45, 0.7], [0.2, 1]);
+  const borrowOpacity = useTransform(scrollYProgress, [0.45, 0.7], [0, 1]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+            const borrowTab = document.querySelector('[href="/borrow"]');
+            if (borrowTab) {
+              borrowTab.classList.add('animate-pulse');
+              setTimeout(() => {
+                borrowTab.classList.remove('animate-pulse');
+              }, 2000);
+            }
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    if (borrowSectionRef.current) {
+      observer.observe(borrowSectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  // Enable smooth scrolling
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => {
+      document.documentElement.style.scrollBehavior = 'auto';
+    };
+  }, []);
+
+  // Handle hash navigation on load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const id = window.location.hash.substring(1);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <AppLayout>
+      <div ref={containerRef} className="relative">
+        {/* Mystical Branches Background */}
+        <MysticalBranches />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Hero Section */}
+        <div className="relative z-10">
+          <HeroSection />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        {/* Portal Transition */}
+        <motion.div
+          style={{
+            scale: portalScale,
+            opacity: portalOpacity,
+          }}
+          className="fixed inset-0 z-20 pointer-events-none flex items-center justify-center"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <div className="relative w-[800px] h-[800px]">
+            {/* Portal rings - dark green with glow */}
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute inset-0 rounded-full border-2"
+                style={{
+                  scale: 1 + i * 0.15,
+                  opacity: 0.3 - i * 0.04,
+                  borderColor: `rgba(42, 73, 48, ${0.6 - i * 0.1})`,
+                  boxShadow: `0 0 ${30 + i * 10}px rgba(42, 73, 48, ${0.3 - i * 0.05})`,
+                }}
+                animate={{
+                  rotate: i % 2 === 0 ? 360 : -360,
+                  scale: [1 + i * 0.15, 1.15 + i * 0.15, 1 + i * 0.15],
+                }}
+                transition={{
+                  rotate: {
+                    duration: 15 - i * 2,
+                    repeat: Infinity,
+                    ease: 'linear',
+                  },
+                  scale: {
+                    duration: 3 + i * 0.5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  },
+                }}
+              />
+            ))}
+
+            {/* Center glow - dark subtle */}
+            <div className="absolute inset-0 rounded-full bg-gradient-radial from-elevated/30 via-surface/20 to-transparent blur-3xl" />
+
+            {/* Particles - dark green */}
+            {[...Array(30)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1.5 h-1.5 bg-border rounded-full"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                }}
+                animate={{
+                  x: [0, (Math.random() - 0.5) * 600],
+                  y: [0, (Math.random() - 0.5) * 600],
+                  opacity: [0, 0.4, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: i * 0.1,
+                  ease: 'easeOut',
+                }}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Spacer for scroll */}
+        <div className="h-[30vh]" />
+
+        {/* Borrow Section - Scales from Portal Center */}
+        <motion.div
+          id="borrow-section"
+          ref={borrowSectionRef}
+          style={{
+            opacity: borrowOpacity,
+            scale: borrowScale,
+          }}
+          className="relative z-30 min-h-screen flex items-center justify-center px-12 py-12"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <motion.div
+            className="w-full max-w-[650px]"
+            style={{
+              transformOrigin: 'center center',
+            }}
+          >
+            {/* Title with staggered fade-in */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="mb-8"
+            >
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="text-2xl font-bold text-text-primary mb-2"
+              >
+                Borrow VUSD
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="text-sm text-text-tertiary"
+              >
+                Deposit collateral and borrow against your assets
+              </motion.p>
+            </motion.div>
+
+            {/* Borrow interface with entrance animation */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 0.8,
+                delay: 0.5,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <BorrowInterface />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </div>
+    </AppLayout>
   );
 }
