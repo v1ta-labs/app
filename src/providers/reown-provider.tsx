@@ -7,9 +7,11 @@ import { projectId, metadata, solanaWeb3JsAdapter, networks, features } from '@/
 // Create the modal only once
 createAppKit({
   adapters: [solanaWeb3JsAdapter],
+  // @ts-expect-error - Reown network type mismatch
   networks,
   metadata,
   projectId,
+  // @ts-expect-error - Reown features type mismatch
   features,
 });
 

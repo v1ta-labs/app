@@ -69,34 +69,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
 
             {/* Wallet List */}
             <div className="space-y-2 mb-4">
-              {/* Reown AppKit - Social Login & WalletConnect */}
-              <button
-                onClick={handleReownClick}
-                className={cn(
-                  'w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
-                  'hover:border-primary hover:bg-primary/5 hover:scale-[1.01]',
-                  'border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10'
-                )}
-              >
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50 group-hover:border-primary transition-all">
-                  <Zap className="w-7 h-7 text-primary" />
-                </div>
-                <div className="flex-1 text-left">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold text-text-primary text-sm">
-                      Social Login & WalletConnect
-                    </span>
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-primary/20 text-primary rounded uppercase tracking-wider">
-                      Recommended
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-text-tertiary">
-                    Google, Email, X, Discord + 600+ wallets
-                  </span>
-                </div>
-                <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-              </button>
-
+              {/* Installed Wallets First */}
               {installedWallets.length > 0 && (
                 <>
                   {installedWallets.map((wallet) => (
@@ -133,6 +106,29 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                   ))}
                 </>
               )}
+
+              {/* Reown AppKit - Social Login & WalletConnect */}
+              <button
+                onClick={handleReownClick}
+                className={cn(
+                  'w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
+                  'hover:border-primary hover:bg-primary/5 hover:scale-[1.01]',
+                  'border-border/50 bg-elevated/50'
+                )}
+              >
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center border border-border/30 group-hover:border-primary/50 transition-all">
+                  <Zap className="w-7 h-7 text-primary" />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-semibold text-text-primary text-sm">
+                    Social Login & WalletConnect
+                  </span>
+                  <div className="text-[11px] text-text-tertiary mt-0.5">
+                    Google, Email, X, Discord + 600+ wallets
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-text-tertiary group-hover:text-primary transition-colors group-hover:translate-x-1 transition-transform" />
+              </button>
 
               {installedWallets.length > 0 && otherWallets.length > 0 && (
                 <>

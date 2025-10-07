@@ -1,58 +1,57 @@
-import { Program, AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 export class VitaClient {
   programId: PublicKey;
 
   constructor(
-    connection: Connection,
+    _connection: Connection,
     programId: string | PublicKey,
-    wallet?: any
+    _wallet?: unknown
   ) {
     this.programId = typeof programId === 'string'
       ? new PublicKey(programId)
       : programId;
   }
 
-  async initializePool(params: {}) {
+  async initializePool(_params: Record<string, never>) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async deposit(params: {
+  async deposit(_params: {
     amount: number;
   }) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async borrow(params: {
+  async borrow(_params: {
     amount: number;
   }) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async repay(params: {
+  async repay(_params: {
     amount: number;
   }) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async withdraw(params: {
+  async withdraw(_params: {
     amount: number;
   }) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async liquidate(params: {
+  async liquidate(_params: {
     position: PublicKey;
   }) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async getUserPosition(userPubkey: PublicKey) {
+  async getUserPosition(_userPubkey: PublicKey) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 
-  async getPoolData(poolPubkey: PublicKey) {
+  async getPoolData(_poolPubkey: PublicKey) {
     throw new Error('Not implemented - add your Anchor program logic');
   }
 }

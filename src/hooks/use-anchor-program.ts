@@ -23,7 +23,7 @@ export function useAnchorProgram<T extends Idl>(
 
     const provider = new AnchorProvider(
       connection,
-      dummyWallet as any,
+      dummyWallet as unknown as AnchorProvider['wallet'],
       { commitment: 'confirmed' }
     );
 
@@ -31,7 +31,7 @@ export function useAnchorProgram<T extends Idl>(
       ? new PublicKey(programId)
       : programId;
 
-    return new Program(idl, programIdKey, provider);
+    return new Program(idl, provider);
   }, [connection, wallet.publicKey, wallet.signTransaction, wallet.signAllTransactions, programId, idl]);
 
   return program as Program<T> | null;

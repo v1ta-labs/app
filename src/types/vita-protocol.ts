@@ -108,4 +108,4 @@ export interface LiquidationEvent {
   timestamp: BN;
 }
 
-export type VitaProtocolIDL = any;
+export type VitaProtocolIDL = unknown;

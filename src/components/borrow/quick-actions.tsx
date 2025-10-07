@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Zap, History, TrendingUp, FileText } from 'lucide-react';
+import { History, TrendingUp, FileText } from 'lucide-react';
 
 const ACTIONS = [
   { label: 'My Positions', icon: History, href: '/positions' },

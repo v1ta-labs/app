@@ -164,7 +164,7 @@ export default function ReferralsPage() {
               />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {TIERS.map((tier, index) => (
+              {TIERS.map((tier) => (
                 <div
                   key={tier.name}
                   className={`text-center p-3 rounded-xl border transition-all ${

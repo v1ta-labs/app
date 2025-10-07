@@ -27,8 +27,8 @@ export default function StabilityPoolPage() {
 
   return (
     <AppLayout>
-      <Card className="mb-6">
-        <CardContent padding="md">
+      <Card className="mb-6" padding="md">
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <span className="text-sm text-text-secondary">Total Pool</span>

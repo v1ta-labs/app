@@ -47,7 +47,7 @@ export function useSolanaBalance() {
         connection.removeAccountChangeListener(subscriptionId);
       };
     }
-  }, [publicKey, connection]);
+  }, [publicKey, connection, fetchBalance]);
 
   return {
     balance,
