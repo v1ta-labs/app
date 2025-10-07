@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Wallet } from 'lucide-react';
@@ -10,7 +11,9 @@ import { formatUSD } from '@/lib/utils/formatters';
 import { WalletModal } from '@/components/common/wallet-modal';
 
 export function HeroSection() {
-  const { connected } = useWallet();
+  const { connected: solanaConnected } = useWallet();
+  const { isConnected: reownConnected } = useAppKitAccount();
+  const connected = solanaConnected || reownConnected;
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   return (
@@ -30,9 +33,7 @@ export function HeroSection() {
         </p>
       </motion.div>
 
-      {/* Wallet Gated Section - Portfolio, Assets, Liabilities */}
       <div className="w-full max-w-4xl mb-20 relative">
-        {/* Portfolio Overview */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -124,7 +125,6 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* Single Connect Wallet Overlay */}
         {!connected && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 backdrop-blur-lg bg-background/40 rounded-2xl" />

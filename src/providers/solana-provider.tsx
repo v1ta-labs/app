@@ -12,7 +12,6 @@ import {
   TrustWalletAdapter,
   LedgerWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
-import { WalletConnectWalletAdapter } from '@solana/wallet-adapter-walletconnect';
 import { RPC_ENDPOINT, CURRENT_NETWORK } from '@/constants/solana';
 
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -28,18 +27,6 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     () => [
       new PhantomWalletAdapter(),
       new SolflareWalletAdapter({ network }),
-      new WalletConnectWalletAdapter({
-        network: network as WalletAdapterNetwork.Mainnet | WalletAdapterNetwork.Devnet,
-        options: {
-          projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '9b1a9c8e3f5e4c5f5f4c5f5f4c5f5f4c',
-          metadata: {
-            name: 'V1ta Protocol',
-            description: 'The Capital-Efficient CDP Protocol',
-            url: 'https://v1ta.xyz',
-            icons: ['https://v1ta.xyz/icon.png'],
-          },
-        },
-      }),
       new CoinbaseWalletAdapter(),
       new Coin98WalletAdapter(),
       new TrustWalletAdapter(),

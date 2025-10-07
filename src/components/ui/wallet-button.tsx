@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
 import { useSolanaBalance } from '@/hooks';
 import { formatNumber } from '@/lib/utils/formatters';
 import { ChevronDown, Check, Copy, LogOut, Wallet } from 'lucide-react';
@@ -9,7 +10,14 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { WalletModal } from '@/components/common/wallet-modal';
 
 export function WalletButton() {
-  const { connected, publicKey, disconnect } = useWallet();
+  const { connected: solanaConnected, publicKey: solanaPublicKey, disconnect: disconnectSolana } = useWallet();
+  const { isConnected: reownConnected, address: reownAddress } = useAppKitAccount();
+  const { disconnect: disconnectReown } = useDisconnect();
+
+  const connected = solanaConnected || reownConnected;
+  const publicKey = solanaConnected ? solanaPublicKey : null;
+  const walletAddress = solanaConnected ? solanaPublicKey?.toString() : reownAddress;
+
   const { balance } = useSolanaBalance();
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -20,10 +28,19 @@ export function WalletButton() {
   }, []);
 
   const handleCopy = () => {
-    if (publicKey) {
-      navigator.clipboard.writeText(publicKey.toString());
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDisconnect = () => {
+    if (solanaConnected) {
+      disconnectSolana();
+    }
+    if (reownConnected) {
+      disconnectReown();
     }
   };
 
@@ -50,8 +67,8 @@ export function WalletButton() {
     );
   }
 
-  const address = publicKey?.toString() || '';
-  const shortAddress = `${address.slice(0, 4)}...${address.slice(-4)}`;
+  const address = walletAddress || '';
+  const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : '';
 
   return (
     <div className="flex items-center gap-2">
@@ -109,7 +126,7 @@ export function WalletButton() {
             {/* Disconnect */}
             <DropdownMenu.Item
               className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-error/10 cursor-pointer outline-none transition-all text-error group"
-              onSelect={disconnect}
+              onSelect={handleDisconnect}
             >
               <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
               <span className="text-sm font-medium">Disconnect</span>

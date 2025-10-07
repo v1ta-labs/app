@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 import * as Dialog from '@radix-ui/react-dialog';
-import { X, ExternalLink, ArrowRight, ChevronDown } from 'lucide-react';
+import { X, ExternalLink, ArrowRight, ChevronDown, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { useAppKit } from '@reown/appkit/react';
 
 interface WalletModalProps {
   open: boolean;
@@ -14,15 +15,19 @@ interface WalletModalProps {
 
 export function WalletModal({ open, onClose }: WalletModalProps) {
   const { wallets, select, connected } = useWallet();
+  const { open: openReownModal } = useAppKit();
 
   const handleWalletClick = async (walletName: WalletName) => {
     select(walletName);
     onClose();
   };
 
-  if (connected) {
-    return null;
-  }
+  const handleReownClick = () => {
+    openReownModal();
+    onClose();
+  };
+
+  const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   const installedWallets = wallets.filter(
     (w) => w.readyState === WalletReadyState.Installed || w.readyState === WalletReadyState.Loadable
@@ -32,7 +37,9 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
     (w) => w.readyState !== WalletReadyState.Installed && w.readyState !== WalletReadyState.Loadable
   );
 
-  const [showMoreOptions, setShowMoreOptions] = useState(false);
+  if (connected) {
+    return null;
+  }
 
   return (
     <Dialog.Root open={open} onOpenChange={onClose}>
@@ -62,7 +69,35 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
 
             {/* Wallet List */}
             <div className="space-y-2 mb-4">
-              {installedWallets.length > 0 ? (
+              {/* Reown AppKit - Social Login & WalletConnect */}
+              <button
+                onClick={handleReownClick}
+                className={cn(
+                  'w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
+                  'hover:border-primary hover:bg-primary/5 hover:scale-[1.01]',
+                  'border-primary/30 bg-gradient-to-r from-primary/5 to-primary/10'
+                )}
+              >
+                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/50 group-hover:border-primary transition-all">
+                  <Zap className="w-7 h-7 text-primary" />
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold text-text-primary text-sm">
+                      Social Login & WalletConnect
+                    </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold bg-primary/20 text-primary rounded uppercase tracking-wider">
+                      Recommended
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-text-tertiary">
+                    Google, Email, X, Discord + 600+ wallets
+                  </span>
+                </div>
+                <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {installedWallets.length > 0 && (
                 <>
                   {installedWallets.map((wallet) => (
                     <button
@@ -96,7 +131,11 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                       <ArrowRight className="w-4 h-4 text-text-tertiary group-hover:text-primary transition-colors group-hover:translate-x-1 transition-transform" />
                     </button>
                   ))}
+                </>
+              )}
 
+              {installedWallets.length > 0 && otherWallets.length > 0 && (
+                <>
                   {/* More Options Toggle */}
                   <div className="mt-3">
                     <button
@@ -142,7 +181,9 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                     )}
                   </div>
                 </>
-              ) : (
+              )}
+
+              {installedWallets.length === 0 && (
                 <div className="text-center py-6">
                   <div className="w-14 h-14 rounded-xl bg-elevated border border-border/50 flex items-center justify-center mx-auto mb-3">
                     <svg className="w-7 h-7 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,7 +221,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
             {/* Footer */}
             <div className="pt-4 border-t border-border/30">
               <p className="text-[10px] text-text-tertiary text-center leading-relaxed">
-                By connecting, you agree to V1ta Protocol's{' '}
+                By connecting, you agree to V1ta Protocol&apos;s{' '}
                 <a href="/terms" className="text-primary hover:text-primary-hover font-medium transition-colors">
                   Terms of Service
                 </a>
