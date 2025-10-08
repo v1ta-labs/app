@@ -6,50 +6,18 @@ import { Button } from '@/components/ui/button';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
 import { ArrowUpRight, TrendingUp, AlertTriangle, Edit, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-const POSITIONS = [
-  {
-    id: 1,
-    type: 'Borrow',
-    collateral: 'SOL',
-    collateralAmount: 50,
-    collateralValue: 9787.50,
-    borrowed: 6000,
-    healthFactor: 163,
-    ltv: 61.3,
-    interestRate: 0.5,
-    status: 'healthy',
-  },
-  {
-    id: 2,
-    type: 'Borrow',
-    collateral: 'jitoSOL',
-    collateralAmount: 25,
-    collateralValue: 5016.25,
-    borrowed: 3200,
-    healthFactor: 157,
-    ltv: 63.8,
-    interestRate: 0.5,
-    status: 'healthy',
-  },
-  {
-    id: 3,
-    type: 'Borrow',
-    collateral: 'mSOL',
-    collateralAmount: 15,
-    collateralValue: 2958,
-    borrowed: 2100,
-    healthFactor: 141,
-    ltv: 71.0,
-    interestRate: 0.5,
-    status: 'warning',
-  },
-];
+import { useRouter } from 'next/navigation';
 
 export default function PositionsPage() {
-  const totalCollateral = POSITIONS.reduce((sum, p) => sum + p.collateralValue, 0);
-  const totalBorrowed = POSITIONS.reduce((sum, p) => sum + p.borrowed, 0);
-  const avgHealthFactor = POSITIONS.reduce((sum, p) => sum + p.healthFactor, 0) / POSITIONS.length;
+  const router = useRouter();
+  // TODO: Replace with actual positions from Solana/backend
+  const positions: any[] = [];
+
+  const totalCollateral = positions.reduce((sum, p) => sum + p.collateralValue, 0);
+  const totalBorrowed = positions.reduce((sum, p) => sum + p.borrowed, 0);
+  const avgHealthFactor = positions.length > 0
+    ? positions.reduce((sum, p) => sum + p.healthFactor, 0) / positions.length
+    : 0;
   const availableToBorrow = totalCollateral * 0.6667 - totalBorrowed;
 
   return (
@@ -96,11 +64,21 @@ export default function PositionsPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-text-primary">Active Positions</h2>
-              <div className="text-sm text-text-tertiary">{POSITIONS.length} positions</div>
+              <div className="text-sm text-text-tertiary">{positions.length} positions</div>
             </div>
 
             <div className="space-y-4">
-              {POSITIONS.map((position, index) => (
+              {positions.length === 0 ? (
+                <Card className="p-12 backdrop-blur-xl bg-surface/70 border-border/50 text-center">
+                  <div className="max-w-md mx-auto">
+                    <h3 className="text-lg font-bold text-text-primary mb-2">No positions yet</h3>
+                    <p className="text-sm text-text-tertiary">
+                      Open your first position to start borrowing VUSD against your collateral
+                    </p>
+                  </div>
+                </Card>
+              ) : (
+                positions.map((position, index) => (
                 <motion.div
                   key={position.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -197,7 +175,7 @@ export default function PositionsPage() {
                     </div>
                   </Card>
                 </motion.div>
-              ))}
+              )))}
             </div>
           </div>
 
@@ -208,7 +186,7 @@ export default function PositionsPage() {
               <p className="text-sm text-text-tertiary mb-4">
                 Deposit collateral and borrow VUSD to maximize your capital efficiency
               </p>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => router.push('/#borrow-section')}>
                 <ArrowUpRight className="w-4 h-4" />
                 Create Position
               </Button>
