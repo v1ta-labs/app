@@ -35,9 +35,20 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
     [network]
   );
 
+  const onError = useMemo(
+    () => (error: Error) => {
+      if (error.name === 'WalletConnectionError') {
+        // User rejected the connection, silently ignore
+        return;
+      }
+      console.error('Wallet error:', error);
+    },
+    []
+  );
+
   return (
     <ConnectionProvider endpoint={RPC_ENDPOINT}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} autoConnect onError={onError}>
         <WalletModalProvider>
           {children}
         </WalletModalProvider>

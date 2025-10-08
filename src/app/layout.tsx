@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "V1ta Protocol - Solana Lending & Borrowing",
   description: "Decentralized lending protocol on Solana. Borrow VUSD against your SOL collateral with zero interest.",
   keywords: ["Solana", "DeFi", "Lending", "Borrowing", "VUSD", "Stablecoin"],
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

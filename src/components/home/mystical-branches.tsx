@@ -29,7 +29,7 @@ export function MysticalBranches() {
     window.addEventListener('resize', resize);
 
     const nodes: Node[] = [];
-    const maxNodes = 60;
+    const maxNodes = 40;
     const connections: Array<[Node, Node]> = [];
 
     const spawnNode = () => {
@@ -72,7 +72,7 @@ export function MysticalBranches() {
       });
     };
 
-    const initialNodes = 2 + Math.floor(Math.random() * 2);
+    const initialNodes = 3 + Math.floor(Math.random() * 4);
     for (let i = 0; i < initialNodes; i++) {
       spawnNode();
     }
@@ -130,7 +130,7 @@ export function MysticalBranches() {
           const dy = other.y - node.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 250 && Math.random() > 0.85) {
+          if (dist < 350 && Math.random() > 0.92) {
             connections.push([node, other]);
           }
         }

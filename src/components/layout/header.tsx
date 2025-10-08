@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { SearchBar } from '@/components/ui/search-bar';
@@ -42,9 +43,13 @@ export function Header() {
         <div className="flex h-16 items-center gap-8 max-w-[1600px] mx-auto">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <span className="text-lg font-bold text-primary">V</span>
-            </div>
+            <Image
+              src="/logo-l-t.png"
+              alt="V1ta Logo"
+              width={32}
+              height={32}
+              className="rounded-lg"
+            />
             <span className="text-lg font-semibold">v1ta</span>
           </Link>
 

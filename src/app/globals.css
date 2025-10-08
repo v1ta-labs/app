@@ -4,10 +4,10 @@
 
 :root {
   /* Background - Dark, scary forest depths */
-  --base: #0A1824; /* Chinese Black - deepest background */
-  --surface: #0F2A38; /* Yankees Blue - card surfaces */
-  --elevated: #1D3C43; /* Japanese Indigo - elevated elements */
-  --border: #2A4930; /* Kombu Green - borders with green tint */
+  --base: #050f05; /* Even darker - almost pure black with subtle green */
+  --surface: #0A1824; /* Chinese Black - card surfaces */
+  --elevated: #0F2A38; /* Yankees Blue - elevated elements */
+  --border: #1D3C43; /* Japanese Indigo - borders */
 
   /* Grey options for subtle variations */
   --grey-darkest: #092409; /* Chinese Black (green-tinted) */
