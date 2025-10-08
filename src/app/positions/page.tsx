@@ -8,10 +8,23 @@ import { ArrowUpRight, TrendingUp, AlertTriangle, Edit, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
+interface Position {
+  id: string;
+  type: string;
+  collateral: string;
+  collateralAmount: number;
+  collateralValue: number;
+  borrowed: number;
+  interestRate: number;
+  healthFactor: number;
+  status: 'healthy' | 'warning' | 'liquidation';
+  ltv: number;
+}
+
 export default function PositionsPage() {
   const router = useRouter();
   // TODO: Replace with actual positions from Solana/backend
-  const positions: any[] = [];
+  const positions: Position[] = [];
 
   const totalCollateral = positions.reduce((sum, p) => sum + p.collateralValue, 0);
   const totalBorrowed = positions.reduce((sum, p) => sum + p.borrowed, 0);
