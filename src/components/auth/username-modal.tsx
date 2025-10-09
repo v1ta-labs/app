@@ -86,11 +86,15 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
   return (
     <Modal
       open={open}
-      onOpenChange={onClose ? () => onClose() : undefined}
+      onOpenChange={(isOpen) => {
+        if (!isOpen && onClose) {
+          onClose();
+        }
+      }}
       size="sm"
-      showClose={!!onClose}
-      closeOnOverlayClick={false}
-      closeOnEscape={false}
+      showClose={true}
+      closeOnOverlayClick={true}
+      closeOnEscape={true}
     >
       <ModalHeader centered>
         <ModalTitle>Welcome to v1ta</ModalTitle>

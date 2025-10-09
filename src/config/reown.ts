@@ -12,11 +12,14 @@ export const metadata = {
   icons: ['https://v1ta.fi/logo.png'],
 };
 
+// Configure default chain with explicit RPC
+const defaultChain = {
+  ...solanaDevnet,
+  rpcUrl: 'https://api.devnet.solana.com',
+};
+
 export const networks = [
-  {
-    ...solanaDevnet,
-    rpcUrl: 'https://api.devnet.solana.com',
-  },
+  defaultChain,
   {
     ...solana,
     rpcUrl: 'https://api.mainnet-beta.solana.com',

@@ -118,6 +118,8 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
       if (res.ok) {
         onClose();
         onDisconnect();
+        // Redirect to home page after account deletion
+        window.location.href = '/';
       }
     } finally {
       setDeleting(false);
