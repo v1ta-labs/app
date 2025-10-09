@@ -28,10 +28,30 @@ enum TransactionType {
   REDEMPTION
 }
 
+model User {
+  id              String    @id @default(cuid())
+  walletAddress   String    @unique
+  username        String    @unique
+  email           String?
+  emailVerified   Boolean   @default(false)
+  avatar          String?
+  bio             String?
+  twitter         String?
+  createdAt       DateTime  @default(now())
+  lastLoginAt     DateTime  @default(now())
+
+  positions       Position[]
+  transactions    Transaction[]
+
+  @@index([walletAddress])
+  @@index([username])
+}
+
 model Position {
   id                String         @id @default(cuid())
   pubkey            String         @unique
   owner             String
+  user              User?          @relation(fields: [owner], references: [walletAddress])
   collateralType    CollateralType
   collateralAmount  Float
   debt              Float
@@ -56,6 +76,7 @@ model Transaction {
   position          Position?       @relation(fields: [positionId], references: [id])
 
   owner             String
+  user              User?           @relation(fields: [owner], references: [walletAddress])
   collateralType    CollateralType?
   collateralAmount  Float?
   collateralAdded   Float?
