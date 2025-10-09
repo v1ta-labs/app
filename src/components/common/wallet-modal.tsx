@@ -30,11 +30,11 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
 
   const installedWallets = wallets.filter(
-    (w) => w.readyState === WalletReadyState.Installed || w.readyState === WalletReadyState.Loadable
+    w => w.readyState === WalletReadyState.Installed || w.readyState === WalletReadyState.Loadable
   );
 
   const otherWallets = wallets.filter(
-    (w) => w.readyState !== WalletReadyState.Installed && w.readyState !== WalletReadyState.Loadable
+    w => w.readyState !== WalletReadyState.Installed && w.readyState !== WalletReadyState.Loadable
   );
 
   if (connected) {
@@ -53,9 +53,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                 <Dialog.Title className="text-xl font-bold text-text-primary mb-0.5">
                   Connect Wallet
                 </Dialog.Title>
-                <p className="text-xs text-text-tertiary">
-                  Choose your wallet to get started
-                </p>
+                <p className="text-xs text-text-tertiary">Choose your wallet to get started</p>
               </div>
               <Dialog.Close asChild>
                 <button
@@ -72,7 +70,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
               {/* Installed Wallets First */}
               {installedWallets.length > 0 && (
                 <>
-                  {installedWallets.map((wallet) => (
+                  {installedWallets.map(wallet => (
                     <button
                       key={wallet.adapter.name}
                       onClick={() => handleWalletClick(wallet.adapter.name as WalletName)}
@@ -139,16 +137,18 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                       className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-elevated/50 text-xs font-medium text-text-secondary hover:text-text-primary transition-all"
                     >
                       <span>More options</span>
-                      <ChevronDown className={cn(
-                        "w-3.5 h-3.5 transition-transform duration-200",
-                        showMoreOptions ? "rotate-180" : ""
-                      )} />
+                      <ChevronDown
+                        className={cn(
+                          'w-3.5 h-3.5 transition-transform duration-200',
+                          showMoreOptions ? 'rotate-180' : ''
+                        )}
+                      />
                     </button>
 
                     {/* Other Wallets */}
                     {showMoreOptions && (
                       <div className="space-y-1.5 mt-2 animate-in slide-in-from-top-2 duration-200">
-                        {otherWallets.map((wallet) => (
+                        {otherWallets.map(wallet => (
                           <button
                             key={wallet.adapter.name}
                             onClick={() => handleWalletClick(wallet.adapter.name as WalletName)}
@@ -182,11 +182,23 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
               {installedWallets.length === 0 && (
                 <div className="text-center py-6">
                   <div className="w-14 h-14 rounded-xl bg-elevated border border-border/50 flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-7 h-7 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <svg
+                      className="w-7 h-7 text-text-tertiary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-text-primary mb-1.5">No wallets detected</h3>
+                  <h3 className="text-sm font-semibold text-text-primary mb-1.5">
+                    No wallets detected
+                  </h3>
                   <p className="text-xs text-text-tertiary mb-4">
                     Install a Solana wallet to connect to V1ta Protocol
                   </p>
@@ -206,7 +218,9 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                       rel="noopener noreferrer"
                       className="flex items-center justify-between px-3 py-2.5 bg-elevated hover:bg-surface rounded-lg transition-all border border-border/50 hover:border-primary/50 group"
                     >
-                      <span className="text-xs font-medium text-text-primary">Install Solflare</span>
+                      <span className="text-xs font-medium text-text-primary">
+                        Install Solflare
+                      </span>
                       <ExternalLink className="w-3.5 h-3.5 text-text-tertiary group-hover:text-primary transition-colors" />
                     </a>
                   </div>
@@ -218,11 +232,17 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
             <div className="pt-4 border-t border-border/30">
               <p className="text-[10px] text-text-tertiary text-center leading-relaxed">
                 By connecting, you agree to V1ta Protocol&apos;s{' '}
-                <a href="/terms" className="text-primary hover:text-primary-hover font-medium transition-colors">
+                <a
+                  href="/terms"
+                  className="text-primary hover:text-primary-hover font-medium transition-colors"
+                >
                   Terms of Service
-                </a>
-                {' '}and{' '}
-                <a href="/privacy" className="text-primary hover:text-primary-hover font-medium transition-colors">
+                </a>{' '}
+                and{' '}
+                <a
+                  href="/privacy"
+                  className="text-primary hover:text-primary-hover font-medium transition-colors"
+                >
                   Privacy Policy
                 </a>
               </p>

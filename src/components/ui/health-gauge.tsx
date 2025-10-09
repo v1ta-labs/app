@@ -25,23 +25,20 @@ export function HealthGauge({ value }: HealthGaugeProps) {
     <div className="space-y-2">
       <div className="h-2 bg-surface rounded-full overflow-hidden">
         <div
-          className={cn(
-            'h-full rounded-full transition-all duration-500',
-            getColor()
-          )}
+          className={cn('h-full rounded-full transition-all duration-500', getColor())}
           style={{ width: `${displayValue}%` }}
         />
       </div>
       <div className="flex items-center justify-between text-xs">
-        <span className={cn(
-          'font-semibold',
-          value >= 150 ? 'text-success' : value >= 120 ? 'text-warning' : 'text-error'
-        )}>
+        <span
+          className={cn(
+            'font-semibold',
+            value >= 150 ? 'text-success' : value >= 120 ? 'text-warning' : 'text-error'
+          )}
+        >
           {getLabel()}
         </span>
-        <span className="text-text-tertiary">
-          Liquidation at 110%
-        </span>
+        <span className="text-text-tertiary">Liquidation at 110%</span>
       </div>
     </div>
   );

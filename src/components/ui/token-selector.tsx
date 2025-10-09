@@ -29,20 +29,16 @@ export function TokenSelector({ selected, tokens, onSelect }: TokenSelectorProps
       >
         <span className="text-lg">{selected.icon}</span>
         <span className="font-semibold text-text-primary">{selected.symbol}</span>
-        <ChevronDown className={cn(
-          'w-4 h-4 text-text-secondary transition-transform',
-          isOpen && 'rotate-180'
-        )} />
+        <ChevronDown
+          className={cn('w-4 h-4 text-text-secondary transition-transform', isOpen && 'rotate-180')}
+        />
       </button>
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute top-full left-0 mt-2 w-64 bg-surface border border-border rounded-[16px] shadow-xl z-50 overflow-hidden">
-            {tokens.map((token) => (
+            {tokens.map(token => (
               <button
                 key={token.symbol}
                 onClick={() => {
@@ -65,9 +61,7 @@ export function TokenSelector({ selected, tokens, onSelect }: TokenSelectorProps
                   <div className="text-sm font-medium text-text-primary">
                     ${token.price.toFixed(2)}
                   </div>
-                  <div className="text-xs text-text-tertiary">
-                    {token.balance.toFixed(4)}
-                  </div>
+                  <div className="text-xs text-text-tertiary">{token.balance.toFixed(4)}</div>
                 </div>
               </button>
             ))}

@@ -62,9 +62,7 @@ export function StakingPositions() {
 
           <div>
             <p className="text-sm text-text-secondary mb-1">Current APY</p>
-            <p className="text-2xl font-bold text-success">
-              {MOCK_STAKING_POSITION.apy}%
-            </p>
+            <p className="text-2xl font-bold text-success">{MOCK_STAKING_POSITION.apy}%</p>
           </div>
 
           <div>
@@ -101,9 +99,7 @@ export function StakingPositions() {
                     day: 'numeric',
                     year: 'numeric',
                   })}
-                  <span className="text-sm text-text-tertiary ml-2">
-                    ({daysUntilUnlock} days)
-                  </span>
+                  <span className="text-sm text-text-tertiary ml-2">({daysUntilUnlock} days)</span>
                 </p>
               </div>
             </div>

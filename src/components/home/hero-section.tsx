@@ -26,11 +26,11 @@ export function HeroSection() {
         className="text-center mb-20"
       >
         <h1 className="text-5xl md:text-6xl font-bold mb-4 text-text-primary leading-tight">
-          Borrow from the depths.<br />Survive the storm.
+          Borrow from the depths.
+          <br />
+          Survive the storm.
         </h1>
-        <p className="text-sm text-text-tertiary">
-          v1ta protocol
-        </p>
+        <p className="text-sm text-text-tertiary">v1ta protocol</p>
       </motion.div>
 
       <div className="w-full max-w-4xl mb-20 relative">
@@ -96,7 +96,9 @@ export function HeroSection() {
               <div className="space-y-2.5">
                 <div className="pt-2.5 mt-1">
                   <div className="flex items-center justify-between">
-                    <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">Total Assets</div>
+                    <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+                      Total Assets
+                    </div>
                     <div className="text-base font-bold text-text-primary">{formatUSD(0)}</div>
                   </div>
                 </div>
@@ -116,7 +118,9 @@ export function HeroSection() {
               <div className="space-y-2.5">
                 <div className="pt-2.5 mt-1">
                   <div className="flex items-center justify-between">
-                    <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">Total Debt</div>
+                    <div className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+                      Total Debt
+                    </div>
                     <div className="text-base font-bold text-text-primary">{formatUSD(0)}</div>
                   </div>
                 </div>
@@ -128,10 +132,7 @@ export function HeroSection() {
         {!connected && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 backdrop-blur-sm bg-background/40 rounded-2xl" />
-            <Button
-              className="shadow-lg relative z-20"
-              onClick={() => setIsWalletModalOpen(true)}
-            >
+            <Button className="shadow-lg relative z-20" onClick={() => setIsWalletModalOpen(true)}>
               <Wallet className="w-4 h-4 mr-2" />
               Connect wallet to view
             </Button>

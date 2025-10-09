@@ -42,18 +42,16 @@ export function CollateralPanel() {
       <div className="space-y-4">
         <h3 className="text-base font-semibold text-text-primary">Deposit Collateral</h3>
         <div>
-          <label className="block text-sm text-text-secondary mb-2">
-            Select Asset
-          </label>
+          <label className="block text-sm text-text-secondary mb-2">Select Asset</label>
           <select
             value={selectedAsset.symbol}
-            onChange={(e) => {
-              const asset = ASSETS.find((a) => a.symbol === e.target.value);
+            onChange={e => {
+              const asset = ASSETS.find(a => a.symbol === e.target.value);
               if (asset) setSelectedAsset(asset);
             }}
             className="w-full h-12 px-4 bg-elevated border border-border rounded-[16px] text-text-primary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
           >
-            {ASSETS.map((asset) => (
+            {ASSETS.map(asset => (
               <option key={asset.symbol} value={asset.symbol}>
                 {asset.symbol} - {asset.name}
               </option>
@@ -90,9 +88,7 @@ export function CollateralPanel() {
           {numericAmount > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-text-tertiary">Value:</span>
-              <span className="text-text-primary">
-                {formatUSD(usdValue)}
-              </span>
+              <span className="text-text-primary">{formatUSD(usdValue)}</span>
             </div>
           )}
         </div>

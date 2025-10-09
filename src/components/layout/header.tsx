@@ -21,7 +21,7 @@ export function Header() {
   const { connected } = useWallet();
   const [notificationOpen, setNotificationOpen] = useState(false);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: typeof NAV_ITEMS[0]) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: (typeof NAV_ITEMS)[0]) => {
     if (item.scrollTo) {
       e.preventDefault();
       if (pathname === '/') {
@@ -43,24 +43,19 @@ export function Header() {
         <div className="flex h-16 items-center gap-8 max-w-[1600px] mx-auto">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Image
-              src="/logo.png"
-              alt="V1ta Logo"
-              width={32}
-              height={32}
-            />
+            <Image src="/logo.png" alt="V1ta Logo" width={32} height={32} />
             <span className="text-lg font-semibold">v1ta</span>
           </Link>
 
           {/* Navigation */}
           <nav className="hidden lg:flex items-center gap-1 shrink-0">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.map(item => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item)}
+                  onClick={e => handleNavClick(e, item)}
                   className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-surface text-text-primary'
@@ -81,10 +76,7 @@ export function Header() {
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
             {connected && (
-              <NotificationModal
-                open={notificationOpen}
-                onOpenChange={setNotificationOpen}
-              />
+              <NotificationModal open={notificationOpen} onOpenChange={setNotificationOpen} />
             )}
             <WalletButton />
           </div>

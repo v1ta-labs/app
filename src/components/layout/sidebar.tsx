@@ -3,15 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import {
-  LayoutDashboard,
-  Wallet,
-  Zap,
-  TrendingUp,
-  BookOpen,
-  Settings,
-  Pin,
-} from 'lucide-react';
+import { LayoutDashboard, Wallet, Zap, TrendingUp, BookOpen, Settings, Pin } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { Tooltip } from '@/components/ui/tooltip';
 
@@ -23,7 +15,13 @@ const SIDEBAR_ITEMS = [
 ];
 
 const SIDEBAR_FOOTER = [
-  { icon: BookOpen, label: 'Docs', href: 'https://docs.v1ta.fi', description: 'Documentation', external: true },
+  {
+    icon: BookOpen,
+    label: 'Docs',
+    href: 'https://docs.v1ta.fi',
+    description: 'Documentation',
+    external: true,
+  },
   { icon: Settings, label: 'Settings', href: '/settings', description: 'Preferences' },
 ];
 
@@ -74,7 +72,7 @@ export function Sidebar() {
 
           {/* Main Navigation */}
           <nav className="flex-1 px-3 space-y-1">
-            {SIDEBAR_ITEMS.map((item) => {
+            {SIDEBAR_ITEMS.map(item => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
 
@@ -89,9 +87,7 @@ export function Sidebar() {
                   )}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
-                  {shouldExpand && (
-                    <span className="truncate">{item.label}</span>
-                  )}
+                  {shouldExpand && <span className="truncate">{item.label}</span>}
                 </Link>
               );
 
@@ -112,7 +108,7 @@ export function Sidebar() {
 
           {/* Footer Navigation */}
           <nav className="px-3 space-y-1">
-            {SIDEBAR_FOOTER.map((item) => {
+            {SIDEBAR_FOOTER.map(item => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
 

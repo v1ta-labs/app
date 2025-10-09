@@ -27,8 +27,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting && !hasAnimated) {
             setHasAnimated(true);
             const borrowTab = document.querySelector('[href="/borrow"]');

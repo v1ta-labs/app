@@ -13,9 +13,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-base">
       <Header />
       <NavigationSidebar />
-      <main className="pl-20">
-        {children}
-      </main>
+      <main className="pl-20">{children}</main>
     </div>
   );
 }

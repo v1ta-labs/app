@@ -19,7 +19,7 @@ const MOCK_POSITIONS: Position[] = [
     id: '1',
     collateral: 'SOL',
     amount: 45.2,
-    value: 7142.50,
+    value: 7142.5,
     borrowed: 4200,
     health: 170,
   },
@@ -41,9 +41,7 @@ export function PositionsTable() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-surface flex items-center justify-center">
             <span className="text-2xl">📊</span>
           </div>
-          <h3 className="text-lg font-semibold text-text-primary mb-2">
-            No Active Positions
-          </h3>
+          <h3 className="text-lg font-semibold text-text-primary mb-2">No Active Positions</h3>
           <p className="text-sm text-text-tertiary mb-4">
             Deposit collateral to start borrowing VUSD
           </p>
@@ -85,7 +83,7 @@ export function PositionsTable() {
             </tr>
           </thead>
           <tbody>
-            {MOCK_POSITIONS.map((position) => (
+            {MOCK_POSITIONS.map(position => (
               <tr
                 key={position.id}
                 className="border-b border-border last:border-0 hover:bg-surface/30 transition-colors"
@@ -97,9 +95,7 @@ export function PositionsTable() {
                         {position.collateral.slice(0, 1)}
                       </span>
                     </div>
-                    <span className="font-medium text-text-primary">
-                      {position.collateral}
-                    </span>
+                    <span className="font-medium text-text-primary">{position.collateral}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
@@ -108,9 +104,7 @@ export function PositionsTable() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <span className="text-text-primary font-medium">
-                    {formatUSD(position.value)}
-                  </span>
+                  <span className="text-text-primary font-medium">{formatUSD(position.value)}</span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex flex-col items-end">

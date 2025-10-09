@@ -14,7 +14,7 @@ export default function RedeemPage() {
 
   const vusdBalance = 0;
   const redemptionRate = 0.995; // 0.5% redemption fee
-  const estimatedReceive = parseFloat(vusdAmount || '0') * redemptionRate / 1; // Price placeholder
+  const estimatedReceive = (parseFloat(vusdAmount || '0') * redemptionRate) / 1; // Price placeholder
 
   const collateralOptions = [
     { symbol: 'SOL', price: 0, available: 0, total: 0 },
@@ -22,7 +22,13 @@ export default function RedeemPage() {
     { symbol: 'mSOL', price: 0, available: 0, total: 0 },
   ];
 
-  const recentRedemptions: { amount: number; collateral: string; received: number; timestamp: string; fee: number }[] = [];
+  const recentRedemptions: {
+    amount: number;
+    collateral: string;
+    received: number;
+    timestamp: string;
+    fee: number;
+  }[] = [];
 
   return (
     <AppLayout>
@@ -31,31 +37,41 @@ export default function RedeemPage() {
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold text-text-primary mb-2">Redeem VUSD</h1>
-            <p className="text-sm text-text-tertiary">Exchange your VUSD for underlying collateral at face value</p>
+            <p className="text-sm text-text-tertiary">
+              Exchange your VUSD for underlying collateral at face value
+            </p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4">
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
-              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">Your VUSD Balance</div>
+              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">
+                Your VUSD Balance
+              </div>
               <div className="text-2xl font-bold text-text-primary">{formatUSD(vusdBalance)}</div>
               <div className="text-xs text-text-tertiary mt-1">Available to redeem</div>
             </Card>
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
-              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">Redemption Rate</div>
+              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">
+                Redemption Rate
+              </div>
               <div className="text-2xl font-bold text-text-primary">1:1</div>
               <div className="text-xs text-text-tertiary mt-1">VUSD to USD value</div>
             </Card>
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
-              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">Redemption Fee</div>
+              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">
+                Redemption Fee
+              </div>
               <div className="text-2xl font-bold text-text-primary">0.5%</div>
               <div className="text-xs text-text-tertiary mt-1">Protocol fee</div>
             </Card>
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
-              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">Total Redeemed</div>
+              <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2">
+                Total Redeemed
+              </div>
               <div className="text-2xl font-bold text-text-primary">{formatUSD(0)}</div>
               <div className="text-xs text-success mt-1 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
@@ -74,9 +90,12 @@ export default function RedeemPage() {
                 <div className="flex items-start gap-3 p-4 bg-primary/10 rounded-xl border border-primary/30 mb-6">
                   <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <div className="text-sm font-semibold text-text-primary mb-1">How Redemption Works</div>
+                    <div className="text-sm font-semibold text-text-primary mb-1">
+                      How Redemption Works
+                    </div>
                     <div className="text-xs text-text-tertiary">
-                      Redeem your VUSD at face value ($1) for the lowest collateralized positions&apos; assets. A 0.5% fee applies.
+                      Redeem your VUSD at face value ($1) for the lowest collateralized
+                      positions&apos; assets. A 0.5% fee applies.
                     </div>
                   </div>
                 </div>
@@ -84,9 +103,14 @@ export default function RedeemPage() {
                 {/* VUSD Input */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">Amount to Redeem</span>
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                      Amount to Redeem
+                    </span>
                     <span className="text-xs text-text-tertiary">
-                      Balance: <span className="font-semibold text-text-secondary">{formatNumber(vusdBalance, 2)} VUSD</span>
+                      Balance:{' '}
+                      <span className="font-semibold text-text-secondary">
+                        {formatNumber(vusdBalance, 2)} VUSD
+                      </span>
                     </span>
                   </div>
 
@@ -94,7 +118,7 @@ export default function RedeemPage() {
                     <input
                       type="number"
                       value={vusdAmount}
-                      onChange={(e) => setVusdAmount(e.target.value)}
+                      onChange={e => setVusdAmount(e.target.value)}
                       placeholder="0.00"
                       className="w-full px-4 py-4 pr-24 bg-base border border-border rounded-[16px] text-2xl font-bold text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary transition-colors"
                     />
@@ -111,7 +135,9 @@ export default function RedeemPage() {
 
                   {vusdAmount && (
                     <div className="mt-2 text-right">
-                      <span className="text-sm text-text-tertiary">≈ {formatUSD(parseFloat(vusdAmount))}</span>
+                      <span className="text-sm text-text-tertiary">
+                        ≈ {formatUSD(parseFloat(vusdAmount))}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -126,9 +152,11 @@ export default function RedeemPage() {
 
                 {/* Collateral Selection */}
                 <div className="mb-6">
-                  <div className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-3">Receive Collateral</div>
+                  <div className="text-xs font-bold text-text-secondary uppercase tracking-wide mb-3">
+                    Receive Collateral
+                  </div>
                   <div className="grid grid-cols-3 gap-2">
-                    {collateralOptions.map((option) => (
+                    {collateralOptions.map(option => (
                       <button
                         key={option.symbol}
                         onClick={() => setSelectedCollateral(option.symbol)}
@@ -138,8 +166,12 @@ export default function RedeemPage() {
                             : 'border-border bg-base hover:bg-elevated'
                         }`}
                       >
-                        <div className="text-sm font-bold text-text-primary mb-1">{option.symbol}</div>
-                        <div className="text-xs text-text-tertiary">{formatNumber(option.available, 2)} available</div>
+                        <div className="text-sm font-bold text-text-primary mb-1">
+                          {option.symbol}
+                        </div>
+                        <div className="text-xs text-text-tertiary">
+                          {formatNumber(option.available, 2)} available
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -165,17 +197,22 @@ export default function RedeemPage() {
                 <div className="flex items-start gap-3 p-4 bg-warning/10 rounded-xl border border-warning/30 mb-6">
                   <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
                   <div className="text-xs text-text-tertiary">
-                    Redemptions directly affect the lowest collateralized positions. Consider the impact on the protocol.
+                    Redemptions directly affect the lowest collateralized positions. Consider the
+                    impact on the protocol.
                   </div>
                 </div>
 
                 {/* Action Button */}
-                <Button fullWidth size="lg" disabled={!vusdAmount || parseFloat(vusdAmount) > vusdBalance}>
+                <Button
+                  fullWidth
+                  size="lg"
+                  disabled={!vusdAmount || parseFloat(vusdAmount) > vusdBalance}
+                >
                   {!vusdAmount
                     ? 'Enter Amount to Redeem'
                     : parseFloat(vusdAmount) > vusdBalance
-                    ? 'Insufficient VUSD Balance'
-                    : 'Redeem VUSD'}
+                      ? 'Insufficient VUSD Balance'
+                      : 'Redeem VUSD'}
                 </Button>
               </Card>
             </div>
@@ -187,20 +224,33 @@ export default function RedeemPage() {
                 <h2 className="text-xl font-bold text-text-primary mb-4">Available Collateral</h2>
                 <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
                   <div className="space-y-3">
-                    {collateralOptions.map((option) => (
-                      <div key={option.symbol} className="flex items-center justify-between p-3 bg-base rounded-xl">
+                    {collateralOptions.map(option => (
+                      <div
+                        key={option.symbol}
+                        className="flex items-center justify-between p-3 bg-base rounded-xl"
+                      >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <span className="text-lg font-bold text-primary">{option.symbol[0]}</span>
+                            <span className="text-lg font-bold text-primary">
+                              {option.symbol[0]}
+                            </span>
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-text-primary">{option.symbol}</div>
-                            <div className="text-xs text-text-tertiary">${formatNumber(option.price, 2)}</div>
+                            <div className="text-sm font-bold text-text-primary">
+                              {option.symbol}
+                            </div>
+                            <div className="text-xs text-text-tertiary">
+                              ${formatNumber(option.price, 2)}
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-bold text-text-primary">{formatNumber(option.available, 2)}</div>
-                          <div className="text-xs text-text-tertiary">of {formatNumber(option.total, 2)}</div>
+                          <div className="text-sm font-bold text-text-primary">
+                            {formatNumber(option.available, 2)}
+                          </div>
+                          <div className="text-xs text-text-tertiary">
+                            of {formatNumber(option.total, 2)}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -210,7 +260,9 @@ export default function RedeemPage() {
 
               {/* Recent Redemptions */}
               <div>
-                <h2 className="text-xl font-bold text-text-primary mb-4">Your Recent Redemptions</h2>
+                <h2 className="text-xl font-bold text-text-primary mb-4">
+                  Your Recent Redemptions
+                </h2>
                 <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
                   <div className="space-y-3">
                     {recentRedemptions.map((redemption, index) => (
@@ -226,13 +278,19 @@ export default function RedeemPage() {
                             <Coins className="w-5 h-5 text-success" />
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-text-primary">{formatUSD(redemption.amount)}</div>
+                            <div className="text-sm font-bold text-text-primary">
+                              {formatUSD(redemption.amount)}
+                            </div>
                             <div className="text-xs text-text-tertiary">{redemption.timestamp}</div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-bold text-success">+{formatNumber(redemption.received, 2)} {redemption.collateral}</div>
-                          <div className="text-xs text-text-tertiary">Fee: {formatUSD(redemption.fee)}</div>
+                          <div className="text-sm font-bold text-success">
+                            +{formatNumber(redemption.received, 2)} {redemption.collateral}
+                          </div>
+                          <div className="text-xs text-text-tertiary">
+                            Fee: {formatUSD(redemption.fee)}
+                          </div>
                         </div>
                       </motion.div>
                     ))}

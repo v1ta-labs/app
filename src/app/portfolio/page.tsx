@@ -17,11 +17,10 @@ export default function PortfolioPage() {
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
               <Wallet className="w-10 h-10 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
-              Connect Your Wallet
-            </h2>
+            <h2 className="text-2xl font-bold text-text-primary mb-3">Connect Your Wallet</h2>
             <p className="text-text-secondary mb-8">
-              Please connect your Solana wallet to view your portfolio overview and manage your positions.
+              Please connect your Solana wallet to view your portfolio overview and manage your
+              positions.
             </p>
           </Card>
         </div>
@@ -36,7 +35,9 @@ export default function PortfolioPage() {
           {/* Header */}
           <div>
             <h1 className="text-3xl font-bold text-text-primary mb-2">Portfolio Overview</h1>
-            <p className="text-sm text-text-tertiary">Track your assets, positions, and performance</p>
+            <p className="text-sm text-text-tertiary">
+              Track your assets, positions, and performance
+            </p>
           </div>
 
           {/* Empty State */}

@@ -54,9 +54,7 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllAsRead = () => {
@@ -128,7 +126,7 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
               </div>
             ) : (
               <div className="py-1">
-                {notifications.map((notification) => (
+                {notifications.map(notification => (
                   <div
                     key={notification.id}
                     className={cn(
@@ -137,10 +135,17 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={cn('w-1.5 h-1.5 rounded-full mt-1.5', !notification.read ? 'bg-primary' : 'bg-transparent')} />
+                      <div
+                        className={cn(
+                          'w-1.5 h-1.5 rounded-full mt-1.5',
+                          !notification.read ? 'bg-primary' : 'bg-transparent'
+                        )}
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
-                          <h4 className={cn('text-sm font-semibold', getTypeColor(notification.type))}>
+                          <h4
+                            className={cn('text-sm font-semibold', getTypeColor(notification.type))}
+                          >
                             {notification.title}
                           </h4>
                           <button

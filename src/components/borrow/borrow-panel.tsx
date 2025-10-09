@@ -63,9 +63,7 @@ export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps
         {numericAmount > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-text-tertiary">= USD Value:</span>
-            <span className="text-text-primary">
-              {formatUSD(usdValue)}
-            </span>
+            <span className="text-text-primary">{formatUSD(usdValue)}</span>
           </div>
         )}
 
@@ -80,22 +78,16 @@ export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps
             <span className="text-lg font-bold text-text-primary">
               {formatPercentage(Math.max(100, newHealthFactor))}
             </span>
-            <span className="text-xs text-text-tertiary">
-              (after borrow)
-            </span>
+            <span className="text-xs text-text-tertiary">(after borrow)</span>
           </div>
           {newHealthFactor < 130 && (
-            <p className="text-xs text-warning mt-2">
-              ⚠️ Health factor will be in caution range
-            </p>
+            <p className="text-xs text-warning mt-2">⚠️ Health factor will be in caution range</p>
           )}
         </div>
 
         <div className="flex justify-between text-sm">
           <span className="text-text-tertiary">Available to Borrow:</span>
-          <span className="text-text-primary">
-            {formatUSD(maxBorrow)}
-          </span>
+          <span className="text-text-primary">{formatUSD(maxBorrow)}</span>
         </div>
 
         <Button

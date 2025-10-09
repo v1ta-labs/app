@@ -20,9 +20,11 @@ export function MarketStats() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-5">Protocol Stats</h2>
+        <h2 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-5">
+          Protocol Stats
+        </h2>
         <div className="space-y-4">
-          {STATS.map((stat) => {
+          {STATS.map(stat => {
             const Icon = stat.icon;
             return (
               <Card key={stat.label} className="p-5">
@@ -35,8 +37,12 @@ export function MarketStats() {
                     <span>{stat.change}</span>
                   </div>
                 </div>
-                <div className="text-[10px] text-text-tertiary uppercase tracking-wider mb-2">{stat.label}</div>
-                <div className="text-2xl font-bold text-text-primary tracking-tight">{stat.value}</div>
+                <div className="text-[10px] text-text-tertiary uppercase tracking-wider mb-2">
+                  {stat.label}
+                </div>
+                <div className="text-2xl font-bold text-text-primary tracking-tight">
+                  {stat.value}
+                </div>
               </Card>
             );
           })}
@@ -44,10 +50,12 @@ export function MarketStats() {
       </div>
 
       <div>
-        <h2 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-5">Markets</h2>
+        <h2 className="text-xs font-bold text-text-secondary uppercase tracking-wider mb-5">
+          Markets
+        </h2>
         <Card className="p-0 overflow-hidden">
           <div className="divide-y divide-border">
-            {COLLATERAL_MARKETS.map((market) => (
+            {COLLATERAL_MARKETS.map(market => (
               <button
                 key={market.token}
                 className="w-full px-5 py-5 hover:bg-elevated transition-colors text-left"
@@ -78,7 +86,9 @@ export function MarketStats() {
                       style={{ width: market.utilization }}
                     />
                   </div>
-                  <span className="text-xs text-text-secondary font-bold min-w-[32px] text-right">{market.utilization}</span>
+                  <span className="text-xs text-text-secondary font-bold min-w-[32px] text-right">
+                    {market.utilization}
+                  </span>
                 </div>
               </button>
             ))}

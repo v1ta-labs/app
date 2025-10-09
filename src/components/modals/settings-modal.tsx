@@ -4,7 +4,24 @@ import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Switch from '@radix-ui/react-switch';
 import * as Tabs from '@radix-ui/react-tabs';
-import { X, Bell, Shield, Palette, Zap, Globe, Moon, Sun, Volume2, VolumeX, Eye, EyeOff, Database, Trash2, Download, RefreshCw } from 'lucide-react';
+import {
+  X,
+  Bell,
+  Shield,
+  Palette,
+  Zap,
+  Globe,
+  Moon,
+  Sun,
+  Volume2,
+  VolumeX,
+  Eye,
+  EyeOff,
+  Database,
+  Trash2,
+  Download,
+  RefreshCw,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface SettingsModalProps {
@@ -53,11 +70,23 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
           <Tabs.Root defaultValue="general" className="flex h-[calc(85vh-88px)]">
             <Tabs.List className="w-56 border-r border-border p-4 space-y-1 overflow-y-auto">
               <TabButton value="general" icon={<Zap className="w-4 h-4" />} label="General" />
-              <TabButton value="notifications" icon={<Bell className="w-4 h-4" />} label="Notifications" />
+              <TabButton
+                value="notifications"
+                icon={<Bell className="w-4 h-4" />}
+                label="Notifications"
+              />
               <TabButton value="security" icon={<Shield className="w-4 h-4" />} label="Security" />
               <TabButton value="trading" icon={<RefreshCw className="w-4 h-4" />} label="Trading" />
-              <TabButton value="appearance" icon={<Palette className="w-4 h-4" />} label="Appearance" />
-              <TabButton value="data" icon={<Database className="w-4 h-4" />} label="Data & Privacy" />
+              <TabButton
+                value="appearance"
+                icon={<Palette className="w-4 h-4" />}
+                label="Appearance"
+              />
+              <TabButton
+                value="data"
+                icon={<Database className="w-4 h-4" />}
+                label="Data & Privacy"
+              />
             </Tabs.List>
 
             <div className="flex-1 overflow-y-auto p-6">
@@ -87,7 +116,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   >
                     <select
                       value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
+                      onChange={e => setLanguage(e.target.value)}
                       className="px-3 py-2 bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary"
                     >
                       <option value="en">English</option>
@@ -119,12 +148,12 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                     label="Liquidation Warnings"
                     description="Alert when approaching liquidation"
                   >
-                    <Toggle checked={liquidationWarnings} onCheckedChange={setLiquidationWarnings} />
+                    <Toggle
+                      checked={liquidationWarnings}
+                      onCheckedChange={setLiquidationWarnings}
+                    />
                   </SettingRow>
-                  <SettingRow
-                    label="Referral Updates"
-                    description="Notify about referral activity"
-                  >
+                  <SettingRow label="Referral Updates" description="Notify about referral activity">
                     <Toggle checked={referralUpdates} onCheckedChange={setReferralUpdates} />
                   </SettingRow>
                 </Section>
@@ -138,10 +167,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   >
                     <Toggle checked={twoFactor} onCheckedChange={setTwoFactor} />
                   </SettingRow>
-                  <SettingRow
-                    label="Auto-Lock Wallet"
-                    description="Lock wallet after inactivity"
-                  >
+                  <SettingRow label="Auto-Lock Wallet" description="Lock wallet after inactivity">
                     <Toggle checked={autoLock} onCheckedChange={setAutoLock} />
                   </SettingRow>
                   <SettingRow
@@ -170,7 +196,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                       <input
                         type="number"
                         value={slippageTolerance}
-                        onChange={(e) => setSlippageTolerance(e.target.value)}
+                        onChange={e => setSlippageTolerance(e.target.value)}
                         className="w-20 px-3 py-2 bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary text-right"
                         step="0.1"
                         min="0.1"
@@ -180,13 +206,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                     </div>
                   </SettingRow>
 
-                  <SettingRow
-                    label="Priority Fee"
-                    description="Transaction confirmation speed"
-                  >
+                  <SettingRow label="Priority Fee" description="Transaction confirmation speed">
                     <select
                       value={priorityFee}
-                      onChange={(e) => setPriorityFee(e.target.value)}
+                      onChange={e => setPriorityFee(e.target.value)}
                       className="px-3 py-2 bg-base border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:border-primary"
                     >
                       <option value="low">Low (Slow)</option>
@@ -222,13 +245,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                       { name: 'Ocean', color: 'bg-gradient-to-br from-blue-500 to-cyan-500' },
                       { name: 'Sunset', color: 'bg-gradient-to-br from-orange-500 to-pink-500' },
                       { name: 'Purple', color: 'bg-gradient-to-br from-purple-500 to-indigo-500' },
-                    ].map((theme) => (
+                    ].map(theme => (
                       <button
                         key={theme.name}
                         className="aspect-square rounded-xl border-2 border-border hover:border-primary transition-colors p-1"
                       >
                         <div className={`w-full h-full rounded-lg ${theme.color}`} />
-                        <div className="text-xs text-text-tertiary mt-1 text-center">{theme.name}</div>
+                        <div className="text-xs text-text-tertiary mt-1 text-center">
+                          {theme.name}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -241,7 +266,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                     <Download className="w-4 h-4" />
                     Export Transaction History
                   </Button>
-                  <Button variant="outline" className="w-full justify-start gap-2 text-error border-error/30 hover:bg-error/10">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-error border-error/30 hover:bg-error/10"
+                  >
                     <Trash2 className="w-4 h-4" />
                     Clear Local Cache
                   </Button>
@@ -267,7 +295,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   );
 }
 
-function TabButton({ value, icon, label }: { value: string; icon: React.ReactNode; label: string }) {
+function TabButton({
+  value,
+  icon,
+  label,
+}: {
+  value: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
   return (
     <Tabs.Trigger
       value={value}
@@ -283,9 +319,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   return (
     <div>
       <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider mb-4">{title}</h3>
-      <div className="space-y-4">
-        {children}
-      </div>
+      <div className="space-y-4">{children}</div>
     </div>
   );
 }
@@ -311,26 +345,30 @@ function SettingRow({
         )}
         <div className="flex-1">
           <div className="text-sm font-medium text-text-primary mb-1">{label}</div>
-          {description && (
-            <div className="text-xs text-text-tertiary">{description}</div>
-          )}
+          {description && <div className="text-xs text-text-tertiary">{description}</div>}
         </div>
       </div>
-      <div className="ml-4">
-        {children}
-      </div>
+      <div className="ml-4">{children}</div>
     </div>
   );
 }
 
-function Toggle({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (checked: boolean) => void }) {
+function Toggle({
+  checked,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
   return (
     <Switch.Root
       checked={checked}
       onCheckedChange={onCheckedChange}
       className={`w-11 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-base border border-border'}`}
     >
-      <Switch.Thumb className={`block w-5 h-5 bg-white rounded-full transition-transform ${checked ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      <Switch.Thumb
+        className={`block w-5 h-5 bg-white rounded-full transition-transform ${checked ? 'translate-x-6' : 'translate-x-0.5'}`}
+      />
     </Switch.Root>
   );
 }

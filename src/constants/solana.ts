@@ -3,16 +3,19 @@ import { Commitment } from '@solana/web3.js';
 export type SolanaNetwork = 'mainnet-beta' | 'devnet' | 'testnet' | 'localnet';
 
 export const SOLANA_NETWORKS: Record<SolanaNetwork, string> = {
-  'mainnet-beta': process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET || 'https://api.mainnet-beta.solana.com',
-  'devnet': process.env.NEXT_PUBLIC_SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
-  'testnet': 'https://api.testnet.solana.com',
-  'localnet': process.env.NEXT_PUBLIC_SOLANA_RPC_LOCALNET || 'http://localhost:8899',
+  'mainnet-beta':
+    process.env.NEXT_PUBLIC_SOLANA_RPC_MAINNET || 'https://api.mainnet-beta.solana.com',
+  devnet: process.env.NEXT_PUBLIC_SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
+  testnet: 'https://api.testnet.solana.com',
+  localnet: process.env.NEXT_PUBLIC_SOLANA_RPC_LOCALNET || 'http://localhost:8899',
 };
 
-export const CURRENT_NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'devnet') as SolanaNetwork;
+export const CURRENT_NETWORK = (process.env.NEXT_PUBLIC_SOLANA_NETWORK ||
+  'devnet') as SolanaNetwork;
 export const RPC_ENDPOINT = SOLANA_NETWORKS[CURRENT_NETWORK];
 
-export const COMMITMENT: Commitment = (process.env.NEXT_PUBLIC_COMMITMENT || 'confirmed') as Commitment;
+export const COMMITMENT: Commitment = (process.env.NEXT_PUBLIC_COMMITMENT ||
+  'confirmed') as Commitment;
 
 export const VITA_PROGRAM_ID = process.env.NEXT_PUBLIC_VITA_PROGRAM_ID || '';
 

@@ -1,36 +1,36 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* V1ta Protocol - Dark Forest Theme */
 
 :root {
   /* Background - Dark, scary forest depths */
   --base: #050f05; /* Even darker - almost pure black with subtle green */
-  --surface: #0A1824; /* Chinese Black - card surfaces */
-  --elevated: #0F2A38; /* Yankees Blue - elevated elements */
-  --border: #1D3C43; /* Japanese Indigo - borders */
+  --surface: #0a1824; /* Chinese Black - card surfaces */
+  --elevated: #0f2a38; /* Yankees Blue - elevated elements */
+  --border: #1d3c43; /* Japanese Indigo - borders */
 
   /* Grey options for subtle variations */
   --grey-darkest: #092409; /* Chinese Black (green-tinted) */
-  --grey-dark: #132F13; /* Phthalo Green */
-  --grey-medium: #1D3C43; /* Japanese Indigo */
-  --grey-light: #2A4930; /* Kombu Green */
+  --grey-dark: #132f13; /* Phthalo Green */
+  --grey-medium: #1d3c43; /* Japanese Indigo */
+  --grey-light: #2a4930; /* Kombu Green */
 
   /* Accent - Dark mystical green */
-  --primary: #2A4930; /* Kombu Green - main accent */
-  --primary-hover: #3A5940; /* Slightly lighter */
-  --primary-muted: #2A493020;
+  --primary: #2a4930; /* Kombu Green - main accent */
+  --primary-hover: #3a5940; /* Slightly lighter */
+  --primary-muted: #2a493020;
 
   /* Text - Muted contrast for scary atmosphere */
-  --text-primary: #C8D3D5;
-  --text-secondary: #8A9A9D;
-  --text-tertiary: #5A6A6D;
-  --text-disabled: #3A4A4D;
+  --text-primary: #c8d3d5;
+  --text-secondary: #8a9a9d;
+  --text-tertiary: #5a6a6d;
+  --text-disabled: #3a4a4d;
 
   /* System Colors - Darker, more muted */
-  --success: #2A4930; /* Kombu Green */
-  --warning: #4A3920;
-  --error: #4A2020;
-  --info: #1D3C43; /* Japanese Indigo */
+  --success: #2a4930; /* Kombu Green */
+  --warning: #4a3920;
+  --error: #4a2020;
+  --info: #1d3c43; /* Japanese Indigo */
 
   /* Design System */
   --radius: 20px;
@@ -75,7 +75,7 @@ html {
 body {
   background: var(--base);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -116,25 +116,35 @@ body {
 }
 
 /* Remove number input spinners */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-fadeIn {
@@ -157,6 +167,9 @@ html {
 }
 
 /* Transitions */
-button, a, input, select {
+button,
+a,
+input,
+select {
   transition: all var(--transition);
 }

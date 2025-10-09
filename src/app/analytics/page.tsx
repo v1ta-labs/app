@@ -3,7 +3,19 @@
 import { AppLayout } from '@/components/layout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { formatLargeNumber, formatPercentage } from '@/lib/utils/formatters';
-import { LineChart, Line, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 const tvlData: { date: string; value: number }[] = [];
 
@@ -68,20 +80,16 @@ export default function AnalyticsPage() {
               <AreaChart data={tvlData}>
                 <defs>
                   <linearGradient id="colorTVL" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6B5FFF" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#6B5FFF" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#6B5FFF" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6B5FFF" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2A38" />
-                <XAxis
-                  dataKey="date"
-                  stroke="#FFFFFF66"
-                  style={{ fontSize: '12px' }}
-                />
+                <XAxis dataKey="date" stroke="#FFFFFF66" style={{ fontSize: '12px' }} />
                 <YAxis
                   stroke="#FFFFFF66"
                   style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
+                  tickFormatter={value => `$${(value / 1000000).toFixed(0)}M`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -113,15 +121,11 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={supplyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2A38" />
-                <XAxis
-                  dataKey="date"
-                  stroke="#FFFFFF66"
-                  style={{ fontSize: '12px' }}
-                />
+                <XAxis dataKey="date" stroke="#FFFFFF66" style={{ fontSize: '12px' }} />
                 <YAxis
                   stroke="#FFFFFF66"
                   style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
+                  tickFormatter={value => `$${(value / 1000000).toFixed(0)}M`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -153,15 +157,11 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={liquidationData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2A2A38" />
-                <XAxis
-                  dataKey="hour"
-                  stroke="#FFFFFF66"
-                  style={{ fontSize: '12px' }}
-                />
+                <XAxis dataKey="hour" stroke="#FFFFFF66" style={{ fontSize: '12px' }} />
                 <YAxis
                   stroke="#FFFFFF66"
                   style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}K`}
+                  tickFormatter={value => `$${(value / 1000).toFixed(0)}K`}
                 />
                 <Tooltip
                   contentStyle={{
@@ -172,11 +172,7 @@ export default function AnalyticsPage() {
                   }}
                   formatter={(value: number) => [`$${(value / 1000).toFixed(1)}K`, 'Volume']}
                 />
-                <Bar
-                  dataKey="volume"
-                  fill="#22C55E"
-                  radius={[4, 4, 0, 0]}
-                />
+                <Bar dataKey="volume" fill="#22C55E" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

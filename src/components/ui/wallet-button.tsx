@@ -10,7 +10,11 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { WalletModal } from '@/components/common/wallet-modal';
 
 export function WalletButton() {
-  const { connected: solanaConnected, publicKey: solanaPublicKey, disconnect: disconnectSolana } = useWallet();
+  const {
+    connected: solanaConnected,
+    publicKey: solanaPublicKey,
+    disconnect: disconnectSolana,
+  } = useWallet();
   const { isConnected: reownConnected, address: reownAddress } = useAppKitAccount();
   const { disconnect: disconnectReown } = useDisconnect();
 
@@ -97,7 +101,9 @@ export function WalletButton() {
           >
             {/* Wallet Address Section */}
             <div className="px-2.5 py-2.5 mb-2.5 rounded-lg bg-elevated/50 border border-border/30">
-              <div className="text-[10px] text-text-tertiary uppercase tracking-wider font-bold mb-1.5">Wallet Address</div>
+              <div className="text-[10px] text-text-tertiary uppercase tracking-wider font-bold mb-1.5">
+                Wallet Address
+              </div>
               <div className="text-[11px] font-mono text-text-primary break-all leading-relaxed">
                 {address}
               </div>

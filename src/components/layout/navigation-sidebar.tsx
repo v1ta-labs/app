@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Home, History, Users, Settings, LayoutDashboard, BookOpen, MessageCircle, ArrowLeftRight } from 'lucide-react';
+import {
+  Home,
+  History,
+  Users,
+  Settings,
+  LayoutDashboard,
+  BookOpen,
+  MessageCircle,
+  ArrowLeftRight,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { SettingsModal } from '@/components/modals/settings-modal';
 import { SwapModal } from '@/components/modals/swap-modal';
@@ -29,7 +38,7 @@ export function NavigationSidebar() {
     <div className="w-20 fixed left-0 top-16 bottom-0 border-r border-border bg-surface/50 backdrop-blur-xl flex flex-col items-center py-8 z-50">
       {/* Main Navigation */}
       <div className="flex-1 flex flex-col items-center gap-4">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map(item => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 
@@ -45,16 +54,12 @@ export function NavigationSidebar() {
               <div
                 className={cn(
                   'p-3 rounded-[16px] transition-all',
-                  isActive
-                    ? 'bg-primary/10'
-                    : 'bg-transparent group-hover:bg-elevated'
+                  isActive ? 'bg-primary/10' : 'bg-transparent group-hover:bg-elevated'
                 )}
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[9px] font-bold uppercase tracking-wider">
-                {item.label}
-              </span>
+              <span className="text-[9px] font-bold uppercase tracking-wider">{item.label}</span>
               {isActive && (
                 <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-1 h-10 bg-primary rounded-full" />
               )}
@@ -79,7 +84,7 @@ export function NavigationSidebar() {
 
         <div className="w-8 h-px bg-border my-1" />
 
-        {BOTTOM_ITEMS.map((item) => {
+        {BOTTOM_ITEMS.map(item => {
           const Icon = item.icon;
 
           return (

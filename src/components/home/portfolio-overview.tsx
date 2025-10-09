@@ -46,7 +46,10 @@ export function PortfolioOverview() {
           <div className="text-5xl font-bold mb-4 text-success">2.8</div>
           <div className="flex items-center gap-2 text-sm">
             <div className="flex-1 h-2 bg-surface rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-success to-primary" style={{ width: '85%' }} />
+              <div
+                className="h-full bg-gradient-to-r from-success to-primary"
+                style={{ width: '85%' }}
+              />
             </div>
           </div>
           <div className="text-xs text-text-tertiary mt-3">Safe</div>
@@ -58,10 +61,10 @@ export function PortfolioOverview() {
           </div>
           <div className="space-y-3">
             {[
-              { name: 'SOL', amount: 143.5, value: 22724.70, change: 2.4, icon: '◎' },
+              { name: 'SOL', amount: 143.5, value: 22724.7, change: 2.4, icon: '◎' },
               { name: 'jitoSOL', amount: 82.3, value: 13373.75, change: 3.1, icon: '🔥' },
               { name: 'mSOL', amount: 65.8, value: 10516.84, change: -0.8, icon: '⚓' },
-            ].map((asset) => (
+            ].map(asset => (
               <div key={asset.name} className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{asset.icon}</span>
@@ -72,8 +75,14 @@ export function PortfolioOverview() {
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-semibold">{formatUSD(asset.value)}</div>
-                  <div className={`text-xs flex items-center justify-end gap-1 ${asset.change > 0 ? 'text-success' : 'text-error'}`}>
-                    {asset.change > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  <div
+                    className={`text-xs flex items-center justify-end gap-1 ${asset.change > 0 ? 'text-success' : 'text-error'}`}
+                  >
+                    {asset.change > 0 ? (
+                      <TrendingUp className="w-3 h-3" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3" />
+                    )}
                     {Math.abs(asset.change)}%
                   </div>
                 </div>

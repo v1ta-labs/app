@@ -9,15 +9,17 @@ export function SearchBar() {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
-    <div className={cn(
-      'relative flex items-center gap-2 px-4 h-10 bg-surface border border-border rounded-[12px] transition-all',
-      isFocused && 'border-primary/50 ring-1 ring-primary/20'
-    )}>
+    <div
+      className={cn(
+        'relative flex items-center gap-2 px-4 h-10 bg-surface border border-border rounded-[12px] transition-all',
+        isFocused && 'border-primary/50 ring-1 ring-primary/20'
+      )}
+    >
       <Search className="w-4 h-4 text-text-tertiary shrink-0" />
       <input
         type="text"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={e => setValue(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder="Search by token or Solana address..."

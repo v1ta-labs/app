@@ -23,7 +23,8 @@ export default function StabilityPoolPage() {
   const rewards: { asset: string; amount: number; value: number }[] = [];
 
   const numericAmount = parseFloat(depositAmount) || 0;
-  const newShare = ((poolData.userDeposit + numericAmount) / (poolData.totalPool + numericAmount)) * 100;
+  const newShare =
+    ((poolData.userDeposit + numericAmount) / (poolData.totalPool + numericAmount)) * 100;
 
   return (
     <AppLayout>
@@ -35,9 +36,7 @@ export default function StabilityPoolPage() {
               <div className="text-2xl font-bold text-text-primary mt-1">
                 {formatNumber(poolData.totalPool)} VUSD
               </div>
-              <span className="text-sm text-text-tertiary">
-                {formatUSD(poolData.totalPool)}
-              </span>
+              <span className="text-sm text-text-tertiary">{formatUSD(poolData.totalPool)}</span>
             </div>
             <div>
               <span className="text-sm text-text-secondary">Your Share</span>
@@ -53,9 +52,7 @@ export default function StabilityPoolPage() {
               <div className="text-2xl font-bold text-success mt-1">
                 {formatPercentage(poolData.apy)}
               </div>
-              <span className="text-sm text-text-tertiary">
-                + Liquidation bonuses
-              </span>
+              <span className="text-sm text-text-tertiary">+ Liquidation bonuses</span>
             </div>
           </div>
         </CardContent>
@@ -120,10 +117,7 @@ export default function StabilityPoolPage() {
                 </div>
               </div>
 
-              <Button
-                fullWidth
-                disabled={!connected || numericAmount <= 0}
-              >
+              <Button fullWidth disabled={!connected || numericAmount <= 0}>
                 {!connected ? 'Connect Wallet' : 'Deposit to Pool'}
               </Button>
 
@@ -150,24 +144,20 @@ export default function StabilityPoolPage() {
               </div>
 
               <div className="space-y-3">
-                {rewards.map((reward) => (
+                {rewards.map(reward => (
                   <div
                     key={reward.asset}
                     className="flex items-center justify-between p-4 bg-surface rounded-button border border-border"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary-muted flex items-center justify-center">
-                        <span className="text-sm font-bold text-primary">
-                          {reward.asset[0]}
-                        </span>
+                        <span className="text-sm font-bold text-primary">{reward.asset[0]}</span>
                       </div>
                       <div>
                         <div className="font-medium text-text-primary">
                           {formatNumber(reward.amount, 2)} {reward.asset}
                         </div>
-                        <div className="text-sm text-text-tertiary">
-                          {formatUSD(reward.value)}
-                        </div>
+                        <div className="text-sm text-text-tertiary">{formatUSD(reward.value)}</div>
                       </div>
                     </div>
                   </div>
@@ -184,8 +174,9 @@ export default function StabilityPoolPage() {
                   <div className="text-sm text-text-secondary">
                     <p className="font-medium text-text-primary mb-1">How it works</p>
                     <p>
-                      By depositing VUSD to the Stability Pool, you help maintain protocol stability.
-                      In return, you earn liquidation bonuses when underwater positions are liquidated.
+                      By depositing VUSD to the Stability Pool, you help maintain protocol
+                      stability. In return, you earn liquidation bonuses when underwater positions
+                      are liquidated.
                     </p>
                   </div>
                 </div>

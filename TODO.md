@@ -17,5 +17,6 @@
 - [ ] fix reown wallet modal
 
 ### Done ✓
+
 - [x] UI Components
 - [x] Wallet Connect

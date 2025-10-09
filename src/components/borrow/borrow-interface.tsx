@@ -26,7 +26,10 @@ const BASE_RATE_MAX = 4.5;
 const FEE_FLOOR = 0.5;
 const FEE_CAP = 5;
 
-const calculateBorrowingFee = (borrowAmount: number, baseRate: number): {
+const calculateBorrowingFee = (
+  borrowAmount: number,
+  baseRate: number
+): {
   feePercentage: number;
   feeAmount: number;
   baseRateComponent: number;
@@ -34,7 +37,7 @@ const calculateBorrowingFee = (borrowAmount: number, baseRate: number): {
 } => {
   const baseRateComponent = baseRate;
   const floorComponent = FEE_FLOOR;
-  const feePercentage = Math.min((baseRateComponent + floorComponent), FEE_CAP);
+  const feePercentage = Math.min(baseRateComponent + floorComponent, FEE_CAP);
   const feeAmount = (borrowAmount * feePercentage) / 100;
 
   return {
@@ -45,7 +48,9 @@ const calculateBorrowingFee = (borrowAmount: number, baseRate: number): {
   };
 };
 
-const getRedemptionRisk = (interestRate: number): {
+const getRedemptionRisk = (
+  interestRate: number
+): {
   level: 'low' | 'medium' | 'high' | 'critical';
   label: string;
   color: string;
@@ -75,7 +80,7 @@ const calculateOptimalRate = (
   }
 
   if (systemUtilization > 0.8) {
-    rate += (systemUtilization - 0.8) * 5; 
+    rate += (systemUtilization - 0.8) * 5;
   }
 
   return Math.min(rate, 10);
@@ -100,19 +105,17 @@ export function BorrowInterface() {
   // Calculate borrowing fee with dynamic base rate
   const feeInfo = calculateBorrowingFee(borrowValue, baseRate);
 
-  const maxBorrow = collateralValue / 1.10;
+  const maxBorrow = collateralValue / 1.1;
   const currentLTV = collateralValue > 0 ? (borrowValue / collateralValue) * 100 : 0;
   const healthFactor = borrowValue > 0 ? (collateralValue / borrowValue) * 100 : 0;
 
-  const interestRate = rateMode === 'protocol'
-    ? calculateOptimalRate(collateralValue, borrowValue)
-    : manualRate;
+  const interestRate =
+    rateMode === 'protocol' ? calculateOptimalRate(collateralValue, borrowValue) : manualRate;
 
   const redemptionRisk = getRedemptionRisk(interestRate);
 
-  const liquidationPrice = borrowValue > 0
-    ? (borrowValue * 1.10) / parseFloat(collateralAmount || '1')
-    : 0;
+  const liquidationPrice =
+    borrowValue > 0 ? (borrowValue * 1.1) / parseFloat(collateralAmount || '1') : 0;
 
   const handleMaxCollateral = () => {
     setCollateralAmount(selectedToken.balance.toString());
@@ -141,32 +144,19 @@ export function BorrowInterface() {
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay
-            label="Your Collateral"
-            value={formatUSD(0)}
-            change="+0%"
-            changePositive
-          />
+          <StatDisplay label="Your Collateral" value={formatUSD(0)} change="+0%" changePositive />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay
-            label="Total Borrowed"
-            value="0"
-            subtitle="VUSD"
-          />
+          <StatDisplay label="Total Borrowed" value="0" subtitle="VUSD" />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay
-            label="Available"
-            value={formatUSD(0)}
-            subtitle="to borrow"
-          />
+          <StatDisplay label="Available" value={formatUSD(0)} subtitle="to borrow" />
         </motion.div>
       </div>
 
@@ -177,9 +167,14 @@ export function BorrowInterface() {
         <Card className="p-0 overflow-hidden backdrop-blur-xl bg-surface/70 border-border/50">
           <div className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">DEPOSIT</span>
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                DEPOSIT
+              </span>
               <span className="text-xs text-text-tertiary">
-                Balance: <span className="font-semibold text-text-secondary">{formatNumber(selectedToken.balance, 4)}</span>
+                Balance:{' '}
+                <span className="font-semibold text-text-secondary">
+                  {formatNumber(selectedToken.balance, 4)}
+                </span>
               </span>
             </div>
 
@@ -199,9 +194,7 @@ export function BorrowInterface() {
 
             {collateralAmount && (
               <div className="mt-2 text-right">
-                <span className="text-sm text-text-tertiary">
-                  ≈ {formatUSD(collateralValue)}
-                </span>
+                <span className="text-sm text-text-tertiary">≈ {formatUSD(collateralValue)}</span>
               </div>
             )}
           </div>
@@ -215,7 +208,9 @@ export function BorrowInterface() {
 
           <div className="p-5">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">BORROW</span>
+              <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                BORROW
+              </span>
               <button
                 onClick={handleMaxBorrow}
                 disabled={!collateralAmount}
@@ -241,7 +236,10 @@ export function BorrowInterface() {
             {borrowAmount && (
               <div className="mt-2 text-right">
                 <span className="text-sm text-text-tertiary">
-                  ≈ <span className="font-semibold text-text-secondary">{formatUSD(borrowValue)}</span>
+                  ≈{' '}
+                  <span className="font-semibold text-text-secondary">
+                    {formatUSD(borrowValue)}
+                  </span>
                 </span>
               </div>
             )}
@@ -253,7 +251,9 @@ export function BorrowInterface() {
                 <div className="p-4 bg-base rounded-2xl border border-border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-text-primary uppercase tracking-wide">Interest Rate</span>
+                      <span className="text-xs font-bold text-text-primary uppercase tracking-wide">
+                        Interest Rate
+                      </span>
                       <button
                         onClick={() => setShowRateSettings(!showRateSettings)}
                         className="text-text-tertiary hover:text-text-secondary transition-colors"
@@ -262,7 +262,9 @@ export function BorrowInterface() {
                       </button>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold text-primary">{interestRate.toFixed(2)}%</div>
+                      <div className="text-xl font-bold text-primary">
+                        {interestRate.toFixed(2)}%
+                      </div>
                       <div className="text-[10px] text-text-tertiary uppercase">Annual</div>
                     </div>
                   </div>
@@ -322,7 +324,9 @@ export function BorrowInterface() {
                             >
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-text-tertiary">Adjust Rate:</span>
-                                <span className="font-bold text-text-primary">{manualRate.toFixed(2)}%</span>
+                                <span className="font-bold text-text-primary">
+                                  {manualRate.toFixed(2)}%
+                                </span>
                               </div>
                               <input
                                 type="range"
@@ -330,7 +334,7 @@ export function BorrowInterface() {
                                 max="10"
                                 step="0.1"
                                 value={manualRate}
-                                onChange={(e) => setManualRate(parseFloat(e.target.value))}
+                                onChange={e => setManualRate(parseFloat(e.target.value))}
                                 className="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary"
                               />
                               <div className="flex justify-between text-[10px] text-text-tertiary">
@@ -355,7 +359,7 @@ export function BorrowInterface() {
                             <div className="mt-2 text-[10px] text-text-tertiary">
                               {rateMode === 'protocol'
                                 ? 'Protocol optimizes for lowest redemption risk'
-                                : 'Higher rates increase your position\'s redemption priority'}
+                                : "Higher rates increase your position's redemption priority"}
                             </div>
                           </div>
                         </div>
@@ -380,8 +384,12 @@ export function BorrowInterface() {
                   </div>
                   <HealthGauge value={healthFactor} />
                   <div className="flex items-center justify-between mt-3 text-xs">
-                    <span className="text-text-tertiary uppercase tracking-wide font-semibold">LTV RATIO</span>
-                    <span className="font-bold text-text-primary text-sm">{currentLTV.toFixed(1)}%</span>
+                    <span className="text-text-tertiary uppercase tracking-wide font-semibold">
+                      LTV RATIO
+                    </span>
+                    <span className="font-bold text-text-primary text-sm">
+                      {currentLTV.toFixed(1)}%
+                    </span>
                   </div>
 
                   {/* Liquidation Warning */}
@@ -410,12 +418,12 @@ export function BorrowInterface() {
         {!connected
           ? 'Connect Wallet to Continue'
           : !collateralAmount
-          ? 'Enter Collateral Amount'
-          : !borrowAmount
-          ? 'Enter Borrow Amount'
-          : healthFactor < 110
-          ? 'Health Factor Too Low (Min 110%)'
-          : 'Confirm Transaction'}
+            ? 'Enter Collateral Amount'
+            : !borrowAmount
+              ? 'Enter Borrow Amount'
+              : healthFactor < 110
+                ? 'Health Factor Too Low (Min 110%)'
+                : 'Confirm Transaction'}
       </Button>
 
       <div className="grid grid-cols-2 gap-3">
@@ -432,10 +440,10 @@ export function BorrowInterface() {
                 <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1">
                   {rateMode === 'protocol' ? 'OPTIMAL RATE' : 'CUSTOM RATE'}
                 </div>
-                <div className="text-lg font-bold text-text-primary">{interestRate.toFixed(2)}%</div>
-                <div className="text-xs text-text-tertiary mt-0.5">
-                  {redemptionRisk.label}
+                <div className="text-lg font-bold text-text-primary">
+                  {interestRate.toFixed(2)}%
                 </div>
+                <div className="text-xs text-text-tertiary mt-0.5">{redemptionRisk.label}</div>
               </div>
             </div>
           </Card>
@@ -451,7 +459,9 @@ export function BorrowInterface() {
                 <Info className="w-4 h-4 text-warning" />
               </div>
               <div className="flex-1">
-                <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1">LIQUIDATION</div>
+                <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1">
+                  LIQUIDATION
+                </div>
                 <div className="text-lg font-bold text-text-primary">
                   {liquidationPrice > 0 ? `$${liquidationPrice.toFixed(2)}` : '$0.00'}
                 </div>
@@ -492,17 +502,21 @@ export function BorrowInterface() {
                           </div>
                           <div className="text-[11px] text-text-secondary space-y-2">
                             <p>
-                              <span className="font-semibold text-text-primary">Fee = (Base Rate + 0.5%) × Amount</span>
+                              <span className="font-semibold text-text-primary">
+                                Fee = (Base Rate + 0.5%) × Amount
+                              </span>
                             </p>
                             <div className="space-y-1">
                               <div>• Minimum: 0.5%</div>
                               <div>• Maximum: 5%</div>
                             </div>
                             <p className="pt-2 border-t border-border/30">
-                              <span className="font-semibold">Base Rate</span> increases with VUSD redemptions and decays over time (12h half-life).
+                              <span className="font-semibold">Base Rate</span> increases with VUSD
+                              redemptions and decays over time (12h half-life).
                             </p>
                             <p className="text-text-tertiary text-[10px]">
-                              When VUSD depegs, high redemptions → higher fees → discourages new borrowing → helps restore peg.
+                              When VUSD depegs, high redemptions → higher fees → discourages new
+                              borrowing → helps restore peg.
                             </p>
                             <div className="pt-2 border-t border-border/30 text-warning text-[10px] font-semibold">
                               MVP: Base rate fixed at 0% (0.5% fee). Dynamic rates in v2.

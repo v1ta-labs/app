@@ -88,7 +88,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
 
       if (window.Jupiter.syncProps) {
         window.Jupiter.syncProps({
-          passthroughWalletContextState: wallet
+          passthroughWalletContextState: wallet,
         });
       }
 
@@ -116,7 +116,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
 
     if (window.Jupiter.syncProps) {
       window.Jupiter.syncProps({
-        passthroughWalletContextState: wallet
+        passthroughWalletContextState: wallet,
       });
     }
   }, [open, scriptLoaded, wallet.connected, wallet.publicKey, wallet]);
@@ -129,8 +129,12 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
           <div className="bg-base border border-border rounded-[24px] shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-surface/50">
               <div>
-                <Dialog.Title className="text-xl font-bold text-text-primary">Swap Tokens</Dialog.Title>
-                <Dialog.Description className="text-xs text-text-tertiary mt-0.5">Powered by Jupiter</Dialog.Description>
+                <Dialog.Title className="text-xl font-bold text-text-primary">
+                  Swap Tokens
+                </Dialog.Title>
+                <Dialog.Description className="text-xs text-text-tertiary mt-0.5">
+                  Powered by Jupiter
+                </Dialog.Description>
               </div>
               <Dialog.Close asChild>
                 <button className="p-2 hover:bg-elevated rounded-[12px] transition-colors text-text-secondary hover:text-text-primary">
@@ -173,22 +177,26 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
         }
 
         #jupiter-terminal-container {
-          --background: #0A1824;
-          --surface: #0F2A38;
-          --elevated: #1D3C43;
-          --border: #2A4930;
-          --primary: #2A4930;
-          --primary-hover: #3A5940;
-          --text-primary: #C8D3D5;
-          --text-secondary: #8A9A9D;
-          --text-tertiary: #5A6A6D;
+          --background: #0a1824;
+          --surface: #0f2a38;
+          --elevated: #1d3c43;
+          --border: #2a4930;
+          --primary: #2a4930;
+          --primary-hover: #3a5940;
+          --text-primary: #c8d3d5;
+          --text-secondary: #8a9a9d;
+          --text-tertiary: #5a6a6d;
           --success: #4ade80;
           --warning: #fbbf24;
           --error: #f87171;
         }
 
         #jupiter-terminal-container * {
-          font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+          font-family:
+            var(--font-geist-sans),
+            system-ui,
+            -apple-system,
+            sans-serif;
         }
 
         #jupiter-terminal-container [class*='bg-'] {

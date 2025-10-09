@@ -27,13 +27,7 @@ export interface BadgeProps
 
 export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
   ({ className, variant, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(badgeVariants({ variant }), className)}
-        {...props}
-      />
-    );
+    return <div ref={ref} className={cn(badgeVariants({ variant }), className)} {...props} />;
   }
 );
 

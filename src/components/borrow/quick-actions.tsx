@@ -13,10 +13,12 @@ const ACTIONS = [
 export function QuickActions() {
   return (
     <div>
-      <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4">Quick Actions</h2>
+      <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4">
+        Quick Actions
+      </h2>
       <Card className="p-2">
         <div className="space-y-1">
-          {ACTIONS.map((action) => {
+          {ACTIONS.map(action => {
             const Icon = action.icon;
             return (
               <Button

@@ -37,7 +37,7 @@ export function useSolanaBalance() {
     if (publicKey) {
       const subscriptionId = connection.onAccountChange(
         publicKey,
-        (accountInfo) => {
+        accountInfo => {
           setBalance(accountInfo.lamports / LAMPORTS_PER_SOL);
         },
         'confirmed'

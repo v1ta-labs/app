@@ -31,11 +31,7 @@ export function StatsBar({ collateral, borrowed, available, healthFactor }: Stat
         subtitle={`${(borrowed / 1000).toFixed(0)}K VUSD`}
       />
 
-      <StatsCard
-        title="Available"
-        value={formatUSD(available)}
-        subtitle="to borrow"
-      />
+      <StatsCard title="Available" value={formatUSD(available)} subtitle="to borrow" />
 
       <StatsCard
         title="Health Factor"

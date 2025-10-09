@@ -10,17 +10,35 @@ import { motion } from 'framer-motion';
 
 const REFERRALS = [
   { address: '7Bk...3Hn', joined: '2025-10-01', volume: 12450, earnings: 62.25, status: 'active' },
-  { address: '9Pm...5Qw', joined: '2025-09-28', volume: 8320, earnings: 41.60, status: 'active' },
+  { address: '9Pm...5Qw', joined: '2025-09-28', volume: 8320, earnings: 41.6, status: 'active' },
   { address: '4Dx...8Wn', joined: '2025-09-25', volume: 15670, earnings: 78.35, status: 'active' },
-  { address: '2Fp...4Ls', joined: '2025-09-20', volume: 5240, earnings: 26.20, status: 'active' },
-  { address: '6Hn...5Pr', joined: '2025-09-18', volume: 18920, earnings: 94.60, status: 'active' },
+  { address: '2Fp...4Ls', joined: '2025-09-20', volume: 5240, earnings: 26.2, status: 'active' },
+  { address: '6Hn...5Pr', joined: '2025-09-18', volume: 18920, earnings: 94.6, status: 'active' },
 ];
 
 const TIERS = [
   { name: 'Bronze', min: 0, commission: '0.5%', icon: '🥉', color: 'from-amber-700 to-amber-600' },
-  { name: 'Silver', min: 50000, commission: '0.75%', icon: '🥈', color: 'from-gray-400 to-gray-500' },
-  { name: 'Gold', min: 150000, commission: '1.0%', icon: '🥇', color: 'from-yellow-400 to-yellow-500' },
-  { name: 'Platinum', min: 500000, commission: '1.5%', icon: '💎', color: 'from-cyan-400 to-blue-500' },
+  {
+    name: 'Silver',
+    min: 50000,
+    commission: '0.75%',
+    icon: '🥈',
+    color: 'from-gray-400 to-gray-500',
+  },
+  {
+    name: 'Gold',
+    min: 150000,
+    commission: '1.0%',
+    icon: '🥇',
+    color: 'from-yellow-400 to-yellow-500',
+  },
+  {
+    name: 'Platinum',
+    min: 500000,
+    commission: '1.5%',
+    icon: '💎',
+    color: 'from-cyan-400 to-blue-500',
+  },
 ];
 
 export default function ReferralsPage() {
@@ -35,7 +53,9 @@ export default function ReferralsPage() {
 
   const currentTier = TIERS.filter(t => totalVolume >= t.min).pop() || TIERS[0];
   const nextTier = TIERS.find(t => t.min > totalVolume);
-  const progressToNext = nextTier ? ((totalVolume - currentTier.min) / (nextTier.min - currentTier.min)) * 100 : 100;
+  const progressToNext = nextTier
+    ? ((totalVolume - currentTier.min) / (nextTier.min - currentTier.min)) * 100
+    : 100;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -73,10 +93,7 @@ export default function ReferralsPage() {
                 <div className="flex-1 px-4 py-3 bg-surface/50 rounded-[12px] border border-border">
                   <div className="text-sm font-mono text-text-primary truncate">{referralLink}</div>
                 </div>
-                <Button
-                  onClick={handleCopy}
-                  className="shrink-0 gap-2"
-                >
+                <Button onClick={handleCopy} className="shrink-0 gap-2">
                   {copied ? (
                     <>
                       <Check className="w-4 h-4" />
@@ -92,7 +109,9 @@ export default function ReferralsPage() {
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-text-tertiary">
                 <Zap className="w-3.5 h-3.5 text-warning" />
-                <span>Earn {currentTier.commission} commission on every transaction your referrals make!</span>
+                <span>
+                  Earn {currentTier.commission} commission on every transaction your referrals make!
+                </span>
               </div>
             </Card>
           </motion.div>
@@ -104,7 +123,9 @@ export default function ReferralsPage() {
                 <div className="p-2 bg-primary/10 rounded-xl">
                   <Users className="w-4 h-4 text-primary" />
                 </div>
-                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">Total Referrals</div>
+                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">
+                  Total Referrals
+                </div>
               </div>
               <div className="text-3xl font-bold text-text-primary">{totalReferrals}</div>
               <div className="text-xs text-success mt-1">{activeReferrals} active</div>
@@ -115,7 +136,9 @@ export default function ReferralsPage() {
                 <div className="p-2 bg-success/10 rounded-xl">
                   <TrendingUp className="w-4 h-4 text-success" />
                 </div>
-                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">Total Volume</div>
+                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">
+                  Total Volume
+                </div>
               </div>
               <div className="text-3xl font-bold text-text-primary">{formatUSD(totalVolume)}</div>
               <div className="text-xs text-text-tertiary mt-1">From referrals</div>
@@ -126,10 +149,12 @@ export default function ReferralsPage() {
                 <div className="p-2 bg-warning/10 rounded-xl">
                   <Gift className="w-4 h-4 text-warning" />
                 </div>
-                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">Total Earned</div>
+                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">
+                  Total Earned
+                </div>
               </div>
               <div className="text-3xl font-bold text-text-primary">{formatUSD(totalEarnings)}</div>
-              <div className="text-xs text-success mt-1">+{formatUSD(24.50)} this week</div>
+              <div className="text-xs text-success mt-1">+{formatUSD(24.5)} this week</div>
             </Card>
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
@@ -137,10 +162,16 @@ export default function ReferralsPage() {
                 <div className="p-2 bg-primary/10 rounded-xl">
                   <Crown className="w-4 h-4 text-primary" />
                 </div>
-                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">Current Tier</div>
+                <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold">
+                  Current Tier
+                </div>
               </div>
-              <div className="text-3xl font-bold text-text-primary">{currentTier.icon} {currentTier.name}</div>
-              <div className="text-xs text-text-tertiary mt-1">{currentTier.commission} commission</div>
+              <div className="text-3xl font-bold text-text-primary">
+                {currentTier.icon} {currentTier.name}
+              </div>
+              <div className="text-xs text-text-tertiary mt-1">
+                {currentTier.commission} commission
+              </div>
             </Card>
           </div>
 
@@ -150,12 +181,12 @@ export default function ReferralsPage() {
               <div>
                 <div className="text-sm font-bold text-text-primary mb-1">Tier Progress</div>
                 <div className="text-xs text-text-tertiary">
-                  {nextTier ? `${formatUSD(nextTier.min - totalVolume)} more to unlock ${nextTier.name}` : 'Max tier reached!'}
+                  {nextTier
+                    ? `${formatUSD(nextTier.min - totalVolume)} more to unlock ${nextTier.name}`
+                    : 'Max tier reached!'}
                 </div>
               </div>
-              {nextTier && (
-                <div className="text-2xl">{nextTier.icon}</div>
-              )}
+              {nextTier && <div className="text-2xl">{nextTier.icon}</div>}
             </div>
             <div className="h-3 bg-base rounded-full overflow-hidden mb-4">
               <div
@@ -164,7 +195,7 @@ export default function ReferralsPage() {
               />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {TIERS.map((tier) => (
+              {TIERS.map(tier => (
                 <div
                   key={tier.name}
                   className={`text-center p-3 rounded-xl border transition-all ${
@@ -174,7 +205,9 @@ export default function ReferralsPage() {
                   }`}
                 >
                   <div className="text-xl mb-1">{tier.icon}</div>
-                  <div className={`text-xs font-bold mb-0.5 ${totalVolume >= tier.min ? 'text-primary' : 'text-text-tertiary'}`}>
+                  <div
+                    className={`text-xs font-bold mb-0.5 ${totalVolume >= tier.min ? 'text-primary' : 'text-text-tertiary'}`}
+                  >
                     {tier.name}
                   </div>
                   <div className="text-[10px] text-text-tertiary">{tier.commission}</div>
@@ -205,14 +238,20 @@ export default function ReferralsPage() {
 
                         {/* Address */}
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-mono font-bold text-text-primary mb-1 truncate">{referral.address}</div>
+                          <div className="text-sm font-mono font-bold text-text-primary mb-1 truncate">
+                            {referral.address}
+                          </div>
                           <div className="text-xs text-text-tertiary">Joined {referral.joined}</div>
                         </div>
 
                         {/* Volume & Earnings */}
                         <div className="text-right">
-                          <div className="text-sm font-bold text-text-primary mb-1">{formatUSD(referral.volume)}</div>
-                          <div className="text-xs font-semibold text-success">+{formatUSD(referral.earnings)}</div>
+                          <div className="text-sm font-bold text-text-primary mb-1">
+                            {formatUSD(referral.volume)}
+                          </div>
+                          <div className="text-xs font-semibold text-success">
+                            +{formatUSD(referral.earnings)}
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -227,14 +266,70 @@ export default function ReferralsPage() {
               <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
                 <div className="space-y-3">
                   {[
-                    { rank: 1, address: '3Hk...7Mn', referrals: 847, volume: 2847320, icon: '🥇', color: 'text-yellow-400' },
-                    { rank: 2, address: '8Ym...2Qr', referrals: 623, volume: 1956400, icon: '🥈', color: 'text-gray-400' },
-                    { rank: 3, address: '5KJ...9Rz', referrals: 489, volume: 1423850, icon: '🥉', color: 'text-amber-600' },
-                    { rank: 4, address: '9Bv...3Kt', referrals: 312, volume: 982340, icon: '4', color: 'text-text-tertiary' },
-                    { rank: 5, address: '2Fp...4Ls', referrals: 287, volume: 845620, icon: '5', color: 'text-text-tertiary' },
-                    { rank: 6, address: '6Hn...5Pr', referrals: 254, volume: 723450, icon: '6', color: 'text-text-tertiary' },
-                    { rank: 7, address: '1Qw...7Zx', referrals: 198, volume: 612380, icon: '7', color: 'text-text-tertiary' },
-                    { rank: 8, address: '4Dx...8Wn', referrals: 176, volume: 534290, icon: '8', color: 'text-text-tertiary' },
+                    {
+                      rank: 1,
+                      address: '3Hk...7Mn',
+                      referrals: 847,
+                      volume: 2847320,
+                      icon: '🥇',
+                      color: 'text-yellow-400',
+                    },
+                    {
+                      rank: 2,
+                      address: '8Ym...2Qr',
+                      referrals: 623,
+                      volume: 1956400,
+                      icon: '🥈',
+                      color: 'text-gray-400',
+                    },
+                    {
+                      rank: 3,
+                      address: '5KJ...9Rz',
+                      referrals: 489,
+                      volume: 1423850,
+                      icon: '🥉',
+                      color: 'text-amber-600',
+                    },
+                    {
+                      rank: 4,
+                      address: '9Bv...3Kt',
+                      referrals: 312,
+                      volume: 982340,
+                      icon: '4',
+                      color: 'text-text-tertiary',
+                    },
+                    {
+                      rank: 5,
+                      address: '2Fp...4Ls',
+                      referrals: 287,
+                      volume: 845620,
+                      icon: '5',
+                      color: 'text-text-tertiary',
+                    },
+                    {
+                      rank: 6,
+                      address: '6Hn...5Pr',
+                      referrals: 254,
+                      volume: 723450,
+                      icon: '6',
+                      color: 'text-text-tertiary',
+                    },
+                    {
+                      rank: 7,
+                      address: '1Qw...7Zx',
+                      referrals: 198,
+                      volume: 612380,
+                      icon: '7',
+                      color: 'text-text-tertiary',
+                    },
+                    {
+                      rank: 8,
+                      address: '4Dx...8Wn',
+                      referrals: 176,
+                      volume: 534290,
+                      icon: '8',
+                      color: 'text-text-tertiary',
+                    },
                   ].map((leader, index) => (
                     <motion.div
                       key={leader.rank}
@@ -242,14 +337,14 @@ export default function ReferralsPage() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.08 }}
                       className={`flex items-center gap-3 p-3 rounded-xl ${
-                        leader.rank <= 3 ? 'bg-gradient-to-r from-base via-elevated to-base border border-border' : 'bg-base'
+                        leader.rank <= 3
+                          ? 'bg-gradient-to-r from-base via-elevated to-base border border-border'
+                          : 'bg-base'
                       }`}
                     >
                       {/* Rank */}
                       <div className="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center shrink-0">
-                        <span className={`text-xl font-bold ${leader.color}`}>
-                          {leader.icon}
-                        </span>
+                        <span className={`text-xl font-bold ${leader.color}`}>{leader.icon}</span>
                       </div>
 
                       {/* User Info */}
@@ -263,9 +358,7 @@ export default function ReferralsPage() {
                       </div>
 
                       {/* Trophy for top 3 */}
-                      {leader.rank <= 3 && (
-                        <Crown className={`w-5 h-5 ${leader.color}`} />
-                      )}
+                      {leader.rank <= 3 && <Crown className={`w-5 h-5 ${leader.color}`} />}
                     </motion.div>
                   ))}
                 </div>
@@ -279,7 +372,9 @@ export default function ReferralsPage() {
                       </div>
                       <div>
                         <div className="text-sm font-bold text-text-primary mb-0.5">You</div>
-                        <div className="text-xs text-text-tertiary">{totalReferrals} referrals • {formatUSD(totalVolume)}</div>
+                        <div className="text-xs text-text-tertiary">
+                          {totalReferrals} referrals • {formatUSD(totalVolume)}
+                        </div>
                       </div>
                     </div>
                     <div className="text-xs text-primary font-semibold">↑ 12 ranks</div>
@@ -298,21 +393,27 @@ export default function ReferralsPage() {
                   <span className="text-2xl">1️⃣</span>
                 </div>
                 <div className="text-sm font-bold text-text-primary mb-2">Share Your Link</div>
-                <div className="text-xs text-text-tertiary">Copy your unique referral link and share it with friends</div>
+                <div className="text-xs text-text-tertiary">
+                  Copy your unique referral link and share it with friends
+                </div>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mx-auto mb-3">
                   <span className="text-2xl">2️⃣</span>
                 </div>
                 <div className="text-sm font-bold text-text-primary mb-2">They Sign Up</div>
-                <div className="text-xs text-text-tertiary">Your friends join V1ta using your link and start trading</div>
+                <div className="text-xs text-text-tertiary">
+                  Your friends join V1ta using your link and start trading
+                </div>
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center mx-auto mb-3">
                   <span className="text-2xl">3️⃣</span>
                 </div>
                 <div className="text-sm font-bold text-text-primary mb-2">Earn Rewards</div>
-                <div className="text-xs text-text-tertiary">Get commission on every transaction they make</div>
+                <div className="text-xs text-text-tertiary">
+                  Get commission on every transaction they make
+                </div>
               </div>
             </div>
           </Card>

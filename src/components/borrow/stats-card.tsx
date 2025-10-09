@@ -14,17 +14,26 @@ interface StatsCardProps {
   className?: string;
 }
 
-export function StatsCard({ title, value, subtitle, change, indicator, className }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  subtitle,
+  change,
+  indicator,
+  className,
+}: StatsCardProps) {
   return (
     <Card className={cn('p-4', className)}>
       <div className="space-y-2">
         <div className="flex items-start justify-between">
           <span className="text-xs text-text-secondary uppercase tracking-wide">{title}</span>
           {change && (
-            <span className={cn(
-              'flex items-center gap-1 text-xs font-semibold',
-              change.isPositive ? 'text-success' : 'text-error'
-            )}>
+            <span
+              className={cn(
+                'flex items-center gap-1 text-xs font-semibold',
+                change.isPositive ? 'text-success' : 'text-error'
+              )}
+            >
               {change.isPositive ? (
                 <TrendingUp className="w-3 h-3" />
               ) : (
@@ -37,9 +46,7 @@ export function StatsCard({ title, value, subtitle, change, indicator, className
 
         <div className="flex items-baseline gap-2">
           <span className="text-xl font-bold text-text-primary">{value}</span>
-          {subtitle && (
-            <span className="text-xs text-text-tertiary">{subtitle}</span>
-          )}
+          {subtitle && <span className="text-xs text-text-tertiary">{subtitle}</span>}
         </div>
 
         {indicator && (
@@ -51,20 +58,27 @@ export function StatsCard({ title, value, subtitle, change, indicator, className
                   className={cn(
                     'w-1 h-1 rounded-full',
                     i < (indicator === 'safe' ? 5 : indicator === 'warning' ? 3 : 1)
-                      ? indicator === 'safe' ? 'bg-success' :
-                        indicator === 'warning' ? 'bg-warning' : 'bg-error'
+                      ? indicator === 'safe'
+                        ? 'bg-success'
+                        : indicator === 'warning'
+                          ? 'bg-warning'
+                          : 'bg-error'
                       : 'bg-border'
                   )}
                 />
               ))}
             </div>
-            <span className={cn(
-              'text-xs font-semibold',
-              indicator === 'safe' ? 'text-success' :
-              indicator === 'warning' ? 'text-warning' : 'text-error'
-            )}>
-              {indicator === 'safe' ? 'Safe' :
-               indicator === 'warning' ? 'Caution' : 'Danger'}
+            <span
+              className={cn(
+                'text-xs font-semibold',
+                indicator === 'safe'
+                  ? 'text-success'
+                  : indicator === 'warning'
+                    ? 'text-warning'
+                    : 'text-error'
+              )}
+            >
+              {indicator === 'safe' ? 'Safe' : indicator === 'warning' ? 'Caution' : 'Danger'}
             </span>
           </div>
         )}

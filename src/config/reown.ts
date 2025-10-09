@@ -3,7 +3,8 @@ import { solana, solanaTestnet, solanaDevnet } from '@reown/appkit/networks';
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets';
 
 // Get project ID from environment
-export const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || 'f34fa03d-7878-4cb9-b63c-6f340085cd16';
+export const projectId =
+  process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || 'f34fa03d-7878-4cb9-b63c-6f340085cd16';
 
 // Metadata for your app
 export const metadata = {

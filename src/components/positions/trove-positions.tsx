@@ -40,7 +40,7 @@ export function TrovePositions() {
 
   return (
     <div className="space-y-4">
-      {MOCK_TROVES.map((trove) => (
+      {MOCK_TROVES.map(trove => (
         <Card key={trove.id} className="p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
@@ -53,8 +53,8 @@ export function TrovePositions() {
                     trove.healthFactor > 150
                       ? 'success'
                       : trove.healthFactor > 120
-                      ? 'warning'
-                      : 'error'
+                        ? 'warning'
+                        : 'error'
                   }
                 >
                   {trove.status}
@@ -83,9 +83,7 @@ export function TrovePositions() {
 
             <div>
               <p className="text-sm text-text-secondary mb-1">Debt</p>
-              <p className="text-lg font-semibold text-text-primary">
-                {formatUSD(trove.debt)}
-              </p>
+              <p className="text-lg font-semibold text-text-primary">{formatUSD(trove.debt)}</p>
               <p className="text-xs text-text-tertiary">VUSD</p>
             </div>
 
@@ -96,8 +94,8 @@ export function TrovePositions() {
                   trove.healthFactor > 150
                     ? 'text-success'
                     : trove.healthFactor > 120
-                    ? 'text-warning'
-                    : 'text-error'
+                      ? 'text-warning'
+                      : 'text-error'
                 }`}
               >
                 {formatPercentage(trove.healthFactor)}

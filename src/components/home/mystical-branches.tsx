@@ -104,8 +104,10 @@ export function MysticalBranches() {
 
         if (
           node.life <= 0 ||
-          node.x < -100 || node.x > canvas.width + 100 ||
-          node.y < -100 || node.y > canvas.height + 100
+          node.x < -100 ||
+          node.x > canvas.width + 100 ||
+          node.y < -100 ||
+          node.y > canvas.height + 100
         ) {
           nodes.splice(i, 1);
           continue;

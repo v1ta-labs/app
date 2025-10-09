@@ -5,10 +5,7 @@ import { AnchorProvider, Program, Idl } from '@coral-xyz/anchor';
 import { useMemo } from 'react';
 import { PublicKey } from '@solana/web3.js';
 
-export function useAnchorProgram<T extends Idl>(
-  programId: string | PublicKey,
-  idl: T
-) {
+export function useAnchorProgram<T extends Idl>(programId: string | PublicKey, idl: T) {
   const { connection } = useConnection();
   const wallet = useWallet();
 
@@ -27,12 +24,17 @@ export function useAnchorProgram<T extends Idl>(
       { commitment: 'confirmed' }
     );
 
-    const programIdKey = typeof programId === 'string'
-      ? new PublicKey(programId)
-      : programId;
+    const programIdKey = typeof programId === 'string' ? new PublicKey(programId) : programId;
 
     return new Program(idl, provider);
-  }, [connection, wallet.publicKey, wallet.signTransaction, wallet.signAllTransactions, programId, idl]);
+  }, [
+    connection,
+    wallet.publicKey,
+    wallet.signTransaction,
+    wallet.signAllTransactions,
+    programId,
+    idl,
+  ]);
 
   return program as Program<T> | null;
 }

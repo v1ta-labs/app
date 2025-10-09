@@ -50,11 +50,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="w-full">
-        {label && (
-          <label className="block text-sm text-text-secondary mb-2">
-            {label}
-          </label>
-        )}
+        {label && <label className="block text-sm text-text-secondary mb-2">{label}</label>}
         <div className="relative">
           <input
             ref={ref}
@@ -73,14 +69,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightElement && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {rightElement}
-            </div>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
           )}
         </div>
-        {error && (
-          <p className="text-sm text-error mt-1">{error}</p>
-        )}
+        {error && <p className="text-sm text-error mt-1">{error}</p>}
       </div>
     );
   }

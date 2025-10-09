@@ -27,11 +27,13 @@ export function AmountInput({
   };
 
   return (
-    <div className={cn(
-      'relative flex items-center gap-3 p-4 bg-elevated rounded-[20px] border border-border',
-      'focus-within:border-primary transition-all',
-      disabled && 'opacity-50 cursor-not-allowed'
-    )}>
+    <div
+      className={cn(
+        'relative flex items-center gap-3 p-4 bg-elevated rounded-[20px] border border-border',
+        'focus-within:border-primary transition-all',
+        disabled && 'opacity-50 cursor-not-allowed'
+      )}
+    >
       {leftElement && leftElement}
 
       <div className="flex-1">

@@ -38,9 +38,7 @@ export function PoolPositions() {
       <Card className="p-6">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h3 className="text-lg font-semibold text-text-primary">
-              Stability Pool Deposit
-            </h3>
+            <h3 className="text-lg font-semibold text-text-primary">Stability Pool Deposit</h3>
             <p className="text-sm text-text-tertiary mt-1">
               Earn liquidation gains and VITA rewards
             </p>
@@ -66,9 +64,7 @@ export function PoolPositions() {
 
           <div>
             <p className="text-sm text-text-secondary mb-1">Pool Share</p>
-            <p className="text-2xl font-bold text-primary">
-              {MOCK_POOL_POSITION.share}%
-            </p>
+            <p className="text-2xl font-bold text-primary">{MOCK_POOL_POSITION.share}%</p>
             <Progress value={MOCK_POOL_POSITION.share} className="mt-2" />
           </div>
 

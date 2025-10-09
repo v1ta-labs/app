@@ -2,31 +2,28 @@ import { HTMLAttributes, forwardRef } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils/cn';
 
-const cardVariants = cva(
-  'rounded-[24px] transition-all duration-200',
-  {
-    variants: {
-      variant: {
-        default: 'bg-surface border border-border',
-        elevated: 'bg-elevated border border-border',
-        ghost: 'bg-transparent',
-      },
-      padding: {
-        none: '',
-        sm: 'p-4',
-        md: 'p-5',
-        lg: 'p-6',
-      },
-      hover: {
-        true: 'hover:border-primary/30 cursor-pointer',
-      },
+const cardVariants = cva('rounded-[24px] transition-all duration-200', {
+  variants: {
+    variant: {
+      default: 'bg-surface border border-border',
+      elevated: 'bg-elevated border border-border',
+      ghost: 'bg-transparent',
     },
-    defaultVariants: {
-      variant: 'default',
-      padding: 'md',
+    padding: {
+      none: '',
+      sm: 'p-4',
+      md: 'p-5',
+      lg: 'p-6',
     },
-  }
-);
+    hover: {
+      true: 'hover:border-primary/30 cursor-pointer',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+    padding: 'md',
+  },
+});
 
 export interface CardProps
   extends HTMLAttributes<HTMLDivElement>,
@@ -48,13 +45,7 @@ Card.displayName = 'Card';
 
 export const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn('flex flex-col space-y-1.5', className)}
-        {...props}
-      />
-    );
+    return <div ref={ref} className={cn('flex flex-col space-y-1.5', className)} {...props} />;
   }
 );
 
@@ -76,9 +67,7 @@ CardTitle.displayName = 'CardTitle';
 
 export const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
-    return (
-      <div ref={ref} className={cn('', className)} {...props} />
-    );
+    return <div ref={ref} className={cn('', className)} {...props} />;
   }
 );
 
