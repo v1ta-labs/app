@@ -23,6 +23,7 @@ const eslintConfig = [
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+      '@next/next/no-img-element': 'off', // Allow <img> for external avatar URLs
     },
   },
   {
