@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CollateralType {
+  SOL
+  jitoSOL
+  mSOL
+  bSOL
+}
+
+enum TransactionType {
+  OPEN_POSITION
+  ADJUST_POSITION
+  CLOSE_POSITION
+  LIQUIDATION
+  REDEMPTION
+}
+
+model Position {
+  id                String         @id @default(cuid())
+  pubkey            String         @unique
+  owner             String
+  collateralType    CollateralType
+  collateralAmount  Float
+  debt              Float
+  createdAt         DateTime       @default(now())
+  lastUpdated       DateTime       @updatedAt
+  closedAt          DateTime?
+
+  transactions      Transaction[]
+
+  @@index([owner])
+  @@index([collateralType])
+  @@index([closedAt])
+}
+
+model Transaction {
+  id                String          @id @default(cuid())
+  signature         String          @unique
+  type              TransactionType
+  timestamp         DateTime        @default(now())
+
+  positionId        String?
+  position          Position?       @relation(fields: [positionId], references: [id])
+
+  owner             String
+  collateralType    CollateralType?
+  collateralAmount  Float?
+  collateralAdded   Float?
+  borrowAmount      Float?
+  debtRepaid        Float?
+  fee               Float?
+  liquidator        String?
+
+  @@index([owner])
+  @@index([type])
+  @@index([timestamp])
+}
+
+model ProtocolStats {
+  id                    Int      @id @default(autoincrement())
+  timestamp             DateTime @default(now())
+
+  totalCollateralSOL    Float    @default(0)
+  totalCollateralJitoSOL Float   @default(0)
+  totalCollateralMSOL   Float    @default(0)
+  totalCollateralBSOL   Float    @default(0)
+
+  totalDebt             Float    @default(0)
+  vUSDSupply            Float    @default(0)
+  activePositions       Int      @default(0)
+
+  baseRate              Float    @default(0.5)
+
+  @@index([timestamp])
+}
+
+model PriceHistory {
+  id         Int      @id @default(autoincrement())
+  timestamp  DateTime @default(now())
+
+  solPrice   Float
+  jitoSOLPrice Float?
+  mSOLPrice    Float?
+  bSOLPrice    Float?
+
+  @@index([timestamp])
+}

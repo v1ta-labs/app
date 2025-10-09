@@ -14,9 +14,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const COLLATERAL_TOKENS = [
   { symbol: 'SOL', name: 'Solana', icon: '◎', price: 0, balance: 0 },
-  { symbol: 'jitoSOL', name: 'Jito Staked SOL', icon: '🔥', price: 0, balance: 0 },
-  { symbol: 'mSOL', name: 'Marinade Staked SOL', icon: '⚓', price: 0, balance: 0 },
-  { symbol: 'bSOL', name: 'BlazeStake SOL', icon: '🔆', price: 0, balance: 0 },
+  // { symbol: 'jitoSOL', name: 'Jito Staked SOL', icon: '🔥', price: 0, balance: 0 },
+  // { symbol: 'mSOL', name: 'Marinade Staked SOL', icon: '⚓', price: 0, balance: 0 },
+  // { symbol: 'bSOL', name: 'BlazeStake SOL', icon: '🔆', price: 0, balance: 0 },
 ];
 
 type InterestRateMode = 'protocol' | 'manual';
