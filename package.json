@@ -56,6 +56,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@prisma/client": "^6.17.0",
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/bn.js": "^5.2.0",
     "@types/node": "^20",

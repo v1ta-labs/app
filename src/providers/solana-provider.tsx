@@ -41,14 +41,27 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
         // User rejected the connection, silently ignore
         return;
       }
+      // Suppress WebSocket errors in development
+      if (error.message?.includes('ws error') || error.message?.includes('WebSocket')) {
+        return;
+      }
       console.error('Wallet error:', error);
     },
     []
   );
 
+  const connectionConfig = useMemo(
+    () => ({
+      commitment: 'confirmed' as const,
+      confirmTransactionInitialTimeout: 60000,
+      wsEndpoint: undefined, // Disable WebSocket for better stability
+    }),
+    []
+  );
+
   return (
-    <ConnectionProvider endpoint={RPC_ENDPOINT}>
-      <WalletProvider wallets={wallets} autoConnect onError={onError}>
+    <ConnectionProvider endpoint={RPC_ENDPOINT} config={connectionConfig}>
+      <WalletProvider wallets={wallets} autoConnect={false} onError={onError}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
