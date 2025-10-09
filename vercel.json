@@ -1,0 +1,6 @@
+{
+  "buildCommand": "prisma generate && next build --turbopack",
+  "env": {
+    "NEXT_TELEMETRY_DISABLED": "1"
+  }
+}
