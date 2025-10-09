@@ -6,7 +6,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 import { useAppKit } from '@reown/appkit/react';
 import { Modal, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalSection } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, ChevronDown, Zap, Wallet, Check } from 'lucide-react';
+import { ExternalLink, ChevronDown, Zap, Wallet, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 interface WalletModalProps {
@@ -18,6 +18,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
   const { wallets, select, connected } = useWallet();
   const { open: openReownModal } = useAppKit();
   const [showMoreOptions, setShowMoreOptions] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   const installedWallets = wallets.filter(
     w => w.readyState === WalletReadyState.Installed || w.readyState === WalletReadyState.Loadable
@@ -28,8 +29,20 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
   );
 
   const handleWalletClick = async (walletName: WalletName) => {
-    select(walletName);
-    onClose();
+    try {
+      setConnecting(true);
+      // Select and connect in one go
+      select(walletName);
+      // The wallet adapter will automatically connect after selection
+      // Just close the modal - the connection happens via the adapter
+      setTimeout(() => {
+        onClose();
+        setConnecting(false);
+      }, 500);
+    } catch (error) {
+      console.debug('Wallet connection error:', error);
+      setConnecting(false);
+    }
   };
 
   const handleReownClick = () => {
@@ -60,10 +73,12 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
               <button
                 key={wallet.adapter.name}
                 onClick={() => handleWalletClick(wallet.adapter.name as WalletName)}
+                disabled={connecting}
                 className={cn(
                   'w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all group',
                   'hover:border-primary hover:bg-primary/5 hover:scale-[1.02]',
-                  'border-border/50 bg-elevated/50'
+                  'border-border/50 bg-elevated/50',
+                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
                 )}
               >
                 <div className="w-12 h-12 rounded-lg bg-surface flex items-center justify-center border border-border/30 group-hover:border-primary/50 transition-all">
@@ -84,7 +99,11 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
                     </span>
                   </div>
                 </div>
-                <ExternalLink className="w-4 h-4 text-text-tertiary group-hover:text-primary transition-colors" />
+                {connecting ? (
+                  <Loader2 className="w-4 h-4 text-primary animate-spin" />
+                ) : (
+                  <ExternalLink className="w-4 h-4 text-text-tertiary group-hover:text-primary transition-colors" />
+                )}
               </button>
             ))}
           </div>
