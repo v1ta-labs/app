@@ -33,8 +33,12 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
   };
 
   const handleReownClick = () => {
-    openReownModal();
-    onClose();
+    try {
+      openReownModal();
+      onClose();
+    } catch (error) {
+      console.debug('Reown connection error:', error);
+    }
   };
 
   if (connected) {

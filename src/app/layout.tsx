@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import '@/lib/utils/error-handler';
 import { SolanaProvider } from '@/providers';
 import { ReownProvider } from '@/providers/reown-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
