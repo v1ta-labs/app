@@ -148,3 +148,34 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }
+
+// DELETE /api/user - Delete user account
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const walletAddress = searchParams.get('wallet');
+
+    if (!walletAddress) {
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
+    }
+
+    // Check if user exists
+    const user = await db.user.findUnique({
+      where: { walletAddress },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Delete user and all related data (cascade will handle positions and transactions)
+    await db.user.delete({
+      where: { walletAddress },
+    });
+
+    return NextResponse.json({ success: true, message: 'Account deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
+  }
+}

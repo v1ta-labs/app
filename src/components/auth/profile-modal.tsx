@@ -40,6 +40,8 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
   const [avatar, setAvatar] = useState(user.avatar || '');
   const [saving, setSaving] = useState(false);
   const [sendingVerification, setSendingVerification] = useState<'email' | 'twitter' | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const shortAddress = `${user.walletAddress.slice(0, 4)}...${user.walletAddress.slice(-4)}`;
@@ -103,6 +105,24 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
     setBio(user.bio || '');
     setTwitter(user.twitter || '');
     setAvatar(user.avatar || '');
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+
+    try {
+      const res = await fetch(`/api/user?wallet=${user.walletAddress}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        onClose();
+        onDisconnect();
+      }
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
   };
 
   return (
@@ -291,17 +311,60 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
               Save Changes
             </Button>
           </>
+        ) : showDeleteConfirm ? (
+          <>
+            <div className="w-full space-y-3">
+              <div className="p-3 bg-error/10 border border-error/30 rounded-lg">
+                <p className="text-sm text-text-primary font-medium mb-1">Delete your account?</p>
+                <p className="text-xs text-text-secondary mb-2">
+                  This will permanently delete your profile and activity data. This action cannot be undone.
+                </p>
+                <p className="text-xs text-success font-medium">
+                  ✓ Your funds will remain safe in your wallet
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  fullWidth
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  fullWidth
+                  variant="danger"
+                  onClick={handleDeleteAccount}
+                  loading={deleting}
+                  loadingText="Deleting..."
+                >
+                  Delete Account
+                </Button>
+              </div>
+            </div>
+          </>
         ) : (
-          <Button
-            fullWidth
-            variant="danger"
-            onClick={() => {
-              onDisconnect();
-              onClose();
-            }}
-          >
-            Disconnect Wallet
-          </Button>
+          <div className="w-full space-y-2">
+            <Button
+              fullWidth
+              variant="danger"
+              onClick={() => {
+                onDisconnect();
+                onClose();
+              }}
+            >
+              Disconnect Wallet
+            </Button>
+            <Button
+              fullWidth
+              variant="ghost"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-error hover:text-error hover:bg-error/5"
+            >
+              Delete Account
+            </Button>
+          </div>
         )}
       </ModalFooter>
     </Modal>
