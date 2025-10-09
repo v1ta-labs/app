@@ -4,16 +4,21 @@ import { useState } from 'react';
 import { Modal, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, User } from 'lucide-react';
 
 interface UsernameModalProps {
   open: boolean;
   walletAddress: string;
   onComplete: (username: string) => void;
   onClose?: () => void;
+  socialProfile?: {
+    email?: string;
+    avatar?: string;
+    name?: string;
+  } | null;
 }
 
-export function UsernameModal({ open, walletAddress, onComplete, onClose }: UsernameModalProps) {
+export function UsernameModal({ open, walletAddress, onComplete, onClose, socialProfile }: UsernameModalProps) {
   const [username, setUsername] = useState('');
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -92,7 +97,36 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose }: User
         <ModalDescription>Choose your unique username to get started</ModalDescription>
       </ModalHeader>
 
-      <ModalBody>
+      <ModalBody className="space-y-4">
+        {socialProfile && (socialProfile.avatar || socialProfile.email) && (
+          <div className="flex items-center gap-3 p-3 bg-surface/50 rounded-lg border border-border/50">
+            {socialProfile.avatar ? (
+              <img
+                src={socialProfile.avatar}
+                alt="Profile"
+                className="w-10 h-10 rounded-full"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              {socialProfile.name && (
+                <p className="text-sm font-medium text-text-primary truncate">
+                  {socialProfile.name}
+                </p>
+              )}
+              {socialProfile.email && (
+                <p className="text-xs text-text-tertiary truncate">
+                  {socialProfile.email}
+                </p>
+              )}
+            </div>
+            <Check className="w-4 h-4 text-success flex-shrink-0" />
+          </div>
+        )}
+
         <Input
           label="Username"
           value={username}

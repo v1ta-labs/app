@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { walletAddress, username, email, avatar, bio, twitter } = body;
+    const { walletAddress, username, email, avatar, bio, twitter, emailVerified } = body;
 
     if (!walletAddress || !username) {
       return NextResponse.json(
@@ -83,6 +83,7 @@ export async function POST(req: NextRequest) {
         walletAddress,
         username,
         email: email || null,
+        emailVerified: emailVerified || false,
         avatar: avatar || null,
         bio: bio || null,
         twitter: twitter || null,

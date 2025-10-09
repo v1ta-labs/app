@@ -16,7 +16,7 @@ export function WalletButton() {
   const { isConnected: reownConnected } = useAppKitAccount();
   const { disconnect: disconnectReown } = useDisconnect();
   const { balance } = useSolanaBalance();
-  const { user, loading, needsUsername, createUser, updateUser, walletAddress } = useUser();
+  const { user, loading, needsUsername, socialProfile, createUser, updateUser, walletAddress } = useUser();
 
   const [mounted, setMounted] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -104,8 +104,9 @@ export function WalletButton() {
         <UsernameModal
           open={needsUsername}
           walletAddress={walletAddress}
-          onComplete={createUser}
+          onComplete={(username) => createUser(username, socialProfile || undefined)}
           onClose={handleDisconnect}
+          socialProfile={socialProfile}
         />
       )}
 
