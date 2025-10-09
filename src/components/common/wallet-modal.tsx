@@ -52,7 +52,7 @@ export function WalletModal({ open, onClose }: WalletModalProps) {
         <ModalDescription>Choose your wallet to get started with v1ta</ModalDescription>
       </ModalHeader>
 
-      <ModalBody className="space-y-3">
+      <ModalBody className="space-y-3 max-h-[60vh] overflow-y-auto">
         {/* Installed Wallets */}
         {installedWallets.length > 0 && (
           <div className="space-y-2">
