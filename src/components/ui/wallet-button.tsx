@@ -22,12 +22,20 @@ export function WalletButton() {
   const [mounted, setMounted] = useState(false);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [dismissedUsernameModal, setDismissedUsernameModal] = useState(false);
 
   const connected = solanaConnected || reownConnected;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Reset dismissed state when wallet changes
+  useEffect(() => {
+    if (!connected) {
+      setDismissedUsernameModal(false);
+    }
+  }, [connected, walletAddress]);
 
   const handleDisconnect = () => {
     if (solanaConnected) {
@@ -110,14 +118,17 @@ export function WalletButton() {
       </div>
 
       {/* Username Setup Modal */}
-      {needsUsername && walletAddress && (
+      {needsUsername && walletAddress && !dismissedUsernameModal && (
         <UsernameModal
-          open={needsUsername}
+          open={needsUsername && !dismissedUsernameModal}
           walletAddress={walletAddress}
-          onComplete={(username) => createUser(username, socialProfile || undefined)}
+          onComplete={(username) => {
+            createUser(username, socialProfile || undefined);
+            setDismissedUsernameModal(false);
+          }}
           onClose={() => {
             // Allow user to skip username setup, they can set it later
-            updateUser();
+            setDismissedUsernameModal(true);
           }}
           socialProfile={socialProfile}
         />

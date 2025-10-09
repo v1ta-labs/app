@@ -16,6 +16,9 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { SettingsModal } from '@/components/modals/settings-modal';
 import { SwapModal } from '@/components/modals/swap-modal';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
+import { useUser } from '@/hooks/use-user';
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/', icon: Home },
@@ -33,6 +36,20 @@ export function NavigationSidebar() {
   const pathname = usePathname();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
+
+  const { connected: solanaConnected, disconnect: disconnectSolana } = useWallet();
+  const { isConnected: reownConnected } = useAppKitAccount();
+  const { disconnect: disconnectReown } = useDisconnect();
+  const { user, updateUser } = useUser();
+
+  const handleDisconnect = () => {
+    if (solanaConnected) {
+      disconnectSolana();
+    }
+    if (reownConnected) {
+      disconnectReown();
+    }
+  };
 
   return (
     <div className="w-20 fixed left-0 top-16 bottom-0 border-r border-border bg-surface/50 backdrop-blur-xl flex flex-col items-center py-8 z-50">
@@ -112,7 +129,13 @@ export function NavigationSidebar() {
       </div>
 
       {/* Modals */}
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <SettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        user={user || undefined}
+        onDisconnect={handleDisconnect}
+        onUpdate={updateUser}
+      />
       <SwapModal open={swapOpen} onOpenChange={setSwapOpen} />
     </div>
   );
