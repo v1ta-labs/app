@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import * as Dialog from '@radix-ui/react-dialog';
+import { Modal, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalFooter } from '@/components/ui/modal';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Check, X, Loader2 } from 'lucide-react';
 
@@ -49,139 +49,80 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose }: User
   };
 
   const handleUsernameChange = (value: string) => {
-    setUsername(value);
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+    setUsername(cleaned);
     setAvailable(null);
     setError('');
 
-    if (value.length >= 3) {
-      checkUsername(value);
+    if (cleaned.length >= 3) {
+      checkUsername(cleaned);
     }
   };
 
   const handleSubmit = async () => {
     if (!available || !username) return;
-
     setCreating(true);
 
     try {
-      const res = await fetch('/api/user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress, username }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || 'Failed to create profile');
-        return;
-      }
-
-      onComplete(username);
-    } catch {
+      await onComplete(username);
+    } catch (error) {
       setError('Failed to create profile');
-    } finally {
       setCreating(false);
     }
   };
 
+  const getRightIcon = () => {
+    if (checking) return <Loader2 className="w-4 h-4 animate-spin" />;
+    if (available === true) return <Check className="w-4 h-4 text-success" />;
+    if (available === false) return <X className="w-4 h-4 text-error" />;
+    return null;
+  };
+
   return (
-    <Dialog.Root open={open} onOpenChange={onClose}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <Dialog.Content className="fixed left-[50%] top-[50%] z-[9999] w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-surface border border-border rounded-3xl p-8 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
-          {onClose && (
-            <Dialog.Close asChild>
-              <button
-                className="absolute right-4 top-4 rounded-lg p-1.5 hover:bg-elevated transition-colors text-text-tertiary hover:text-text-primary"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </Dialog.Close>
-          )}
+    <Modal
+      open={open}
+      onOpenChange={onClose ? () => onClose() : undefined}
+      size="sm"
+      showClose={!!onClose}
+      closeOnOverlayClick={false}
+      closeOnEscape={false}
+    >
+      <ModalHeader centered>
+        <ModalTitle>Welcome to v1ta</ModalTitle>
+        <ModalDescription>Choose your unique username to get started</ModalDescription>
+      </ModalHeader>
 
-          <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to v1ta</h2>
-              <p className="text-sm text-text-tertiary">Choose your unique username</p>
-            </div>
+      <ModalBody>
+        <Input
+          label="Username"
+          value={username}
+          onChange={handleUsernameChange}
+          placeholder="satoshi"
+          maxLength={20}
+          rightIcon={getRightIcon()}
+          error={error || (available === false && !error ? 'Username already taken' : undefined)}
+          hint={
+            available === true
+              ? '✓ Username is available!'
+              : '3-20 characters, letters, numbers, _ or -'
+          }
+          variant={available === true ? 'success' : available === false ? 'error' : 'default'}
+          autoFocus
+        />
+      </ModalBody>
 
-            <div className="space-y-4">
-              <div>
-              <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2 block">
-                Username
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={username}
-                  onChange={e => handleUsernameChange(e.target.value.toLowerCase())}
-                  placeholder="satoshi"
-                  className="w-full px-4 py-3 bg-base border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  maxLength={20}
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <AnimatePresence mode="wait">
-                    {checking && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <Loader2 className="w-4 h-4 text-text-tertiary animate-spin" />
-                      </motion.div>
-                    )}
-                    {!checking && available === true && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
-                      >
-                        <Check className="w-4 h-4 text-success" />
-                      </motion.div>
-                    )}
-                    {!checking && available === false && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
-                      >
-                        <X className="w-4 h-4 text-error" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-              <p className="text-xs text-text-tertiary mt-2">
-                3-20 characters, letters, numbers, _ or -
-              </p>
-              {error && <p className="text-xs text-error mt-2">{error}</p>}
-              {available === false && !error && (
-                <p className="text-xs text-error mt-2">Username is already taken</p>
-              )}
-              {available === true && (
-                <p className="text-xs text-success mt-2">Username is available!</p>
-              )}
-              </div>
-
-              <Button
-                fullWidth
-                size="lg"
-                disabled={!available || creating}
-                onClick={handleSubmit}
-                className="mt-6"
-              >
-                {creating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating Profile...
-                  </>
-                ) : (
-                  'Continue'
-                )}
-              </Button>
-            </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      <ModalFooter align="center">
+        <Button
+          fullWidth
+          size="lg"
+          disabled={!available || creating}
+          onClick={handleSubmit}
+          loading={creating}
+          loadingText="Creating Profile..."
+        >
+          Continue
+        </Button>
+      </ModalFooter>
+    </Modal>
   );
 }
