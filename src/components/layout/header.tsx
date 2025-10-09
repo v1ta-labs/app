@@ -44,7 +44,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
-              src="/logo-d.png"
+              src="/logo.png"
               alt="V1ta Logo"
               width={32}
               height={32}

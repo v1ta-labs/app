@@ -44,7 +44,7 @@ export function HeroSection() {
             whileHover={connected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
-            <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
+            <Card className="p-4 backdrop-blur-sm bg-surface/70 border-border/50">
               <div className="text-[9px] text-text-tertiary uppercase tracking-wider font-bold mb-3">
                 Portfolio Overview
               </div>
@@ -127,7 +127,7 @@ export function HeroSection() {
 
         {!connected && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-            <div className="absolute inset-0 backdrop-blur-lg bg-background/40 rounded-2xl" />
+            <div className="absolute inset-0 backdrop-blur-sm bg-background/40 rounded-2xl" />
             <Button
               className="shadow-lg relative z-20"
               onClick={() => setIsWalletModalOpen(true)}

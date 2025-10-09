@@ -13,7 +13,6 @@ export function PortfolioOverview() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Portfolio Value */}
         <Card className="p-6 md:col-span-2">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -42,7 +41,6 @@ export function PortfolioOverview() {
           </div>
         </Card>
 
-        {/* Health Factor */}
         <Card className="p-6">
           <div className="text-sm text-text-tertiary mb-2">Health Factor</div>
           <div className="text-5xl font-bold mb-4 text-success">2.8</div>
@@ -54,7 +52,6 @@ export function PortfolioOverview() {
           <div className="text-xs text-text-tertiary mt-3">Safe</div>
         </Card>
 
-        {/* Assets Breakdown */}
         <Card className="p-6 md:col-span-2">
           <div className="text-sm font-bold text-text-secondary uppercase tracking-wide mb-4">
             Top Assets
@@ -85,7 +82,6 @@ export function PortfolioOverview() {
           </div>
         </Card>
 
-        {/* Liabilities */}
         <Card className="p-6">
           <div className="text-sm font-bold text-text-secondary uppercase tracking-wide mb-4">
             Borrowed
