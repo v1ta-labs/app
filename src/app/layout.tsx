@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import '@/lib/utils/error-handler';
-import { SolanaProvider } from '@/providers';
 import { ReownProvider } from '@/providers/reown-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
@@ -33,22 +32,20 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans`}>
         <QueryProvider>
           <ReownProvider>
-            <SolanaProvider>
-              <TooltipProvider>
-                {children}
-                <Toaster
-                  position="top-right"
-                  theme="dark"
-                  toastOptions={{
-                    style: {
-                      background: 'var(--elevated)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text-primary)',
-                    },
-                  }}
-                />
-              </TooltipProvider>
-            </SolanaProvider>
+            <TooltipProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                theme="dark"
+                toastOptions={{
+                  style: {
+                    background: 'var(--elevated)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                  },
+                }}
+              />
+            </TooltipProvider>
           </ReownProvider>
         </QueryProvider>
       </body>

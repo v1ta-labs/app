@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { X } from 'lucide-react';
 import * as Dialog from '@radix-ui/react-dialog';
 
@@ -24,7 +24,7 @@ declare global {
 }
 
 export function SwapModal({ open, onOpenChange }: SwapModalProps) {
-  const wallet = useWallet();
+  const { isConnected, address } = useAppKitAccount();
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
@@ -53,7 +53,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
   }, [scriptLoaded]);
 
   useEffect(() => {
-    if (!open || !scriptLoaded || !window.Jupiter || !wallet.publicKey) {
+    if (!open || !scriptLoaded || !window.Jupiter || !address) {
       return;
     }
 
@@ -88,7 +88,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
 
       if (window.Jupiter.syncProps) {
         window.Jupiter.syncProps({
-          passthroughWalletContextState: wallet,
+          passthroughWalletContextState: { publicKey: address, connected: isConnected },
         });
       }
 
@@ -107,7 +107,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
         }
       }
     };
-  }, [open, scriptLoaded, wallet, wallet.connected, wallet.publicKey]);
+  }, [open, scriptLoaded, isConnected, address]);
 
   useEffect(() => {
     if (!open || !scriptLoaded || !window.Jupiter || !initializedRef.current) {
@@ -116,10 +116,10 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
 
     if (window.Jupiter.syncProps) {
       window.Jupiter.syncProps({
-        passthroughWalletContextState: wallet,
+        passthroughWalletContextState: { publicKey: address, connected: isConnected },
       });
     }
-  }, [open, scriptLoaded, wallet.connected, wallet.publicKey, wallet]);
+  }, [open, scriptLoaded, isConnected, address]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -144,7 +144,7 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
             </div>
 
             <div className="p-6">
-              {!wallet.connected ? (
+              {!isConnected ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <span className="text-3xl">🔌</span>

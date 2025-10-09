@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
 import { useSolanaBalance } from '@/hooks';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 
 const ASSETS = [
   { symbol: 'SOL', name: 'Solana', price: 158.0 },
@@ -15,7 +15,7 @@ const ASSETS = [
 ];
 
 export function CollateralPanel() {
-  const { connected } = useWallet();
+  const { isConnected } = useAppKitAccount();
   const { balance } = useSolanaBalance();
   const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
   const [amount, setAmount] = useState('');
@@ -30,7 +30,7 @@ export function CollateralPanel() {
   };
 
   const handleDeposit = () => {
-    if (!connected) {
+    if (!isConnected) {
       alert('Please connect your wallet first');
       return;
     }
@@ -96,9 +96,9 @@ export function CollateralPanel() {
         <Button
           fullWidth
           onClick={handleDeposit}
-          disabled={!connected || numericAmount <= 0 || numericAmount > (balance || 0)}
+          disabled={!isConnected || numericAmount <= 0 || numericAmount > (balance || 0)}
         >
-          {!connected ? 'Connect Wallet' : 'Deposit Collateral'}
+          {!isConnected ? 'Connect Wallet' : 'Deposit Collateral'}
         </Button>
       </div>
     </Card>

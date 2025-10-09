@@ -1,15 +1,15 @@
 'use client';
 
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { AppLayout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet } from 'lucide-react';
 
 export default function PortfolioPage() {
-  const { connected } = useWallet();
+  const { isConnected } = useAppKitAccount();
 
-  if (!connected) {
+  if (!isConnected) {
     return (
       <AppLayout>
         <div className="min-h-screen flex items-center justify-center p-8">

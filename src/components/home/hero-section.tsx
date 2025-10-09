@@ -1,20 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useAppKitAccount } from '@reown/appkit/react';
+import { useAppKitAccount, useAppKit } from '@reown/appkit/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Wallet } from 'lucide-react';
 import { formatUSD } from '@/lib/utils/formatters';
-import { WalletModal } from '@/components/common/wallet-modal';
 
 export function HeroSection() {
-  const { connected: solanaConnected } = useWallet();
-  const { isConnected: reownConnected } = useAppKitAccount();
-  const connected = solanaConnected || reownConnected;
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const { isConnected } = useAppKitAccount();
+  const { open: openReownModal } = useAppKit();
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-start pt-20 px-8">
@@ -41,7 +36,7 @@ export function HeroSection() {
           className="w-full mb-5"
         >
           <motion.div
-            whileHover={connected ? { scale: 1.01 } : undefined}
+            whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Card className="p-4 backdrop-blur-sm bg-surface/70 border-border/50">
@@ -86,7 +81,7 @@ export function HeroSection() {
         >
           {/* Assets */}
           <motion.div
-            whileHover={connected ? { scale: 1.01 } : undefined}
+            whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
@@ -108,7 +103,7 @@ export function HeroSection() {
 
           {/* Liabilities */}
           <motion.div
-            whileHover={connected ? { scale: 1.01 } : undefined}
+            whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
@@ -129,17 +124,15 @@ export function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {!connected && (
+        {!isConnected && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 backdrop-blur-sm bg-background/40 rounded-2xl" />
-            <Button className="shadow-lg relative z-20" onClick={() => setIsWalletModalOpen(true)}>
+            <Button className="shadow-lg relative z-20" onClick={() => openReownModal({ view: 'Connect' })}>
               <Wallet className="w-4 h-4 mr-2" />
               Connect wallet to view
             </Button>
           </div>
         )}
-
-        <WalletModal open={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
       </div>
 
       {/* Scroll Indicator */}

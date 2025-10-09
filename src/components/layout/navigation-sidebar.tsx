@@ -16,8 +16,7 @@ import {
 import { cn } from '@/lib/utils/cn';
 import { SettingsModal } from '@/components/modals/settings-modal';
 import { SwapModal } from '@/components/modals/swap-modal';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
+import { useDisconnect } from '@reown/appkit/react';
 import { useUser } from '@/hooks/use-user';
 
 const NAV_ITEMS = [
@@ -37,18 +36,11 @@ export function NavigationSidebar() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
 
-  const { connected: solanaConnected, disconnect: disconnectSolana } = useWallet();
-  const { isConnected: reownConnected } = useAppKitAccount();
-  const { disconnect: disconnectReown } = useDisconnect();
+  const { disconnect } = useDisconnect();
   const { user, updateUser } = useUser();
 
   const handleDisconnect = () => {
-    if (solanaConnected) {
-      disconnectSolana();
-    }
-    if (reownConnected) {
-      disconnectReown();
-    }
+    disconnect();
   };
 
   return (

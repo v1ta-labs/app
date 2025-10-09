@@ -26,7 +26,7 @@ console.error = (...args: unknown[]) => {
   originalConsoleError(...args);
 };
 
-// Create the modal only once
+// Create the AppKit instance with custom theming
 try {
   createAppKit({
     adapters: [solanaWeb3JsAdapter],
@@ -38,6 +38,16 @@ try {
     features,
     enableAnalytics: false,
     allWallets: 'SHOW',
+    defaultChain: networks[0],
+    themeMode: 'dark',
+    themeVariables: {
+      '--w3m-font-family': 'var(--font-inter), sans-serif',
+      '--w3m-accent': '#2a4930',
+      '--w3m-color-mix': '#050f05',
+      '--w3m-color-mix-strength': 0,
+      '--w3m-border-radius-master': '12px',
+      '--w3m-z-index': 9999,
+    },
   });
 } catch (error) {
   // Silently handle initialization errors

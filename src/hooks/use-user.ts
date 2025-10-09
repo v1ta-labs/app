@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
 import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
 
 interface User {
@@ -24,12 +23,8 @@ interface SocialProfile {
 }
 
 export function useUser() {
-  const { connected: solanaConnected, publicKey } = useWallet();
-  const { isConnected: reownConnected, address: reownAddress } = useAppKitAccount();
+  const { isConnected, address } = useAppKitAccount();
   const { walletProvider } = useAppKitProvider('solana');
-
-  const connected = solanaConnected || reownConnected;
-  const walletAddress = solanaConnected ? publicKey?.toString() : reownAddress;
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,7 +32,7 @@ export function useUser() {
   const [socialProfile, setSocialProfile] = useState<SocialProfile | null>(null);
 
   const fetchSocialProfile = async () => {
-    if (!reownConnected || !walletProvider) return;
+    if (!isConnected || !walletProvider) return;
 
     try {
       // Try to get social profile data from Reown
@@ -53,12 +48,12 @@ export function useUser() {
   };
 
   const fetchUser = async () => {
-    if (!walletAddress) return;
+    if (!address) return;
 
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/user?wallet=${walletAddress}`);
+      const res = await fetch(`/api/user?wallet=${address}`);
       const data = await res.json();
 
       if (data.exists) {
@@ -68,7 +63,7 @@ export function useUser() {
         setUser(null);
         setNeedsUsername(true);
         // Fetch social profile for new users
-        if (reownConnected) {
+        if (isConnected) {
           await fetchSocialProfile();
         }
       }
@@ -80,14 +75,14 @@ export function useUser() {
   };
 
   const createUser = async (username: string, profile?: { email?: string; avatar?: string }) => {
-    if (!walletAddress) return;
+    if (!address) return;
 
     try {
       const res = await fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          walletAddress,
+          walletAddress: address,
           username,
           email: profile?.email || null,
           avatar: profile?.avatar || null,
@@ -112,14 +107,14 @@ export function useUser() {
   };
 
   useEffect(() => {
-    if (connected && walletAddress) {
+    if (isConnected && address) {
       fetchUser();
     } else {
       setUser(null);
       setNeedsUsername(false);
       setSocialProfile(null);
     }
-  }, [connected, walletAddress]);
+  }, [isConnected, address]);
 
   return {
     user,
@@ -128,6 +123,6 @@ export function useUser() {
     socialProfile,
     createUser,
     updateUser,
-    walletAddress: walletAddress || '',
+    walletAddress: address || '',
   };
 }

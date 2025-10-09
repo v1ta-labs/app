@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatUSD, formatPercentage } from '@/lib/utils/formatters';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 
 interface BorrowPanelProps {
   maxBorrow: number;
@@ -13,7 +13,7 @@ interface BorrowPanelProps {
 }
 
 export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps) {
-  const { connected } = useWallet();
+  const { isConnected } = useAppKitAccount();
   const [amount, setAmount] = useState('');
 
   const numericAmount = parseFloat(amount) || 0;
@@ -27,7 +27,7 @@ export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps
   };
 
   const handleBorrow = () => {
-    if (!connected) {
+    if (!isConnected) {
       alert('Please connect your wallet first');
       return;
     }
@@ -93,9 +93,9 @@ export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps
         <Button
           fullWidth
           onClick={handleBorrow}
-          disabled={!connected || numericAmount <= 0 || numericAmount > maxBorrow}
+          disabled={!isConnected || numericAmount <= 0 || numericAmount > maxBorrow}
         >
-          {!connected ? 'Connect Wallet' : 'Borrow VUSD'}
+          {!isConnected ? 'Connect Wallet' : 'Borrow VUSD'}
         </Button>
       </div>
     </Card>

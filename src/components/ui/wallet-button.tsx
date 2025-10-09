@@ -1,49 +1,60 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
-import { useSolanaBalance } from '@/hooks';
+import { useAppKitAccount, useDisconnect, useAppKitProvider, useAppKit } from '@reown/appkit/react';
 import { useUser } from '@/hooks/use-user';
 import { formatNumber } from '@/lib/utils/formatters';
 import { ChevronDown, User as UserIcon, Wallet } from 'lucide-react';
-import { WalletModal } from '@/components/common/wallet-modal';
 import { UsernameModal } from '@/components/auth/username-modal';
 import { ProfileDropdown } from '@/components/common/profile-dropdown';
 import { SettingsModal } from '@/components/modals/settings-modal';
 
 export function WalletButton() {
-  const { connected: solanaConnected, disconnect: disconnectSolana } = useWallet();
-  const { isConnected: reownConnected } = useAppKitAccount();
-  const { disconnect: disconnectReown } = useDisconnect();
-  const { balance } = useSolanaBalance();
-  const { user, loading, needsUsername, socialProfile, createUser, updateUser, walletAddress } = useUser();
+  const { isConnected, address } = useAppKitAccount();
+  const { disconnect } = useDisconnect();
+  const { walletProvider } = useAppKitProvider('solana');
+  const { open: openReownModal } = useAppKit();
+  const { user, loading, needsUsername, socialProfile, createUser, updateUser } = useUser();
 
   const [mounted, setMounted] = useState(false);
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [dismissedUsernameModal, setDismissedUsernameModal] = useState(false);
-
-  const connected = solanaConnected || reownConnected;
+  const [balance, setBalance] = useState<number | null>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Reset dismissed state when wallet changes
   useEffect(() => {
-    if (!connected) {
+    if (!isConnected) {
       setDismissedUsernameModal(false);
+      setBalance(null);
     }
-  }, [connected, walletAddress]);
+  }, [isConnected, address]);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!walletProvider || !address) {
+        setBalance(null);
+        return;
+      }
+      try {
+        // @ts-expect-error - Reown provider types
+        const bal = await walletProvider.getBalance(address);
+        setBalance(bal ? Number(bal) / 1e9 : 0); // Convert lamports to SOL
+      } catch (error) {
+        console.debug('Failed to fetch balance:', error);
+        setBalance(null);
+      }
+    };
+
+    if (isConnected && address) {
+      fetchBalance();
+    }
+  }, [isConnected, address, walletProvider]);
 
   const handleDisconnect = () => {
-    if (solanaConnected) {
-      disconnectSolana();
-    }
-    if (reownConnected) {
-      disconnectReown();
-    }
+    disconnect();
   };
 
   if (!mounted) {
@@ -54,22 +65,19 @@ export function WalletButton() {
     );
   }
 
-  if (!connected) {
+  if (!isConnected) {
     return (
-      <>
-        <button
-          className="px-4 py-2 bg-primary hover:bg-primary-hover transition-colors rounded-[12px] text-sm font-bold text-text-primary flex items-center gap-2"
-          onClick={() => setIsWalletModalOpen(true)}
-        >
-          <Wallet className="w-4 h-4" />
-          Select Wallet
-        </button>
-        <WalletModal open={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
-      </>
+      <button
+        className="px-4 py-2 bg-primary hover:bg-primary-hover transition-colors rounded-[12px] text-sm font-bold text-text-primary flex items-center gap-2"
+        onClick={() => openReownModal({ view: 'Connect' })}
+      >
+        <Wallet className="w-4 h-4" />
+        Select Wallet
+      </button>
     );
   }
 
-  const shortAddress = walletAddress ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : '';
+  const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : '';
 
   return (
     <>
@@ -105,7 +113,7 @@ export function WalletButton() {
               <ChevronDown className="w-3.5 h-3.5 text-text-tertiary" />
             </button>
           </ProfileDropdown>
-        ) : connected && walletAddress ? (
+        ) : isConnected && address ? (
           <button
             onClick={() => setIsSettingsModalOpen(true)}
             className="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-border hover:bg-elevated transition-all"
@@ -118,10 +126,10 @@ export function WalletButton() {
       </div>
 
       {/* Username Setup Modal */}
-      {needsUsername && walletAddress && !dismissedUsernameModal && (
+      {needsUsername && address && !dismissedUsernameModal && (
         <UsernameModal
           open={needsUsername && !dismissedUsernameModal}
-          walletAddress={walletAddress}
+          walletAddress={address}
           onComplete={(username) => {
             createUser(username, socialProfile || undefined);
             setDismissedUsernameModal(false);

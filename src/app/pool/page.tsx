@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { formatUSD, formatNumber, formatPercentage } from '@/lib/utils/formatters';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 
 export default function StabilityPoolPage() {
-  const { connected } = useWallet();
+  const { isConnected } = useAppKitAccount();
   const [depositAmount, setDepositAmount] = useState('');
 
   const poolData = {
@@ -117,11 +117,11 @@ export default function StabilityPoolPage() {
                 </div>
               </div>
 
-              <Button fullWidth disabled={!connected || numericAmount <= 0}>
-                {!connected ? 'Connect Wallet' : 'Deposit to Pool'}
+              <Button fullWidth disabled={!isConnected || numericAmount <= 0}>
+                {!isConnected ? 'Connect Wallet' : 'Deposit to Pool'}
               </Button>
 
-              {connected && poolData.userDeposit > 0 && (
+              {isConnected && poolData.userDeposit > 0 && (
                 <Button fullWidth variant="secondary">
                   Withdraw from Pool
                 </Button>
@@ -164,7 +164,7 @@ export default function StabilityPoolPage() {
                 ))}
               </div>
 
-              <Button fullWidth disabled={!connected || rewards.length === 0}>
+              <Button fullWidth disabled={!isConnected || rewards.length === 0}>
                 Claim All Rewards
               </Button>
 

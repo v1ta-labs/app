@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useAppKitAccount } from '@reown/appkit/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TokenSelector } from '@/components/ui/token-selector';
@@ -87,7 +87,7 @@ const calculateOptimalRate = (
 };
 
 export function BorrowInterface() {
-  const { connected } = useWallet();
+  const { isConnected } = useAppKitAccount();
   const [selectedToken, setSelectedToken] = useState(COLLATERAL_TOKENS[0]);
   const [collateralAmount, setCollateralAmount] = useState('');
   const [borrowAmount, setBorrowAmount] = useState('');
@@ -126,7 +126,7 @@ export function BorrowInterface() {
   };
 
   const handleBorrow = async () => {
-    if (!connected) return;
+    if (!isConnected) return;
 
     console.log('Opening position:', {
       collateralType: selectedToken.symbol,
@@ -411,11 +411,11 @@ export function BorrowInterface() {
       <Button
         fullWidth
         size="lg"
-        disabled={!connected || !collateralAmount || !borrowAmount || healthFactor < 110}
+        disabled={!isConnected || !collateralAmount || !borrowAmount || healthFactor < 110}
         onClick={handleBorrow}
         className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
       >
-        {!connected
+        {!isConnected
           ? 'Connect Wallet to Continue'
           : !collateralAmount
             ? 'Enter Collateral Amount'

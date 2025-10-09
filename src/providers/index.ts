@@ -1,2 +1,2 @@
-export { SolanaProvider } from './solana-provider';
 export { QueryProvider } from './query-provider';
+export { ReownProvider } from './reown-provider';
