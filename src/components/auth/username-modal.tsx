@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog } from '@/components/ui/dialog';
+import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
 import { Check, X, Loader2 } from 'lucide-react';
 
@@ -10,9 +10,10 @@ interface UsernameModalProps {
   open: boolean;
   walletAddress: string;
   onComplete: (username: string) => void;
+  onClose?: () => void;
 }
 
-export function UsernameModal({ open, walletAddress, onComplete }: UsernameModalProps) {
+export function UsernameModal({ open, walletAddress, onComplete, onClose }: UsernameModalProps) {
   const [username, setUsername] = useState('');
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -84,21 +85,28 @@ export function UsernameModal({ open, walletAddress, onComplete }: UsernameModal
   };
 
   return (
-    <Dialog open={open}>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
-      <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-surface border border-border rounded-3xl p-8 max-w-md w-full shadow-2xl"
-        >
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to v1ta</h2>
-            <p className="text-sm text-text-tertiary">Choose your unique username</p>
-          </div>
+    <Dialog.Root open={open} onOpenChange={onClose}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+        <Dialog.Content className="fixed left-[50%] top-[50%] z-[9999] w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-surface border border-border rounded-3xl p-8 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+          {onClose && (
+            <Dialog.Close asChild>
+              <button
+                className="absolute right-4 top-4 rounded-lg p-1.5 hover:bg-elevated transition-colors text-text-tertiary hover:text-text-primary"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </Dialog.Close>
+          )}
 
-          <div className="space-y-4">
-            <div>
+          <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-text-primary mb-2">Welcome to v1ta</h2>
+              <p className="text-sm text-text-tertiary">Choose your unique username</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
               <label className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-2 block">
                 Username
               </label>
@@ -153,27 +161,27 @@ export function UsernameModal({ open, walletAddress, onComplete }: UsernameModal
               {available === true && (
                 <p className="text-xs text-success mt-2">Username is available!</p>
               )}
-            </div>
+              </div>
 
-            <Button
-              fullWidth
-              size="lg"
-              disabled={!available || creating}
-              onClick={handleSubmit}
-              className="mt-6"
-            >
-              {creating ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Profile...
-                </>
-              ) : (
-                'Continue'
-              )}
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-    </Dialog>
+              <Button
+                fullWidth
+                size="lg"
+                disabled={!available || creating}
+                onClick={handleSubmit}
+                className="mt-6"
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Profile...
+                  </>
+                ) : (
+                  'Continue'
+                )}
+              </Button>
+            </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
