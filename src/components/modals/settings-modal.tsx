@@ -46,7 +46,13 @@ interface SettingsModalProps {
   onUpdate?: () => void;
 }
 
-export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate }: SettingsModalProps) {
+export function SettingsModal({
+  open,
+  onOpenChange,
+  user,
+  onDisconnect,
+  onUpdate,
+}: SettingsModalProps) {
   const [darkMode, setDarkMode] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [showBalances, setShowBalances] = useState(true);
@@ -161,9 +167,18 @@ export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate
             </Dialog.Close>
           </div>
 
-          <Tabs.Root defaultValue={user ? "profile" : "general"} className="flex h-[calc(85vh-88px)]">
+          <Tabs.Root
+            defaultValue={user ? 'profile' : 'general'}
+            className="flex h-[calc(85vh-88px)]"
+          >
             <Tabs.List className="w-56 border-r border-border p-4 space-y-1 overflow-y-auto">
-              {user && <TabButton value="profile" icon={<UserIcon className="w-4 h-4" />} label="Profile" />}
+              {user && (
+                <TabButton
+                  value="profile"
+                  icon={<UserIcon className="w-4 h-4" />}
+                  label="Profile"
+                />
+              )}
               <TabButton value="general" icon={<Zap className="w-4 h-4" />} label="General" />
               <TabButton
                 value="notifications"
@@ -192,7 +207,11 @@ export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate
                       <div className="relative group">
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
                           {avatar ? (
-                            <img src={avatar} alt={user.username} className="w-full h-full object-cover" />
+                            <img
+                              src={avatar}
+                              alt={user.username}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <span className="text-2xl font-bold text-primary">
                               {user.username.charAt(0).toUpperCase()}
@@ -214,7 +233,9 @@ export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate
                         </button>
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-text-primary mb-1">@{user.username}</p>
+                        <p className="text-sm font-medium text-text-primary mb-1">
+                          @{user.username}
+                        </p>
                         <p className="text-xs text-text-tertiary">
                           Click on avatar to change your profile picture
                         </p>
@@ -301,7 +322,12 @@ export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate
                       )}
                     </div>
 
-                    <Button onClick={handleSaveProfile} loading={saving} loadingText="Saving..." className="mt-4">
+                    <Button
+                      onClick={handleSaveProfile}
+                      loading={saving}
+                      loadingText="Saving..."
+                      className="mt-4"
+                    >
                       Save Profile
                     </Button>
                   </Section>
@@ -310,9 +336,12 @@ export function SettingsModal({ open, onOpenChange, user, onDisconnect, onUpdate
                     <Section title="Delete Account">
                       <div className="space-y-3">
                         <div className="p-3 bg-error/10 border border-error/30 rounded-lg">
-                          <p className="text-sm text-text-primary font-medium mb-1">Delete your account?</p>
+                          <p className="text-sm text-text-primary font-medium mb-1">
+                            Delete your account?
+                          </p>
                           <p className="text-xs text-text-secondary mb-2">
-                            This will permanently delete your profile and activity data. This action cannot be undone.
+                            This will permanently delete your profile and activity data. This action
+                            cannot be undone.
                           </p>
                           <p className="text-xs text-success font-medium">
                             ✓ Your funds will remain safe in your wallet

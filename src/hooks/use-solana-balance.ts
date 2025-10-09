@@ -1,7 +1,7 @@
 'use client';
 
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export function useSolanaBalance() {
@@ -11,7 +11,7 @@ export function useSolanaBalance() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchBalance = async () => {
+  const fetchBalance = useCallback(async () => {
     if (!publicKey) {
       setBalance(null);
       return;
@@ -29,7 +29,7 @@ export function useSolanaBalance() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [publicKey, connection]);
 
   useEffect(() => {
     fetchBalance();

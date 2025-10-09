@@ -24,17 +24,8 @@ export function useAnchorProgram<T extends Idl>(programId: string | PublicKey, i
       { commitment: 'confirmed' }
     );
 
-    const programIdKey = typeof programId === 'string' ? new PublicKey(programId) : programId;
-
     return new Program(idl, provider);
-  }, [
-    connection,
-    wallet.publicKey,
-    wallet.signTransaction,
-    wallet.signAllTransactions,
-    programId,
-    idl,
-  ]);
+  }, [connection, wallet.publicKey, wallet.signTransaction, wallet.signAllTransactions, idl]);
 
   return program as Program<T> | null;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,6 @@ const COLLATERAL_TOKENS = [
 
 type InterestRateMode = 'protocol' | 'manual';
 
-const BASE_RATE_MIN = 0;
-const BASE_RATE_MAX = 4.5;
 const FEE_FLOOR = 0.5;
 const FEE_CAP = 5;
 
@@ -128,13 +126,15 @@ export function BorrowInterface() {
   const handleBorrow = async () => {
     if (!isConnected) return;
 
-    console.log('Opening position:', {
+    // TODO: Implement actual position opening logic
+    // Opening position with collateral and borrow amounts
+    void {
       collateralType: selectedToken.symbol,
-      collateralAmount: parseFloat(collateralAmount),
-      borrowAmount: parseFloat(borrowAmount),
+      collateralAmount,
+      borrowAmount,
       interestRate,
       rateMode,
-    });
+    };
   };
 
   return (

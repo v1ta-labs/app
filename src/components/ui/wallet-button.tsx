@@ -43,7 +43,7 @@ export function WalletButton() {
         const bal = await walletProvider.getBalance(address);
         setBalance(bal ? Number(bal) / 1e9 : 0); // Convert lamports to SOL
       } catch (error) {
-        console.debug('Failed to fetch balance:', error);
+        console.error('Failed to fetch balance:', error);
         setBalance(null);
       }
     };
@@ -104,7 +104,11 @@ export function WalletButton() {
             <button className="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-border hover:bg-elevated transition-all hover:border-border/80">
               <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center overflow-hidden">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <UserIcon className="w-3.5 h-3.5 text-primary" />
                 )}
@@ -130,7 +134,7 @@ export function WalletButton() {
         <UsernameModal
           open={needsUsername && !dismissedUsernameModal}
           walletAddress={address}
-          onComplete={(username) => {
+          onComplete={username => {
             createUser(username, socialProfile || undefined);
             setDismissedUsernameModal(false);
           }}

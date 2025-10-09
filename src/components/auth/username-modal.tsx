@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Modal, ModalHeader, ModalTitle, ModalDescription, ModalBody, ModalFooter } from '@/components/ui/modal';
+import {
+  Modal,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalBody,
+  ModalFooter,
+} from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Check, X, Loader2, User } from 'lucide-react';
@@ -18,7 +25,13 @@ interface UsernameModalProps {
   } | null;
 }
 
-export function UsernameModal({ open, walletAddress, onComplete, onClose, socialProfile }: UsernameModalProps) {
+export function UsernameModal({
+  open,
+  walletAddress: _walletAddress,
+  onComplete,
+  onClose,
+  socialProfile,
+}: UsernameModalProps) {
   const [username, setUsername] = useState('');
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
@@ -60,7 +73,7 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
     setError('');
 
     if (cleaned.length >= 3) {
-      checkUsername(cleaned);
+      void checkUsername(cleaned);
     }
   };
 
@@ -70,7 +83,7 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
 
     try {
       await onComplete(username);
-    } catch (error) {
+    } catch {
       setError('Failed to create profile');
       setCreating(false);
     }
@@ -86,7 +99,7 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
   return (
     <Modal
       open={open}
-      onOpenChange={(isOpen) => {
+      onOpenChange={isOpen => {
         if (!isOpen && onClose) {
           onClose();
         }
@@ -105,11 +118,7 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
         {socialProfile && (socialProfile.avatar || socialProfile.email) && (
           <div className="flex items-center gap-3 p-3 bg-surface/50 rounded-lg border border-border/50">
             {socialProfile.avatar ? (
-              <img
-                src={socialProfile.avatar}
-                alt="Profile"
-                className="w-10 h-10 rounded-full"
-              />
+              <img src={socialProfile.avatar} alt="Profile" className="w-10 h-10 rounded-full" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="w-5 h-5 text-primary" />
@@ -122,9 +131,7 @@ export function UsernameModal({ open, walletAddress, onComplete, onClose, social
                 </p>
               )}
               {socialProfile.email && (
-                <p className="text-xs text-text-tertiary truncate">
-                  {socialProfile.email}
-                </p>
+                <p className="text-xs text-text-tertiary truncate">{socialProfile.email}</p>
               )}
             </div>
             <Check className="w-4 h-4 text-success flex-shrink-0" />

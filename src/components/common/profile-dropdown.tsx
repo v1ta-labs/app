@@ -22,7 +22,12 @@ interface ProfileDropdownProps {
   onDisconnect: () => void;
 }
 
-export function ProfileDropdown({ user, children, onSettingsClick, onDisconnect }: ProfileDropdownProps) {
+export function ProfileDropdown({
+  user,
+  children,
+  onSettingsClick,
+  onDisconnect,
+}: ProfileDropdownProps) {
   const [copied, setCopied] = useState(false);
   const shortAddress = `${user.walletAddress.slice(0, 6)}...${user.walletAddress.slice(-4)}`;
 
@@ -34,9 +39,7 @@ export function ProfileDropdown({ user, children, onSettingsClick, onDisconnect 
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild>
-        {children}
-      </DropdownMenu.Trigger>
+      <DropdownMenu.Trigger asChild>{children}</DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content
@@ -49,16 +52,18 @@ export function ProfileDropdown({ user, children, onSettingsClick, onDisconnect 
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
                 {user.avatar ? (
-                  <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <User className="w-6 h-6 text-primary" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-text-primary truncate">@{user.username}</p>
-                {user.email && (
-                  <p className="text-xs text-text-tertiary truncate">{user.email}</p>
-                )}
+                {user.email && <p className="text-xs text-text-tertiary truncate">{user.email}</p>}
               </div>
             </div>
 

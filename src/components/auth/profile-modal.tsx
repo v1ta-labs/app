@@ -1,16 +1,20 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import {
-  Modal,
-  ModalHeader,
-  ModalTitle,
-  ModalBody,
-  ModalFooter,
-} from '@/components/ui/modal';
+import { Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Input, Textarea } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Copy, Check, ExternalLink, Calendar, TrendingUp, Camera, Send } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Copy,
+  Check,
+  ExternalLink,
+  Calendar,
+  TrendingUp,
+  Camera,
+  Send,
+} from 'lucide-react';
 
 interface UserProfile {
   walletAddress: string;
@@ -139,11 +143,7 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
           <div className="relative group flex-shrink-0">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/30 flex items-center justify-center overflow-hidden">
               {avatar ? (
-                <img
-                  src={avatar}
-                  alt={user.username}
-                  className="w-full h-full object-cover"
-                />
+                <img src={avatar} alt={user.username} className="w-full h-full object-cover" />
               ) : (
                 <User className="w-7 h-7 text-primary" />
               )}
@@ -319,7 +319,8 @@ export function ProfileModal({ open, onClose, user, onDisconnect, onUpdate }: Pr
               <div className="p-3 bg-error/10 border border-error/30 rounded-lg">
                 <p className="text-sm text-text-primary font-medium mb-1">Delete your account?</p>
                 <p className="text-xs text-text-secondary mb-2">
-                  This will permanently delete your profile and activity data. This action cannot be undone.
+                  This will permanently delete your profile and activity data. This action cannot be
+                  undone.
                 </p>
                 <p className="text-xs text-success font-medium">
                   ✓ Your funds will remain safe in your wallet

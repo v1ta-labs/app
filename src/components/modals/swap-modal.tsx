@@ -36,7 +36,6 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
     script.src = 'https://terminal.jup.ag/main-v4.js';
     script.async = true;
     script.onload = () => {
-      console.log('Jupiter Terminal script loaded');
       setScriptLoaded(true);
     };
     script.onerror = () => {
@@ -62,13 +61,11 @@ export function SwapModal({ open, onOpenChange }: SwapModalProps) {
         window.Jupiter.close();
         initializedRef.current = false;
       } catch (e) {
-        console.log('Error closing previous instance:', e);
+        console.error('Error closing previous instance:', e);
       }
     }
 
     try {
-      console.log('Initializing Jupiter Terminal');
-
       window.Jupiter.init({
         displayMode: 'integrated',
         integratedTargetId: 'jupiter-terminal-container',

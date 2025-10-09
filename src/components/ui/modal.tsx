@@ -239,11 +239,7 @@ export const ModalSection = forwardRef<
 >(({ children, className, bordered = false }, ref) => (
   <div
     ref={ref}
-    className={cn(
-      'px-6 py-4',
-      bordered && 'border-t border-border/30 first:border-t-0',
-      className
-    )}
+    className={cn('px-6 py-4', bordered && 'border-t border-border/30 first:border-t-0', className)}
   >
     {children}
   </div>

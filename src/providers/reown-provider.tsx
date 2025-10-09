@@ -50,9 +50,9 @@ try {
     },
   });
 } catch (error) {
-  // Silently handle initialization errors
+  // Silently handle initialization errors in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('Reown AppKit initialization error:', error);
+    console.error('Reown AppKit initialization error:', error);
   }
 }
 

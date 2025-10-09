@@ -31,7 +31,7 @@ export function BorrowPanel({ maxBorrow, currentHealthFactor }: BorrowPanelProps
       alert('Please connect your wallet first');
       return;
     }
-    console.log('Borrow:', amount, 'VUSD');
+    // TODO: Implement borrow logic
   };
 
   return (

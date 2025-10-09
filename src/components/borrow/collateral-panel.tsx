@@ -34,7 +34,7 @@ export function CollateralPanel() {
       alert('Please connect your wallet first');
       return;
     }
-    console.log('Deposit:', amount, selectedAsset.symbol);
+    // TODO: Implement deposit logic
   };
 
   return (

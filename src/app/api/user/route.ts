@@ -54,10 +54,7 @@ export async function POST(req: NextRequest) {
     // Validate username format
     const usernameRegex = /^[a-zA-Z0-9_-]{3,20}$/;
     if (!usernameRegex.test(username)) {
-      return NextResponse.json(
-        { error: 'Invalid username format' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid username format' }, { status: 400 });
     }
 
     // Check if user already exists

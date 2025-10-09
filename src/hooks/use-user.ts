@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
 
 interface User {
@@ -31,7 +31,7 @@ export function useUser() {
   const [needsUsername, setNeedsUsername] = useState(false);
   const [socialProfile, setSocialProfile] = useState<SocialProfile | null>(null);
 
-  const fetchSocialProfile = async () => {
+  const fetchSocialProfile = useCallback(async () => {
     if (!isConnected || !walletProvider) return;
 
     try {
@@ -43,11 +43,11 @@ export function useUser() {
       }
     } catch (error) {
       // Social profile not available, that's fine
-      console.debug('No social profile available');
+      console.error('No social profile available', error);
     }
-  };
+  }, [isConnected, walletProvider]);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     if (!address) return;
 
     setLoading(true);
@@ -72,7 +72,7 @@ export function useUser() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [address, isConnected, fetchSocialProfile]);
 
   const createUser = async (username: string, profile?: { email?: string; avatar?: string }) => {
     if (!address) return;
@@ -102,9 +102,9 @@ export function useUser() {
     }
   };
 
-  const updateUser = async () => {
+  const updateUser = useCallback(async () => {
     await fetchUser();
-  };
+  }, [fetchUser]);
 
   useEffect(() => {
     if (isConnected && address) {
@@ -114,7 +114,7 @@ export function useUser() {
       setNeedsUsername(false);
       setSocialProfile(null);
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, fetchUser]);
 
   return {
     user,

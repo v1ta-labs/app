@@ -127,7 +127,10 @@ export function HeroSection() {
         {!isConnected && (
           <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
             <div className="absolute inset-0 backdrop-blur-sm bg-background/40 rounded-2xl" />
-            <Button className="shadow-lg relative z-20" onClick={() => openReownModal({ view: 'Connect' })}>
+            <Button
+              className="shadow-lg relative z-20"
+              onClick={() => openReownModal({ view: 'Connect' })}
+            >
               <Wallet className="w-4 h-4 mr-2" />
               Connect wallet to view
             </Button>

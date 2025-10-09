@@ -26,7 +26,7 @@ if (typeof window !== 'undefined') {
   };
 
   // Handle unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
+  window.addEventListener('unhandledrejection', event => {
     const message = event.reason?.message || String(event.reason);
     const errorName = event.reason?.name || '';
 

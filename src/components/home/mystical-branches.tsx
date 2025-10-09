@@ -77,8 +77,6 @@ export function MysticalBranches() {
       spawnNode();
     }
 
-    let time = 0;
-
     const animate = () => {
       ctx.fillStyle = 'rgba(10, 24, 36, 0.03)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -164,7 +162,6 @@ export function MysticalBranches() {
         ctx.fill();
       });
 
-      time++;
       requestAnimationFrame(animate);
     };
 
