@@ -36,14 +36,19 @@ export function useUser() {
 
     try {
       // Try to get social profile data from Reown
+      // Note: Social profiles are only available with social login (Google, Apple, etc.)
+      // Regular wallet connections won't have this data
       // @ts-expect-error - Reown provider types are not fully exported
-      const profile = await walletProvider.request?.({ method: 'wallet_getProfile' });
-      if (profile) {
-        setSocialProfile(profile as SocialProfile);
+      if (walletProvider && typeof walletProvider.request === 'function') {
+        // @ts-expect-error - Reown provider types are not fully exported
+        const profile = await walletProvider.request({ method: 'wallet_getProfile' });
+        if (profile) {
+          setSocialProfile(profile as SocialProfile);
+        }
       }
     } catch (error) {
-      // Social profile not available, that's fine
-      console.error('No social profile available', error);
+      // Social profile not available - this is normal for wallet connections
+      // Only social logins (Google, Apple, etc.) provide this data
     }
   }, [isConnected, walletProvider]);
 
