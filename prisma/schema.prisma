@@ -15,9 +15,9 @@ datasource db {
 
 enum CollateralType {
   SOL
-  jitoSOL
   mSOL
-  bSOL
+  stSOL
+  jitoSOL
 }
 
 enum TransactionType {
@@ -52,9 +52,12 @@ model Position {
   pubkey            String         @unique
   owner             String
   user              User?          @relation(fields: [owner], references: [walletAddress])
+  positionId        BigInt
   collateralType    CollateralType
   collateralAmount  Float
   debt              Float
+  status            Int            @default(0)
+  bump              Int?
   createdAt         DateTime       @default(now())
   lastUpdated       DateTime       @updatedAt
   closedAt          DateTime?
@@ -63,6 +66,7 @@ model Position {
 
   @@index([owner])
   @@index([collateralType])
+  @@index([status])
   @@index([closedAt])
 }
 
@@ -94,10 +98,10 @@ model ProtocolStats {
   id                    Int      @id @default(autoincrement())
   timestamp             DateTime @default(now())
 
-  totalCollateralSOL    Float    @default(0)
-  totalCollateralJitoSOL Float   @default(0)
-  totalCollateralMSOL   Float    @default(0)
-  totalCollateralBSOL   Float    @default(0)
+  totalCollateralSOL     Float    @default(0)
+  totalCollateralMSOL    Float    @default(0)
+  totalCollateralStSOL   Float    @default(0)
+  totalCollateralJitoSOL Float    @default(0)
 
   totalDebt             Float    @default(0)
   vUSDSupply            Float    @default(0)
@@ -112,10 +116,10 @@ model PriceHistory {
   id         Int      @id @default(autoincrement())
   timestamp  DateTime @default(now())
 
-  solPrice   Float
-  jitoSOLPrice Float?
+  solPrice     Float
   mSOLPrice    Float?
-  bSOLPrice    Float?
+  stSOLPrice   Float?
+  jitoSOLPrice Float?
 
   @@index([timestamp])
 }

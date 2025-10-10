@@ -32,9 +32,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { pubkey, owner, collateralType, collateralAmount, debt } = body;
+    const { pubkey, owner, positionId, collateralType, collateralAmount, debt, status, bump } = body;
 
-    if (!pubkey || !owner || !collateralType || !collateralAmount || debt === undefined) {
+    if (!pubkey || !owner || positionId === undefined || !collateralType || !collateralAmount || debt === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -42,9 +42,12 @@ export async function POST(req: NextRequest) {
       data: {
         pubkey,
         owner,
+        positionId: BigInt(positionId),
         collateralType,
         collateralAmount: parseFloat(collateralAmount),
         debt: parseFloat(debt),
+        status: status ?? 0,
+        bump: bump ?? undefined,
       },
     });
 
