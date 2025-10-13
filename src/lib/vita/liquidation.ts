@@ -1,13 +1,12 @@
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
   VITA_PROGRAM_ID,
-  PROTOCOL_PARAMS,
   getPositionPda,
   calculateCollateralRatio,
   isLiquidatable,
   calculateLiquidationPenalty,
 } from './constants';
-import { PositionState, fetchPosition, fetchAllPositions } from './position';
+import { PositionState, fetchPosition } from './position';
 
 /**
  * Liquidation result
@@ -59,7 +58,8 @@ export function calculateLiquidation(
   const collateralValuePerUnit = BigInt(Math.floor(collateralPrice * 1e9));
 
   // Determine debt to repay (either max or full position debt)
-  const debtRepaid = maxDebtToRepay && maxDebtToRepay < position.debt ? maxDebtToRepay : position.debt;
+  const debtRepaid =
+    maxDebtToRepay && maxDebtToRepay < position.debt ? maxDebtToRepay : position.debt;
 
   // Calculate collateral to liquidate (debt * price ratio)
   const collateralNeeded = (debtRepaid * 1_000_000_000n) / collateralValuePerUnit;
@@ -144,7 +144,9 @@ export async function checkLiquidatable(
     return { liquidatable: false, collateralRatio: 0 };
   }
 
-  const collateralValue = BigInt(Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9));
+  const collateralValue = BigInt(
+    Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9)
+  );
   const collateralRatio = calculateCollateralRatio(collateralValue, position.debt);
   const liquidatable = isLiquidatable(collateralValue, position.debt);
 
@@ -170,7 +172,9 @@ export function calculateLiquidationProfitability(
   const liquidation = calculateLiquidation(position, collateralPrice);
 
   // Value of collateral received (including penalty)
-  const collateralValue = BigInt(Math.floor(Number(liquidation.collateralLiquidated) * collateralPrice * 1e9));
+  const collateralValue = BigInt(
+    Math.floor(Number(liquidation.collateralLiquidated) * collateralPrice * 1e9)
+  );
 
   // Cost of debt to repay
   const debtCost = BigInt(Math.floor(Number(liquidation.debtRepaid) * vusdPrice * 1e9));
@@ -225,7 +229,7 @@ export function isLiquidationProfitable(
   solPrice: number
 ): boolean {
   const gasCost = estimateLiquidationCost();
-  const gasCostInUsd = BigInt(Math.floor(Number(gasCost) * solPrice / 1e9 * 1e9));
+  const gasCostInUsd = BigInt(Math.floor(((Number(gasCost) * solPrice) / 1e9) * 1e9));
 
   return profitability.netValue > gasCostInUsd;
 }

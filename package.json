@@ -22,6 +22,9 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
     "@jup-ag/terminal": "^4.5.7",
+    "@prisma/client": "^6.17.0",
+    "@pythnetwork/hermes-client": "^2.0.0",
+    "@pythnetwork/pyth-solana-receiver": "^0.12.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-popover": "^1.1.15",
@@ -48,8 +51,7 @@
     "recharts": "^3.2.1",
     "sonner": "^2.0.7",
     "three": "^0.180.0",
-    "zustand": "^5.0.8",
-    "@prisma/client": "^6.17.0"
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

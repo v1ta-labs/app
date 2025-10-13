@@ -25,7 +25,9 @@ export interface StabilityDepositState {
 /**
  * Fetch stability pool state from blockchain
  */
-export async function fetchStabilityPool(connection: Connection): Promise<StabilityPoolState | null> {
+export async function fetchStabilityPool(
+  connection: Connection
+): Promise<StabilityPoolState | null> {
   const [poolPda] = await getStabilityPoolPda();
 
   try {
@@ -143,10 +145,7 @@ export async function createWithdrawStabilityInstruction(
 /**
  * Calculate user's share of stability pool
  */
-export function calculatePoolShare(
-  userDeposit: bigint,
-  totalPoolVusd: bigint
-): number {
+export function calculatePoolShare(userDeposit: bigint, totalPoolVusd: bigint): number {
   if (totalPoolVusd === 0n) return 0;
   return Number((userDeposit * 10000n) / totalPoolVusd) / 100; // Returns percentage
 }

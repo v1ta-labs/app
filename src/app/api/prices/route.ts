@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { solPrice, jitoSOLPrice, mSOLPrice, bSOLPrice } = body;
+    const { solPrice, jitoSOLPrice, mSOLPrice } = body;
 
     if (!solPrice) {
       return NextResponse.json({ error: 'SOL price is required' }, { status: 400 });
@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
         solPrice: parseFloat(solPrice),
         jitoSOLPrice: jitoSOLPrice ? parseFloat(jitoSOLPrice) : null,
         mSOLPrice: mSOLPrice ? parseFloat(mSOLPrice) : null,
-        bSOLPrice: bSOLPrice ? parseFloat(bSOLPrice) : null,
       },
     });
 

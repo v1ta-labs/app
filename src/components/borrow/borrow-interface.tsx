@@ -1,119 +1,105 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TokenSelector } from '@/components/ui/token-selector';
 import { AmountInput } from '@/components/ui/amount-input';
 import { StatDisplay } from '@/components/ui/stat-display';
 import { HealthGauge } from '@/components/ui/health-gauge';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowDown, Info, TrendingUp, AlertTriangle, Settings2, Zap } from 'lucide-react';
+import { ArrowDown, Info, AlertTriangle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const COLLATERAL_TOKENS = [
-  { symbol: 'SOL', name: 'Solana', icon: '◎', price: 0, balance: 0 },
-  // { symbol: 'jitoSOL', name: 'Jito Staked SOL', icon: '🔥', price: 0, balance: 0 },
-  // { symbol: 'mSOL', name: 'Marinade Staked SOL', icon: '⚓', price: 0, balance: 0 },
-  // { symbol: 'bSOL', name: 'BlazeStake SOL', icon: '🔆', price: 0, balance: 0 },
-];
+interface TokenInfo {
+  symbol: string;
+  name: string;
+  icon: string;
+  price: number;
+  balance: number;
+}
 
-type InterestRateMode = 'protocol' | 'manual';
-
-const FEE_FLOOR = 0.5;
-const FEE_CAP = 5;
-
-const calculateBorrowingFee = (
-  borrowAmount: number,
-  baseRate: number
-): {
-  feePercentage: number;
-  feeAmount: number;
-  baseRateComponent: number;
-  floorComponent: number;
-} => {
-  const baseRateComponent = baseRate;
-  const floorComponent = FEE_FLOOR;
-  const feePercentage = Math.min(baseRateComponent + floorComponent, FEE_CAP);
-  const feeAmount = (borrowAmount * feePercentage) / 100;
-
-  return {
-    feePercentage,
-    feeAmount,
-    baseRateComponent,
-    floorComponent,
-  };
+const DEFAULT_TOKEN: TokenInfo = {
+  symbol: 'SOL',
+  name: 'Solana',
+  icon: '◎',
+  price: 0,
+  balance: 0,
 };
 
-const getRedemptionRisk = (
-  interestRate: number
-): {
-  level: 'low' | 'medium' | 'high' | 'critical';
-  label: string;
-  color: string;
-} => {
-  if (interestRate <= 0.5) {
-    return { level: 'low', label: 'Low Risk', color: 'text-success' };
-  } else if (interestRate <= 2) {
-    return { level: 'medium', label: 'Medium Risk', color: 'text-warning' };
-  } else if (interestRate <= 5) {
-    return { level: 'high', label: 'High Risk', color: 'text-error' };
-  } else {
-    return { level: 'critical', label: 'Critical Risk', color: 'text-error' };
-  }
+// V1TA Protocol Constants - IMMUTABLE
+const BORROWING_FEE = 0.5; // 0.5% one-time fee
+
+const calculateBorrowingFee = (borrowAmount: number): { feeAmount: number; totalDebt: number } => {
+  const feeAmount = (borrowAmount * BORROWING_FEE) / 100;
+  const totalDebt = borrowAmount + feeAmount;
+  return { feeAmount, totalDebt };
 };
 
-const calculateOptimalRate = (
-  collateralValue: number,
-  borrowAmount: number,
-  systemUtilization: number = 0.6
-): number => {
-  const ltv = borrowAmount / collateralValue;
-
-  let rate = 0.5;
-
-  if (ltv > 0.5) {
-    rate += (ltv - 0.5) * 2;
-  }
-
-  if (systemUtilization > 0.8) {
-    rate += (systemUtilization - 0.8) * 5;
-  }
-
-  return Math.min(rate, 10);
+const getLiquidationRisk = (
+  cr: number
+): { level: 'safe' | 'moderate' | 'risky' | 'danger'; label: string; color: string } => {
+  if (cr >= 200) return { level: 'safe', label: 'Very Safe', color: 'text-success' };
+  if (cr >= 150) return { level: 'moderate', label: 'Safe', color: 'text-success' };
+  if (cr >= 120) return { level: 'risky', label: 'At Risk', color: 'text-warning' };
+  return { level: 'danger', label: 'Danger Zone', color: 'text-error' };
 };
 
 export function BorrowInterface() {
   const { isConnected } = useAppKitAccount();
-  const [selectedToken, setSelectedToken] = useState(COLLATERAL_TOKENS[0]);
+  const [selectedToken, setSelectedToken] = useState<TokenInfo>(DEFAULT_TOKEN);
   const [collateralAmount, setCollateralAmount] = useState('');
   const [borrowAmount, setBorrowAmount] = useState('');
-
-  const [rateMode, setRateMode] = useState<InterestRateMode>('protocol');
-  const [manualRate, setManualRate] = useState(0.5);
-  const [showRateSettings, setShowRateSettings] = useState(false);
   const [showFeeTooltip, setShowFeeTooltip] = useState(false);
+  const [solPrice, setSolPrice] = useState<number>(0);
+  const [isPriceLoading, setIsPriceLoading] = useState(true);
 
-  const [baseRate] = useState(0);
+  // Fetch SOL price from Pyth Hermes API
+  useEffect(() => {
+    const fetchSolPrice = async () => {
+      try {
+        setIsPriceLoading(true);
+        // Fetch from Pyth Hermes API (SOL/USD price feed ID)
+        const response = await fetch(
+          'https://hermes.pyth.network/v2/updates/price/latest?ids%5B%5D=0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d'
+        );
+        const data = await response.json();
+
+        if (data.parsed && data.parsed[0]) {
+          const priceData = data.parsed[0].price;
+          // Pyth price format: price * 10^expo
+          const priceInUsd = Number(priceData.price) * Math.pow(10, priceData.expo);
+          setSolPrice(priceInUsd);
+          setSelectedToken(prev => ({ ...prev, price: priceInUsd }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch SOL price from Pyth:', error);
+      } finally {
+        setIsPriceLoading(false);
+      }
+    };
+
+    fetchSolPrice();
+    const interval = setInterval(fetchSolPrice, 10000); // Update every 10s
+
+    return () => clearInterval(interval);
+  }, []);
 
   const collateralValue = parseFloat(collateralAmount || '0') * selectedToken.price;
   const borrowValue = parseFloat(borrowAmount || '0');
 
-  // Calculate borrowing fee with dynamic base rate
-  const feeInfo = calculateBorrowingFee(borrowValue, baseRate);
+  // Calculate borrowing fee (0.5% one-time)
+  const feeInfo = calculateBorrowingFee(borrowValue);
 
-  const maxBorrow = collateralValue / 1.1;
-  const currentLTV = collateralValue > 0 ? (borrowValue / collateralValue) * 100 : 0;
-  const healthFactor = borrowValue > 0 ? (collateralValue / borrowValue) * 100 : 0;
-
-  const interestRate =
-    rateMode === 'protocol' ? calculateOptimalRate(collateralValue, borrowValue) : manualRate;
-
-  const redemptionRisk = getRedemptionRisk(interestRate);
+  // Health calculations use TOTAL DEBT (borrow amount + fee)
+  const maxBorrow = collateralValue / 1.1; // Max at 110% CR
+  const totalDebt = feeInfo.totalDebt;
+  const currentLTV = collateralValue > 0 ? (totalDebt / collateralValue) * 100 : 0;
+  const healthFactor = totalDebt > 0 ? (collateralValue / totalDebt) * 100 : 0; // Collateral Ratio
+  const liquidationRisk = getLiquidationRisk(healthFactor);
 
   const liquidationPrice =
-    borrowValue > 0 ? (borrowValue * 1.1) / parseFloat(collateralAmount || '1') : 0;
+    totalDebt > 0 ? (totalDebt * 1.1) / parseFloat(collateralAmount || '1') : 0;
 
   const handleMaxCollateral = () => {
     setCollateralAmount(selectedToken.balance.toString());
@@ -126,14 +112,12 @@ export function BorrowInterface() {
   const handleBorrow = async () => {
     if (!isConnected) return;
 
-    // TODO: Implement actual position opening logic
+    // TODO: Implement actual position opening logic with V1TAClient
     // Opening position with collateral and borrow amounts
     void {
       collateralType: selectedToken.symbol,
       collateralAmount,
-      borrowAmount,
-      interestRate,
-      rateMode,
+      borrowAmount: feeInfo.totalDebt, // Include 0.5% fee in total debt
     };
   };
 
@@ -144,19 +128,23 @@ export function BorrowInterface() {
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay label="Your Collateral" value={formatUSD(0)} change="+0%" changePositive />
+          <StatDisplay
+            label="SOL Price"
+            value={isPriceLoading ? 'Loading...' : formatUSD(solPrice)}
+            subtitle="Live from Pyth"
+          />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay label="Total Borrowed" value="0" subtitle="VUSD" />
+          <StatDisplay label="Borrowing Fee" value="0.5%" subtitle="One-time only" />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay label="Available" value={formatUSD(0)} subtitle="to borrow" />
+          <StatDisplay label="Interest Rate" value="0%" subtitle="Forever" />
         </motion.div>
       </div>
 
@@ -168,7 +156,7 @@ export function BorrowInterface() {
           <div className="p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
-                DEPOSIT
+                COLLATERAL
               </span>
               <span className="text-xs text-text-tertiary">
                 Balance:{' '}
@@ -184,17 +172,21 @@ export function BorrowInterface() {
               onMax={handleMaxCollateral}
               placeholder="0.00"
               leftElement={
-                <TokenSelector
-                  selected={selectedToken}
-                  tokens={COLLATERAL_TOKENS}
-                  onSelect={setSelectedToken}
-                />
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <span className="text-xl">{selectedToken.icon}</span>
+                  <span className="font-semibold text-text-primary">{selectedToken.symbol}</span>
+                </div>
               }
             />
 
             {collateralAmount && (
-              <div className="mt-2 text-right">
-                <span className="text-sm text-text-tertiary">≈ {formatUSD(collateralValue)}</span>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-xs text-text-tertiary">
+                  SOL Price: {isPriceLoading ? 'Loading...' : formatUSD(solPrice)}
+                </span>
+                <span className="text-sm text-text-tertiary font-semibold">
+                  ≈ {formatUSD(collateralValue)}
+                </span>
               </div>
             )}
           </div>
@@ -209,14 +201,14 @@ export function BorrowInterface() {
           <div className="p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
-                BORROW
+                MINT VUSD
               </span>
               <button
                 onClick={handleMaxBorrow}
-                disabled={!collateralAmount}
+                disabled={!collateralAmount || isPriceLoading}
                 className="text-xs text-primary hover:text-primary-hover font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Max: <span className="font-semibold">{formatUSD(maxBorrow)}</span>
+                Max at 110%: <span className="font-semibold">{formatUSD(maxBorrow)}</span>
               </button>
             </div>
 
@@ -247,125 +239,27 @@ export function BorrowInterface() {
 
           {collateralAmount && borrowAmount && (
             <>
+              {/* V1TA 0% Interest Highlight */}
               <div className="p-5 pt-0">
-                <div className="p-4 bg-base rounded-2xl border border-border">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="p-4 bg-gradient-to-br from-success/10 to-primary/10 rounded-2xl border border-success/30">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-success" />
                       <span className="text-xs font-bold text-text-primary uppercase tracking-wide">
                         Interest Rate
                       </span>
-                      <button
-                        onClick={() => setShowRateSettings(!showRateSettings)}
-                        className="text-text-tertiary hover:text-text-secondary transition-colors"
-                      >
-                        <Settings2 className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold text-primary">
-                        {interestRate.toFixed(2)}%
-                      </div>
-                      <div className="text-[10px] text-text-tertiary uppercase">Annual</div>
+                      <div className="text-2xl font-bold text-success">0%</div>
+                      <div className="text-[10px] text-text-tertiary uppercase">Forever</div>
                     </div>
                   </div>
-
-                  <AnimatePresence>
-                    {showRateSettings && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-3 border-t border-border mt-3 space-y-3">
-                          {/* Mode Selection */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setRateMode('protocol')}
-                              className={`p-3 rounded-xl border transition-all ${
-                                rateMode === 'protocol'
-                                  ? 'bg-primary/10 border-primary text-primary'
-                                  : 'bg-surface border-border text-text-secondary hover:border-primary/50'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 mb-1">
-                                <Zap className="w-3.5 h-3.5" />
-                                <span className="text-xs font-bold">Protocol Managed</span>
-                              </div>
-                              <div className="text-[10px] text-left opacity-70">
-                                Lowest rate, minimal redemption risk
-                              </div>
-                            </button>
-
-                            <button
-                              onClick={() => setRateMode('manual')}
-                              className={`p-3 rounded-xl border transition-all ${
-                                rateMode === 'manual'
-                                  ? 'bg-primary/10 border-primary text-primary'
-                                  : 'bg-surface border-border text-text-secondary hover:border-primary/50'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 mb-1">
-                                <Settings2 className="w-3.5 h-3.5" />
-                                <span className="text-xs font-bold">Set Manually</span>
-                              </div>
-                              <div className="text-[10px] text-left opacity-70">
-                                Custom rate, higher risk
-                              </div>
-                            </button>
-                          </div>
-
-                          {rateMode === 'manual' && (
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="space-y-2"
-                            >
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-text-tertiary">Adjust Rate:</span>
-                                <span className="font-bold text-text-primary">
-                                  {manualRate.toFixed(2)}%
-                                </span>
-                              </div>
-                              <input
-                                type="range"
-                                min="0.5"
-                                max="10"
-                                step="0.1"
-                                value={manualRate}
-                                onChange={e => setManualRate(parseFloat(e.target.value))}
-                                className="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary"
-                              />
-                              <div className="flex justify-between text-[10px] text-text-tertiary">
-                                <span>0.5% (Safest)</span>
-                                <span>10% (Risky)</span>
-                              </div>
-                            </motion.div>
-                          )}
-
-                          <div className="p-3 bg-surface rounded-xl border border-border">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs text-text-tertiary">Redemption Risk:</span>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-xs font-bold ${redemptionRisk.color}`}>
-                                  {redemptionRisk.label}
-                                </span>
-                                {redemptionRisk.level !== 'low' && (
-                                  <AlertTriangle className="w-3.5 h-3.5 text-warning" />
-                                )}
-                              </div>
-                            </div>
-                            <div className="mt-2 text-[10px] text-text-tertiary">
-                              {rateMode === 'protocol'
-                                ? 'Protocol optimizes for lowest redemption risk'
-                                : "Higher rates increase your position's redemption priority"}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="text-xs text-text-secondary">
+                    No recurring interest. Ever. Only a{' '}
+                    <span className="font-bold text-primary">0.5% one-time fee</span> when you mint
+                    VUSD.{' '}
+                    <span className="font-semibold">Decentralized. Efficient. Unstoppable.</span>
+                  </div>
                 </div>
               </div>
 
@@ -373,27 +267,37 @@ export function BorrowInterface() {
                 <div className="p-4 bg-base rounded-2xl border border-border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-text-primary">Health Factor</span>
+                      <span className="text-xs font-bold text-text-primary">Collateral Ratio</span>
                       <button className="text-text-tertiary hover:text-text-secondary transition-colors">
                         <Info className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     <span className="text-xl font-bold text-text-primary">
-                      {healthFactor.toFixed(0)}%
+                      {healthFactor > 0 ? `${healthFactor.toFixed(0)}%` : '—'}
                     </span>
                   </div>
                   <HealthGauge value={healthFactor} />
-                  <div className="flex items-center justify-between mt-3 text-xs">
-                    <span className="text-text-tertiary uppercase tracking-wide font-semibold">
-                      LTV RATIO
-                    </span>
-                    <span className="font-bold text-text-primary text-sm">
-                      {currentLTV.toFixed(1)}%
-                    </span>
+                  <div className="grid grid-cols-2 gap-3 mt-3 text-xs">
+                    <div>
+                      <span className="text-text-tertiary uppercase tracking-wide font-semibold block mb-1">
+                        LTV RATIO
+                      </span>
+                      <span className="font-bold text-text-primary text-sm">
+                        {currentLTV > 0 ? `${currentLTV.toFixed(1)}%` : '—'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-text-tertiary uppercase tracking-wide font-semibold block mb-1">
+                        RISK
+                      </span>
+                      <span className={`font-bold text-sm ${liquidationRisk.color}`}>
+                        {healthFactor > 0 ? liquidationRisk.label : '—'}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Liquidation Warning */}
-                  {healthFactor < 115 && (
+                  {healthFactor > 0 && healthFactor < 115 && (
                     <div className="mt-3 p-2 bg-warning/10 rounded-lg flex items-center gap-2">
                       <AlertTriangle className="w-3.5 h-3.5 text-warning" />
                       <span className="text-xs text-warning font-semibold">
@@ -411,19 +315,23 @@ export function BorrowInterface() {
       <Button
         fullWidth
         size="lg"
-        disabled={!isConnected || !collateralAmount || !borrowAmount || healthFactor < 110}
+        disabled={
+          !isConnected || !collateralAmount || !borrowAmount || healthFactor < 110 || isPriceLoading
+        }
         onClick={handleBorrow}
         className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
       >
         {!isConnected
           ? 'Connect Wallet to Continue'
-          : !collateralAmount
-            ? 'Enter Collateral Amount'
-            : !borrowAmount
-              ? 'Enter Borrow Amount'
-              : healthFactor < 110
-                ? 'Health Factor Too Low (Min 110%)'
-                : 'Confirm Transaction'}
+          : isPriceLoading
+            ? 'Loading Price...'
+            : !collateralAmount
+              ? 'Enter Collateral Amount'
+              : !borrowAmount
+                ? 'Mint VUSD'
+                : healthFactor < 110
+                  ? 'Collateral Ratio Too Low (Min 110%)'
+                  : 'Open Position & Mint VUSD'}
       </Button>
 
       <div className="grid grid-cols-2 gap-3">
@@ -433,17 +341,15 @@ export function BorrowInterface() {
         >
           <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
             <div className="flex items-start gap-2.5">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <TrendingUp className="w-4 h-4 text-primary" />
+              <div className="p-2 bg-success/10 rounded-xl">
+                <Zap className="w-4 h-4 text-success" />
               </div>
               <div className="flex-1">
                 <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1">
-                  {rateMode === 'protocol' ? 'OPTIMAL RATE' : 'CUSTOM RATE'}
+                  INTEREST RATE
                 </div>
-                <div className="text-lg font-bold text-text-primary">
-                  {interestRate.toFixed(2)}%
-                </div>
-                <div className="text-xs text-text-tertiary mt-0.5">{redemptionRisk.label}</div>
+                <div className="text-lg font-bold text-success">0%</div>
+                <div className="text-xs text-text-tertiary mt-0.5">Forever</div>
               </div>
             </div>
           </Card>
@@ -460,7 +366,7 @@ export function BorrowInterface() {
               </div>
               <div className="flex-1">
                 <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1">
-                  LIQUIDATION
+                  LIQUIDATION PRICE
                 </div>
                 <div className="text-lg font-bold text-text-primary">
                   {liquidationPrice > 0 ? `$${liquidationPrice.toFixed(2)}` : '$0.00'}
@@ -498,29 +404,23 @@ export function BorrowInterface() {
                       >
                         <div className="bg-base border border-border rounded-xl p-3 shadow-xl">
                           <div className="text-xs font-bold text-text-primary mb-2">
-                            Dynamic Borrowing Fee
+                            V1TA Borrowing Fee
                           </div>
                           <div className="text-[11px] text-text-secondary space-y-2">
                             <p>
-                              <span className="font-semibold text-text-primary">
-                                Fee = (Base Rate + 0.5%) × Amount
+                              <span className="font-semibold text-success">
+                                0.5% one-time fee. 0% interest forever.
                               </span>
                             </p>
                             <div className="space-y-1">
-                              <div>• Minimum: 0.5%</div>
-                              <div>• Maximum: 5%</div>
+                              <div>• No recurring interest charges</div>
+                              <div>• No variable rates</div>
+                              <div>• Immutable protocol design</div>
                             </div>
-                            <p className="pt-2 border-t border-border/30">
-                              <span className="font-semibold">Base Rate</span> increases with VUSD
-                              redemptions and decays over time (12h half-life).
+                            <p className="pt-2 border-t border-border/30 text-text-tertiary text-[10px]">
+                              V1TA is designed for pure decentralization. Your debt never grows from
+                              interest - only the initial 0.5% fee when you borrow.
                             </p>
-                            <p className="text-text-tertiary text-[10px]">
-                              When VUSD depegs, high redemptions → higher fees → discourages new
-                              borrowing → helps restore peg.
-                            </p>
-                            <div className="pt-2 border-t border-border/30 text-warning text-[10px] font-semibold">
-                              MVP: Base rate fixed at 0% (0.5% fee). Dynamic rates in v2.
-                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -532,46 +432,39 @@ export function BorrowInterface() {
                 <div className="font-semibold text-text-primary">
                   {formatUSD(feeInfo.feeAmount)}
                 </div>
-                <div className="text-[10px] text-text-tertiary">
-                  {feeInfo.feePercentage.toFixed(2)}%
-                </div>
+                <div className="text-[10px] text-success font-bold">0.5%</div>
               </div>
-            </div>
-
-            {/* Fee breakdown */}
-            <div className="pl-3 space-y-1 border-l-2 border-border/30">
-              <div className="flex justify-between text-[11px]">
-                <span className="text-text-tertiary">Base Rate:</span>
-                <span className="font-medium text-text-secondary">
-                  {feeInfo.baseRateComponent.toFixed(2)}%
-                </span>
-              </div>
-              <div className="flex justify-between text-[11px]">
-                <span className="text-text-tertiary">Minimum Fee Floor:</span>
-                <span className="font-medium text-text-secondary">
-                  {feeInfo.floorComponent.toFixed(2)}%
-                </span>
-              </div>
-              {feeInfo.feePercentage === FEE_CAP && (
-                <div className="flex items-center gap-1 text-[10px] text-warning mt-1">
-                  <AlertTriangle className="w-2.5 h-2.5" />
-                  <span>Fee capped at {FEE_CAP}%</span>
-                </div>
-              )}
             </div>
 
             <div className="pt-2 border-t border-border/30">
               <div className="flex justify-between">
-                <span className="text-text-tertiary font-semibold">You will receive:</span>
-                <span className="font-bold text-text-primary">
-                  {formatNumber(borrowValue - feeInfo.feeAmount, 2)} VUSD
+                <span className="text-text-tertiary">Borrow Amount:</span>
+                <span className="font-semibold text-text-primary">
+                  {formatNumber(borrowValue, 2)} VUSD
                 </span>
               </div>
             </div>
 
             <div className="flex justify-between">
+              <span className="text-text-tertiary font-semibold">Total Debt:</span>
+              <span className="font-bold text-text-primary">
+                {formatNumber(feeInfo.totalDebt, 2)} VUSD
+              </span>
+            </div>
+
+            <div className="pt-2 border-t border-border/30 flex justify-between">
               <span className="text-text-tertiary">Min Collateral Ratio:</span>
               <span className="font-semibold text-text-primary">110%</span>
+            </div>
+
+            <div className="pt-2 border-t border-border/30 p-3 bg-base/50 rounded-xl">
+              <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1.5">
+                V1TA Protocol
+              </div>
+              <div className="text-xs text-text-secondary">
+                <span className="text-success font-bold">0% interest forever</span> · Pure
+                decentralized stablecoin · Your debt never compounds
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,10 @@
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { VITA_PROGRAM_ID, getPositionPda, calculateCollateralRatio, isLiquidatable } from './constants';
+import {
+  VITA_PROGRAM_ID,
+  getPositionPda,
+  calculateCollateralRatio,
+  isLiquidatable,
+} from './constants';
 
 /**
  * Position State (matches on-chain account)
@@ -194,7 +199,9 @@ export async function getPositionHealth(
   position: PositionState,
   collateralPrice: number
 ): Promise<PositionHealth> {
-  const collateralValue = BigInt(Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9));
+  const collateralValue = BigInt(
+    Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9)
+  );
 
   const collateralRatio = calculateCollateralRatio(collateralValue, position.debt);
   const liquidatable = isLiquidatable(collateralValue, position.debt);

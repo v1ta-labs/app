@@ -1,85 +1,69 @@
 import { PublicKey } from '@solana/web3.js';
 
 /**
- * V1TA Protocol Constants
- * Devnet v0.1
+ * V1TA Protocol Constants - Devnet v0.1
  */
-
 export const VITA_PROGRAM_ID = new PublicKey('D4PzAjCQtGL5n6b79fBJh5Z84GKJk1ruPCYn8914dsST');
 
 /**
- * PDA Seeds
+ * PDA Seeds (must match Rust program exactly)
  */
 export const SEEDS = {
-  GLOBAL_STATE: 'global_state',
+  GLOBAL_STATE: 'global-state',
+  VUSD_MINT: 'vusd-mint',
   POSITION: 'position',
-  STABILITY_POOL: 'stability_pool',
-  STABILITY_DEPOSIT: 'stability_deposit',
+  STABILITY_POOL: 'stability-pool',
+  STABILITY_DEPOSIT: 'stability-deposit',
+  PROTOCOL_SOL_VAULT: 'protocol-sol-vault',
 } as const;
 
 /**
  * Protocol Parameters
  */
 export const PROTOCOL_PARAMS = {
-  MIN_COLLATERAL_RATIO: 110, // 110% minimum CR
-  LIQUIDATION_PENALTY: 5, // 5% penalty
-  BORROWING_FEE: 0.5, // 0.5% one-time fee
-  PRECISION: 1e9, // 9 decimals for VUSD
+  MIN_COLLATERAL_RATIO: 11000, // 110% in basis points
+  MIN_DEBT: 1_000_000, // 1 VUSD (6 decimals)
+  BORROWING_FEE_RATE: 50, // 0.5% (50 basis points)
+  REDEMPTION_FEE_RATE: 50, // 0.5%
+  LIQUIDATION_PENALTY: 500, // 5% (500 basis points)
+  LIQUIDATOR_REWARD: 50, // 0.5% (50 basis points)
+  PERCENTAGE_PRECISION: 10_000, // Basis points
+  VUSD_DECIMALS: 6,
+  SOL_DECIMALS: 9,
 } as const;
 
 /**
- * Token Mints (Devnet)
+ * Pyth Oracle (Devnet)
  */
-export const TOKEN_MINTS = {
-  VUSD: new PublicKey('VUSD_MINT_PLACEHOLDER'), // Will be set when program deploys
-  SOL: new PublicKey('So11111111111111111111111111111111111111112'),
-} as const;
+export const PYTH_SOL_USD_FEED = new PublicKey('J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix');
 
 /**
- * Derive Global State PDA
+ * Derive PDAs
  */
-export async function getGlobalStatePda(): Promise<[PublicKey, number]> {
+export function getGlobalStatePda(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync([Buffer.from(SEEDS.GLOBAL_STATE)], VITA_PROGRAM_ID);
+}
+
+export function getVusdMintPda(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync([Buffer.from(SEEDS.VUSD_MINT)], VITA_PROGRAM_ID);
+}
+
+export function getStabilityPoolPda(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync([Buffer.from(SEEDS.STABILITY_POOL)], VITA_PROGRAM_ID);
+}
+
+export function getProtocolVaultPda(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync([Buffer.from(SEEDS.PROTOCOL_SOL_VAULT)], VITA_PROGRAM_ID);
+}
+
+export function getPositionPda(owner: PublicKey): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
-    [Buffer.from(SEEDS.GLOBAL_STATE)],
+    [Buffer.from(SEEDS.POSITION), owner.toBuffer()],
     VITA_PROGRAM_ID
   );
 }
 
-/**
- * Derive Position PDA
- * @param owner - Owner's public key
- * @param positionId - Position ID (u64 as Buffer)
- */
-export async function getPositionPda(
-  owner: PublicKey,
-  positionId: bigint
-): Promise<[PublicKey, number]> {
-  const positionIdBuffer = Buffer.alloc(8);
-  positionIdBuffer.writeBigUInt64LE(positionId);
-
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from(SEEDS.POSITION), owner.toBuffer(), positionIdBuffer],
-    VITA_PROGRAM_ID
-  );
-}
-
-/**
- * Derive Stability Pool PDA
- */
-export async function getStabilityPoolPda(): Promise<[PublicKey, number]> {
-  return PublicKey.findProgramAddressSync(
-    [Buffer.from(SEEDS.STABILITY_POOL)],
-    VITA_PROGRAM_ID
-  );
-}
-
-/**
- * Derive Stability Deposit PDA
- * @param depositor - Depositor's public key
- */
-export async function getStabilityDepositPda(
-  depositor: PublicKey
-): Promise<[PublicKey, number]> {
+export function getStabilityDepositPda(depositor: PublicKey): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
     [Buffer.from(SEEDS.STABILITY_DEPOSIT), depositor.toBuffer()],
     VITA_PROGRAM_ID
@@ -88,56 +72,33 @@ export async function getStabilityDepositPda(
 
 /**
  * Calculate Collateral Ratio
- * @param collateralValue - Collateral value in USD (with precision)
- * @param debt - Debt amount in VUSD (with precision)
+ * @param collateralSol - Collateral in SOL
+ * @param solPrice - SOL price in USD
+ * @param debtVusd - Debt in VUSD
  * @returns Collateral ratio as percentage (e.g., 150 for 150%)
  */
 export function calculateCollateralRatio(
-  collateralValue: bigint,
-  debt: bigint
+  collateralSol: number,
+  solPrice: number,
+  debtVusd: number
 ): number {
-  if (debt === 0n) return Infinity;
-  return Number((collateralValue * 100n) / debt);
-}
-
-/**
- * Calculate maximum debt for given collateral
- * @param collateralValue - Collateral value in USD (with precision)
- * @param minCR - Minimum collateral ratio (default 110%)
- * @returns Maximum debt in VUSD (with precision)
- */
-export function calculateMaxDebt(
-  collateralValue: bigint,
-  minCR: number = PROTOCOL_PARAMS.MIN_COLLATERAL_RATIO
-): bigint {
-  return (collateralValue * 100n) / BigInt(minCR);
-}
-
-/**
- * Calculate borrowing fee
- * @param debtAmount - Debt amount in VUSD (with precision)
- * @returns Fee amount in VUSD (with precision)
- */
-export function calculateBorrowingFee(debtAmount: bigint): bigint {
-  return (debtAmount * BigInt(PROTOCOL_PARAMS.BORROWING_FEE * 100)) / 10000n;
-}
-
-/**
- * Calculate liquidation penalty
- * @param collateralAmount - Collateral amount (with precision)
- * @returns Penalty amount (with precision)
- */
-export function calculateLiquidationPenalty(collateralAmount: bigint): bigint {
-  return (collateralAmount * BigInt(PROTOCOL_PARAMS.LIQUIDATION_PENALTY)) / 100n;
+  if (debtVusd === 0) return Infinity;
+  return ((collateralSol * solPrice) / debtVusd) * 100;
 }
 
 /**
  * Check if position is liquidatable
- * @param collateralValue - Collateral value in USD (with precision)
- * @param debt - Debt amount in VUSD (with precision)
- * @returns True if CR < 110%
  */
-export function isLiquidatable(collateralValue: bigint, debt: bigint): boolean {
-  const cr = calculateCollateralRatio(collateralValue, debt);
-  return cr < PROTOCOL_PARAMS.MIN_COLLATERAL_RATIO;
+export function isLiquidatable(cr: number): boolean {
+  return cr < 110;
+}
+
+/**
+ * Calculate liquidation penalty (5%)
+ */
+export function calculateLiquidationPenalty(collateral: bigint): bigint {
+  return (
+    (collateral * BigInt(PROTOCOL_PARAMS.LIQUIDATION_PENALTY)) /
+    BigInt(PROTOCOL_PARAMS.PERCENTAGE_PRECISION)
+  );
 }

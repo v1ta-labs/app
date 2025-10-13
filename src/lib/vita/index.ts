@@ -3,6 +3,5 @@
  */
 
 export * from './constants';
-export * from './position';
-export * from './stability-pool';
-export * from './liquidation';
+export * from './types';
+export { V1TAClient } from './v1ta-client';

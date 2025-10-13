@@ -35,14 +35,17 @@ export function useUser() {
     if (!isConnected || !walletProvider) return;
 
     try {
-      // @ts-expect-error - Reown provider types are not fully exported
-      if (walletProvider && 'request' in walletProvider && typeof walletProvider.request === 'function') {
-        const profile = await walletProvider.request({ method: 'wallet_getProfile' });
+      if (
+        walletProvider &&
+        'request' in walletProvider &&
+        typeof walletProvider.request === 'function'
+      ) {
+        const profile = await (walletProvider as any).request({ method: 'wallet_getProfile' });
         if (profile) {
           setSocialProfile(profile as SocialProfile);
         }
       }
-    } catch (error) {
+    } catch {
       // Silently ignore errors
     }
   }, [isConnected, walletProvider]);
