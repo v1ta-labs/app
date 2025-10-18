@@ -96,8 +96,8 @@ export function calculateCollateralRatioFromBigInt(
   collateralValue: bigint,
   debt: bigint
 ): number {
-  if (debt === 0n) return Infinity;
-  return Number((collateralValue * 100n) / debt);
+  if (debt === BigInt(0)) return Infinity;
+  return Number((collateralValue * BigInt(100)) / debt);
 }
 
 /**

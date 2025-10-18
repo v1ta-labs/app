@@ -1,7 +1,8 @@
 'use client';
 
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useMemo } from 'react';
 import { createAppKit } from '@reown/appkit/react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { projectId, metadata, solanaWeb3JsAdapter, networks, features } from '@/config/reown';
 
 // Suppress Reown config warnings and connection errors
@@ -61,5 +62,15 @@ interface ReownProviderProps {
 }
 
 export const ReownProvider: FC<ReownProviderProps> = ({ children }) => {
-  return <>{children}</>;
+  const endpoint = useMemo(() => 'https://api.devnet.solana.com', []);
+
+  const wallets = useMemo(() => [], []);
+
+  return (
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect={false}>
+        {children}
+      </WalletProvider>
+    </ConnectionProvider>
+  );
 };

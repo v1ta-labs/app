@@ -181,7 +181,7 @@ export function calculateLiquidationProfitability(
 
   // Net profit
   const netValue = collateralValue - debtCost;
-  const isProfitable = netValue > 0n;
+  const isProfitable = netValue > BigInt(0);
 
   return {
     isProfitable,

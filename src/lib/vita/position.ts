@@ -2,8 +2,7 @@ import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
   VITA_PROGRAM_ID,
   getPositionPda,
-  calculateCollateralRatio,
-  isLiquidatable,
+  calculateCollateralRatioFromBigInt,
 } from './constants';
 
 /**
@@ -202,15 +201,17 @@ export async function getPositionHealth(
     Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9)
   );
 
-  const collateralRatio = calculateCollateralRatio(collateralValue, position.debt);
-  const liquidatable = isLiquidatable(collateralValue, position.debt);
+  const collateralRatio = calculateCollateralRatioFromBigInt(collateralValue, position.debt);
+
+  // Check if liquidatable based on collateral ratio
+  const liquidatable = collateralRatio < 110;
 
   // Calculate available debt (max debt - current debt)
-  const maxDebt = (collateralValue * 100n) / 110n;
-  const availableDebt = maxDebt > position.debt ? maxDebt - position.debt : 0n;
+  const maxDebt = (collateralValue * BigInt(100)) / BigInt(110);
+  const availableDebt = maxDebt > position.debt ? maxDebt - position.debt : BigInt(0);
 
   // Calculate required collateral for current debt at 110% CR
-  const requiredCollateral = (position.debt * 110n) / 100n;
+  const requiredCollateral = (position.debt * BigInt(110)) / BigInt(100);
 
   return {
     collateralRatio,

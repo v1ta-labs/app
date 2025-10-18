@@ -221,7 +221,7 @@ export class V1TAClient {
   // Fetch Global State
   async getGlobalState(): Promise<GlobalState | null> {
     try {
-      return await this.program.account.globalState.fetch(this.pdas.globalState);
+      return await (this.program.account as any).globalState.fetch(this.pdas.globalState);
     } catch {
       return null;
     }
@@ -231,7 +231,7 @@ export class V1TAClient {
   async getPosition(user?: PublicKey): Promise<Position | null> {
     try {
       const [positionPDA] = getPositionPda(user || this.provider.wallet.publicKey);
-      return await this.program.account.position.fetch(positionPDA);
+      return await (this.program.account as any).position.fetch(positionPDA);
     } catch {
       return null;
     }
@@ -240,7 +240,7 @@ export class V1TAClient {
   // Fetch Stability Pool
   async getStabilityPool(): Promise<StabilityPool | null> {
     try {
-      return await this.program.account.stabilityPool.fetch(this.pdas.stabilityPool);
+      return await (this.program.account as any).stabilityPool.fetch(this.pdas.stabilityPool);
     } catch {
       return null;
     }
@@ -265,10 +265,10 @@ export class V1TAClient {
 
   // Find All Liquidatable Positions
   async findLiquidatablePositions(solPriceUsd: number): Promise<PublicKey[]> {
-    const positions = await this.program.account.position.all();
+    const positions = await (this.program.account as any).position.all();
 
     return positions
-      .filter(p => {
+      .filter((p: any) => {
         if (!('active' in p.account.status)) return false;
         if (p.account.debt.toNumber() === 0) return false;
 
@@ -278,6 +278,6 @@ export class V1TAClient {
 
         return cr < 110;
       })
-      .map(p => p.account.owner);
+      .map((p: any) => p.account.owner);
   }
 }

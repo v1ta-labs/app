@@ -146,8 +146,8 @@ export async function createWithdrawStabilityInstruction(
  * Calculate user's share of stability pool
  */
 export function calculatePoolShare(userDeposit: bigint, totalPoolVusd: bigint): number {
-  if (totalPoolVusd === 0n) return 0;
-  return Number((userDeposit * 10000n) / totalPoolVusd) / 100; // Returns percentage
+  if (totalPoolVusd === BigInt(0)) return 0;
+  return Number((userDeposit * BigInt(10000)) / totalPoolVusd) / 100; // Returns percentage
 }
 
 /**
@@ -158,7 +158,7 @@ export function calculateExpectedGains(
   totalPoolVusd: bigint,
   totalCollateralGains: bigint
 ): bigint {
-  if (totalPoolVusd === 0n) return 0n;
+  if (totalPoolVusd === BigInt(0)) return BigInt(0);
   return (userDeposit * totalCollateralGains) / totalPoolVusd;
 }
 
@@ -182,15 +182,15 @@ export async function getStabilityPoolMetrics(
 
   if (!pool) return null;
 
-  const userDeposit = deposit?.amount || 0n;
+  const userDeposit = deposit?.amount || BigInt(0);
   const userShare = calculatePoolShare(userDeposit, pool.totalVusd);
 
   // Calculate pending gains based on pool's total collateral gains
   const pendingGains: Record<string, bigint> = {};
   for (const [collateralType, totalGain] of Object.entries(pool.totalCollateralGains)) {
     const userGain = calculateExpectedGains(userDeposit, pool.totalVusd, totalGain);
-    const alreadyClaimed = deposit?.collateralGains[collateralType] || 0n;
-    pendingGains[collateralType] = userGain > alreadyClaimed ? userGain - alreadyClaimed : 0n;
+    const alreadyClaimed = deposit?.collateralGains[collateralType] || BigInt(0);
+    pendingGains[collateralType] = userGain > alreadyClaimed ? userGain - alreadyClaimed : BigInt(0);
   }
 
   // TODO: Calculate APR based on historical liquidation data
