@@ -2,14 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AmountInput } from '@/components/ui/amount-input';
 import { StatDisplay } from '@/components/ui/stat-display';
 import { HealthGauge } from '@/components/ui/health-gauge';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowDown, Info, AlertTriangle, Zap } from 'lucide-react';
+import { ArrowDown, Info, AlertTriangle, Zap, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { V1TAClient } from '@/lib/vita';
 
 interface TokenInfo {
   symbol: string;
@@ -47,12 +50,66 @@ const getLiquidationRisk = (
 
 export function BorrowInterface() {
   const { isConnected } = useAppKitAccount();
+  const { connection } = useConnection();
+  const wallet = useWallet();
   const [selectedToken, setSelectedToken] = useState<TokenInfo>(DEFAULT_TOKEN);
   const [collateralAmount, setCollateralAmount] = useState('');
   const [borrowAmount, setBorrowAmount] = useState('');
   const [showFeeTooltip, setShowFeeTooltip] = useState(false);
   const [solPrice, setSolPrice] = useState<number>(0);
   const [isPriceLoading, setIsPriceLoading] = useState(true);
+  const [isTransacting, setIsTransacting] = useState(false);
+  const [txError, setTxError] = useState<string | null>(null);
+  const [userCollateral, setUserCollateral] = useState<number>(0);
+  const [userDebt, setUserDebt] = useState<number>(0);
+  const [hasPosition, setHasPosition] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!wallet.publicKey) return;
+
+      try {
+        const balance = await connection.getBalance(wallet.publicKey);
+        const solBal = balance / LAMPORTS_PER_SOL;
+        setSelectedToken(prev => ({ ...prev, balance: solBal }));
+      } catch (error) {
+        console.error('Failed to fetch SOL balance:', error);
+      }
+    };
+
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 10000); // Update every 10s
+
+    return () => clearInterval(interval);
+  }, [wallet.publicKey, connection]);
+
+  useEffect(() => {
+    const fetchPosition = async () => {
+      if (!wallet.publicKey) return;
+
+      try {
+        const client = await V1TAClient.create(connection, wallet);
+        const position = await client.getPosition();
+
+        if (position) {
+          setHasPosition(true);
+          setUserCollateral(position.collateral.toNumber() / LAMPORTS_PER_SOL);
+          setUserDebt(position.debt.toNumber() / 1_000_000); // VUSD has 6 decimals
+        } else {
+          setHasPosition(false);
+          setUserCollateral(0);
+          setUserDebt(0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch position:', error);
+      }
+    };
+
+    fetchPosition();
+    const interval = setInterval(fetchPosition, 10000); // Update every 10s
+
+    return () => clearInterval(interval);
+  }, [wallet.publicKey, connection, wallet]);
 
   // Fetch SOL price from Pyth Hermes API
   useEffect(() => {
@@ -110,15 +167,28 @@ export function BorrowInterface() {
   };
 
   const handleBorrow = async () => {
-    if (!isConnected) return;
+    if (!isConnected || !wallet.publicKey) return;
 
-    // TODO: Implement actual position opening logic with V1TAClient
-    // Opening position with collateral and borrow amounts
-    void {
-      collateralType: selectedToken.symbol,
-      collateralAmount,
-      borrowAmount: feeInfo.totalDebt, // Include 0.5% fee in total debt
-    };
+    try {
+      setIsTransacting(true);
+      setTxError(null);
+
+      const client = await V1TAClient.create(connection, wallet);
+
+      const collateralSol = parseFloat(collateralAmount);
+      const borrowVusd = parseFloat(borrowAmount);
+
+      await client.openPosition(collateralSol, borrowVusd);
+
+      // Clear form on success
+      setCollateralAmount('');
+      setBorrowAmount('');
+    } catch (error) {
+      console.error('Failed to open position:', error);
+      setTxError(error instanceof Error ? error.message : 'Transaction failed');
+    } finally {
+      setIsTransacting(false);
+    }
   };
 
   return (
@@ -129,22 +199,30 @@ export function BorrowInterface() {
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
           <StatDisplay
-            label="SOL Price"
-            value={isPriceLoading ? 'Loading...' : formatUSD(solPrice)}
-            subtitle="Live from Pyth"
+            label="Your Collateral"
+            value={hasPosition ? `${formatNumber(userCollateral, 2)} SOL` : '0 SOL'}
+            subtitle={hasPosition ? formatUSD(userCollateral * solPrice) : 'No position'}
           />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay label="Borrowing Fee" value="0.5%" subtitle="One-time only" />
+          <StatDisplay
+            label="Total Borrowed"
+            value={hasPosition ? formatNumber(userDebt, 2) : '0'}
+            subtitle="VUSD"
+          />
         </motion.div>
         <motion.div
           whileHover={{ scale: 1.03, y: -2 }}
           transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-          <StatDisplay label="Interest Rate" value="0%" subtitle="Forever" />
+          <StatDisplay
+            label="SOL Price"
+            value={isPriceLoading ? 'Loading...' : formatUSD(solPrice)}
+            subtitle="Live from Pyth"
+          />
         </motion.div>
       </div>
 
@@ -312,26 +390,48 @@ export function BorrowInterface() {
         </Card>
       </motion.div>
 
+      {txError && (
+        <div className="p-3 bg-error/10 border border-error/30 rounded-xl flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 text-error mt-0.5" />
+          <div className="flex-1">
+            <div className="text-sm font-semibold text-error">Transaction Failed</div>
+            <div className="text-xs text-error/80 mt-1">{txError}</div>
+          </div>
+        </div>
+      )}
+
       <Button
         fullWidth
         size="lg"
         disabled={
-          !isConnected || !collateralAmount || !borrowAmount || healthFactor < 110 || isPriceLoading
+          !isConnected ||
+          !collateralAmount ||
+          !borrowAmount ||
+          healthFactor < 110 ||
+          isPriceLoading ||
+          isTransacting
         }
         onClick={handleBorrow}
         className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
       >
-        {!isConnected
-          ? 'Connect Wallet to Continue'
-          : isPriceLoading
-            ? 'Loading Price...'
-            : !collateralAmount
-              ? 'Enter Collateral Amount'
-              : !borrowAmount
-                ? 'Mint VUSD'
-                : healthFactor < 110
-                  ? 'Collateral Ratio Too Low (Min 110%)'
-                  : 'Open Position & Mint VUSD'}
+        {isTransacting ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Opening Position...
+          </span>
+        ) : !isConnected ? (
+          'Connect Wallet to Continue'
+        ) : isPriceLoading ? (
+          'Loading Price...'
+        ) : !collateralAmount ? (
+          'Enter Collateral Amount'
+        ) : !borrowAmount ? (
+          'Mint VUSD'
+        ) : healthFactor < 110 ? (
+          'Collateral Ratio Too Low (Min 110%)'
+        ) : (
+          'Open Position & Mint VUSD'
+        )}
       </Button>
 
       <div className="grid grid-cols-2 gap-3">

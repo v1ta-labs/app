@@ -36,11 +36,14 @@ export function useUser() {
 
     try {
       if (
-        walletProvider &&
+        typeof walletProvider === 'object' &&
+        walletProvider !== null &&
         'request' in walletProvider &&
         typeof walletProvider.request === 'function'
       ) {
-        const profile = await (walletProvider as any).request({ method: 'wallet_getProfile' });
+        const profile = await (
+          walletProvider as { request: (args: { method: string }) => Promise<unknown> }
+        ).request({ method: 'wallet_getProfile' });
         if (profile) {
           setSocialProfile(profile as SocialProfile);
         }

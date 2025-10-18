@@ -37,10 +37,9 @@ export enum PositionStatus {
  */
 export async function fetchPosition(
   connection: Connection,
-  owner: PublicKey,
-  positionId: bigint
+  owner: PublicKey
 ): Promise<PositionState | null> {
-  const [positionPda] = await getPositionPda(owner, positionId);
+  const [positionPda] = getPositionPda(owner);
 
   try {
     const accountInfo = await connection.getAccountInfo(positionPda);
@@ -102,12 +101,12 @@ function parsePositionAccount(data: Buffer): PositionState | null {
  */
 export async function createOpenPositionInstruction(
   owner: PublicKey,
-  positionId: bigint,
+  _positionId: bigint,
   collateralType: CollateralType,
   collateralAmount: bigint,
   debtAmount: bigint
 ): Promise<TransactionInstruction> {
-  const [positionPda, bump] = await getPositionPda(owner, positionId);
+  const [positionPda, _bump] = getPositionPda(owner);
 
   // Build instruction data
   const instructionData = Buffer.alloc(1 + 1 + 8 + 8); // discriminator + collateral_type + collateral + debt
@@ -135,12 +134,12 @@ export async function createOpenPositionInstruction(
  */
 export async function createAdjustPositionInstruction(
   owner: PublicKey,
-  positionId: bigint,
+  _positionId: bigint,
   collateralDelta: bigint,
   debtDelta: bigint,
   isIncrease: boolean
 ): Promise<TransactionInstruction> {
-  const [positionPda] = await getPositionPda(owner, positionId);
+  const [positionPda] = getPositionPda(owner);
 
   const instructionData = Buffer.alloc(1 + 8 + 8 + 1);
   instructionData.writeUInt8(2, 0); // AdjustPosition discriminator
@@ -165,9 +164,9 @@ export async function createAdjustPositionInstruction(
  */
 export async function createClosePositionInstruction(
   owner: PublicKey,
-  positionId: bigint
+  _positionId: bigint
 ): Promise<TransactionInstruction> {
-  const [positionPda] = await getPositionPda(owner, positionId);
+  const [positionPda] = getPositionPda(owner);
 
   const instructionData = Buffer.alloc(1);
   instructionData.writeUInt8(3, 0); // ClosePosition discriminator

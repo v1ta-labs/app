@@ -2,7 +2,7 @@ import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 import {
   VITA_PROGRAM_ID,
   getPositionPda,
-  calculateCollateralRatio,
+  calculateCollateralRatioFromBigInt,
   isLiquidatable,
   calculateLiquidationPenalty,
 } from './constants';
@@ -24,10 +24,10 @@ export interface LiquidationResult {
 export async function createLiquidateInstruction(
   liquidator: PublicKey,
   positionOwner: PublicKey,
-  positionId: bigint,
+  _positionId: bigint,
   maxDebtToRepay: bigint
 ): Promise<TransactionInstruction> {
-  const [positionPda] = await getPositionPda(positionOwner, positionId);
+  const [positionPda] = getPositionPda(positionOwner);
 
   const instructionData = Buffer.alloc(1 + 8);
   instructionData.writeUInt8(4, 0); // Liquidate discriminator
@@ -62,7 +62,7 @@ export function calculateLiquidation(
     maxDebtToRepay && maxDebtToRepay < position.debt ? maxDebtToRepay : position.debt;
 
   // Calculate collateral to liquidate (debt * price ratio)
-  const collateralNeeded = (debtRepaid * 1_000_000_000n) / collateralValuePerUnit;
+  const collateralNeeded = (debtRepaid * BigInt(1000000000)) / collateralValuePerUnit;
 
   // Add liquidation penalty (5%)
   const penalty = calculateLiquidationPenalty(collateralNeeded);
@@ -111,12 +111,12 @@ export async function findLiquidatablePositions(
       const price = collateralPrices[collateralType];
       if (!price) continue;
 
-      // Calculate collateral value
+      // Calculate collateral value and ratio
       const collateralValue = BigInt(Math.floor(Number(position.collateralAmount) * price * 1e9));
+      const cr = calculateCollateralRatioFromBigInt(collateralValue, position.debt);
 
       // Check if liquidatable
-      if (isLiquidatable(collateralValue, position.debt)) {
-        const cr = calculateCollateralRatio(collateralValue, position.debt);
+      if (isLiquidatable(cr)) {
         liquidatablePositions.push({ position, collateralRatio: cr });
       }
     }
@@ -135,10 +135,10 @@ export async function findLiquidatablePositions(
 export async function checkLiquidatable(
   connection: Connection,
   positionOwner: PublicKey,
-  positionId: bigint,
+  _positionId: bigint,
   collateralPrice: number
 ): Promise<{ liquidatable: boolean; collateralRatio: number }> {
-  const position = await fetchPosition(connection, positionOwner, positionId);
+  const position = await fetchPosition(connection, positionOwner);
 
   if (!position) {
     return { liquidatable: false, collateralRatio: 0 };
@@ -147,8 +147,8 @@ export async function checkLiquidatable(
   const collateralValue = BigInt(
     Math.floor(Number(position.collateralAmount) * collateralPrice * 1e9)
   );
-  const collateralRatio = calculateCollateralRatio(collateralValue, position.debt);
-  const liquidatable = isLiquidatable(collateralValue, position.debt);
+  const collateralRatio = calculateCollateralRatioFromBigInt(collateralValue, position.debt);
+  const liquidatable = isLiquidatable(collateralRatio);
 
   return { liquidatable, collateralRatio };
 }

@@ -87,6 +87,20 @@ export function calculateCollateralRatio(
 }
 
 /**
+ * Calculate collateral ratio from bigint values (for internal calculations)
+ * @param collateralValue - Collateral value in USD (as bigint with 9 decimals)
+ * @param debt - Debt in VUSD (as bigint)
+ * @returns Collateral ratio as percentage
+ */
+export function calculateCollateralRatioFromBigInt(
+  collateralValue: bigint,
+  debt: bigint
+): number {
+  if (debt === 0n) return Infinity;
+  return Number((collateralValue * 100n) / debt);
+}
+
+/**
  * Check if position is liquidatable
  */
 export function isLiquidatable(cr: number): boolean {
