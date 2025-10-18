@@ -173,3 +173,127 @@ input,
 select {
   transition: all var(--transition);
 }
+
+/* Mobile Responsive Styles */
+
+/* Account for bottom navigation on mobile */
+@media (max-width: 768px) {
+  /* Add padding bottom for mobile bottom nav */
+  main {
+    padding-bottom: 80px !important;
+  }
+
+  /* Make content scrollable above bottom nav */
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Adjust header for mobile */
+  header {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Make cards and modals more mobile-friendly */
+  [role="dialog"],
+  .modal {
+    max-width: 95vw;
+    max-height: 90vh;
+    margin: auto;
+  }
+}
+
+/* Mobile Phones - Portrait (320px - 480px) */
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.375rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  /* Make buttons more touch-friendly */
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Adjust card padding */
+  .card {
+    padding: 1rem;
+  }
+
+  /* Make forms more mobile-friendly */
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Mobile Phones - Landscape & Small Tablets (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  main {
+    padding-bottom: 75px !important;
+  }
+}
+
+/* Tablets - Portrait (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Adjust for desktop sidebar */
+  main {
+    padding-left: 80px;
+  }
+}
+
+/* Safe area support for notched devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  button,
+  a,
+  [role="button"],
+  [role="link"] {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Remove hover states on touch devices */
+  *:hover {
+    /* Override hover states that don't make sense on touch */
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+  main {
+    padding-bottom: 60px !important;
+  }
+
+  header {
+    min-height: 3rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper text rendering */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import '@/lib/utils/error-handler';
 import { ReownProvider } from '@/providers/reown-provider';
@@ -10,6 +10,13 @@ import { QueryProvider } from '@/providers/query-provider';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: '--font-cormorant',
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  style: ['normal', 'italic'],
 });
 
 export const metadata: Metadata = {
@@ -29,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} font-sans`}>
+      <body className={`${inter.variable} ${cormorant.variable} font-sans`}>
         <QueryProvider>
           <ReownProvider>
             <TooltipProvider>

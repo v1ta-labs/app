@@ -44,7 +44,9 @@ export function NavigationSidebar() {
   };
 
   return (
-    <div className="w-20 fixed left-0 top-16 bottom-0 border-r border-border bg-surface/50 backdrop-blur-xl flex flex-col items-center py-8 z-50">
+    <>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex w-20 fixed left-0 top-16 bottom-0 border-r border-border bg-surface/50 backdrop-blur-xl flex-col items-center py-8 z-50">
       {/* Main Navigation */}
       <div className="flex-1 flex flex-col items-center gap-4">
         {NAV_ITEMS.map(item => {
@@ -130,5 +132,39 @@ export function NavigationSidebar() {
       />
       <SwapModal open={swapOpen} onOpenChange={setSwapOpen} />
     </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-surface/95 backdrop-blur-xl z-50">
+        <div className="flex items-center justify-around px-2 py-3 pb-safe">
+          {NAV_ITEMS.map(item => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all min-w-[60px]',
+                  isActive ? 'text-primary bg-primary/10' : 'text-text-tertiary active:bg-elevated'
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[9px] font-semibold uppercase tracking-wide leading-tight">{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* Swap Button */}
+          <button
+            onClick={() => setSwapOpen(true)}
+            className="flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all text-text-tertiary active:bg-elevated min-w-[60px]"
+          >
+            <ArrowLeftRight className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wide leading-tight">Swap</span>
+          </button>
+        </div>
+      </div>
+    </>
   );
 }

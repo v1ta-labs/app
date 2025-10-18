@@ -6,29 +6,36 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, Wallet } from 'lucide-react';
 import { formatUSD } from '@/lib/utils/formatters';
+import { Logotype } from '@/components/ui/logotype';
 
 export function HeroSection() {
   const { isConnected } = useAppKitAccount();
   const { open: openReownModal } = useAppKit();
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-start pt-20 px-8">
+    <div className="relative min-h-screen flex flex-col items-center justify-start pt-12 sm:pt-20 px-4 sm:px-8">
       {/* Title */}
       <motion.div
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: 'easeOut' }}
-        className="text-center mb-20"
+        className="text-center mb-12 sm:mb-20"
       >
-        <h1 className="text-5xl md:text-6xl font-bold mb-4 text-text-primary leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 sm:mb-8 text-text-primary leading-tight px-4">
           Borrow from the depths.
           <br />
           Survive the storm.
         </h1>
-        <p className="text-sm text-text-tertiary">v1ta protocol</p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+        >
+          <Logotype size="md" showSubheading={true} interactive={true} />
+        </motion.div>
       </motion.div>
 
-      <div className="w-full max-w-4xl mb-20 relative">
+      <div className="w-full max-w-4xl mb-12 sm:mb-20 relative">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -39,17 +46,18 @@ export function HeroSection() {
             whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
-            <Card className="p-4 backdrop-blur-sm bg-surface/70 border-border/50">
-              <div className="text-[9px] text-text-tertiary uppercase tracking-wider font-bold mb-3">
+            <Card className="p-3 sm:p-4 backdrop-blur-sm bg-surface/70 border-border/50">
+              <div className="text-[9px] text-text-tertiary uppercase tracking-wider font-bold mb-2 sm:mb-3">
                 Portfolio Overview
               </div>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div>
-                  <div className="text-[10px] text-text-tertiary mb-1.5">Total Value</div>
-                  <div className="text-xl font-bold text-text-primary mb-1">{formatUSD(0)}</div>
-                  <div className="flex items-center gap-1 text-success text-[10px] font-semibold">
-                    <TrendingUp className="w-2.5 h-2.5" />
-                    <span>+0% (24h)</span>
+                  <div className="text-[9px] sm:text-[10px] text-text-tertiary mb-1 sm:mb-1.5">Total Value</div>
+                  <div className="text-lg sm:text-xl font-bold text-text-primary mb-0.5 sm:mb-1">{formatUSD(0)}</div>
+                  <div className="flex items-center gap-1 text-success text-[9px] sm:text-[10px] font-semibold">
+                    <TrendingUp className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                    <span className="hidden sm:inline">+0% (24h)</span>
+                    <span className="sm:hidden">+0%</span>
                   </div>
                 </div>
                 <div>
@@ -77,14 +85,14 @@ export function HeroSection() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="grid grid-cols-2 gap-4 w-full"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full"
         >
           {/* Assets */}
           <motion.div
             whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
-            <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
+            <Card className="p-3 sm:p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
               <div className="text-[9px] text-text-tertiary uppercase tracking-wider font-bold mb-3">
                 Assets
               </div>
@@ -106,7 +114,7 @@ export function HeroSection() {
             whileHover={isConnected ? { scale: 1.01 } : undefined}
             transition={{ type: 'spring', stiffness: 300 }}
           >
-            <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
+            <Card className="p-3 sm:p-4 backdrop-blur-xl bg-surface/70 border-border/50 h-full">
               <div className="text-[9px] text-text-tertiary uppercase tracking-wider font-bold mb-3">
                 Liabilities
               </div>
