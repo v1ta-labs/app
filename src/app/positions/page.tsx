@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { AppLayout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowUpRight, TrendingUp, AlertTriangle, Edit, X, Loader2 } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, AlertTriangle, Edit, X, Loader2, Plus, Minus, ArrowDown, Info, Zap, CheckCircle2, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { usePosition, useSolPrice, useVitaClient } from '@/hooks';
@@ -15,7 +16,10 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
+  DialogPortal,
+  DialogOverlay,
 } from '@/components/ui/dialog';
+import { AmountInput } from '@/components/ui/amount-input';
 
 export default function PositionsPage() {
   const router = useRouter();
@@ -25,46 +29,122 @@ export default function PositionsPage() {
   const { client: vitaClient } = useVitaClient();
 
   const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [showRepayModal, setShowRepayModal] = useState(false);
   const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isRepaying, setIsRepaying] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [collateralChange, setCollateralChange] = useState('');
   const [debtChange, setDebtChange] = useState('');
+  const [repayAmount, setRepayAmount] = useState('');
+  const [adjustMode, setAdjustMode] = useState<'collateral' | 'debt'>('collateral');
 
   async function handleAdjustPosition() {
     if (!vitaClient) return;
 
+    const toastId = toast.loading('Preparing adjustment...');
+
     try {
       setIsAdjusting(true);
+
+      toast.loading('Waiting for wallet approval...', { id: toastId });
+
       const signature = await vitaClient.adjustPosition(
         parseFloat(collateralChange || '0'),
         parseFloat(debtChange || '0')
       );
-      console.log('Position adjusted!', signature);
-      alert('Position adjusted successfully!');
+
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <div>
+            <div className="font-semibold">Position adjusted successfully!</div>
+            <a
+              href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+            >
+              View on Explorer <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
+
       setShowAdjustModal(false);
       setCollateralChange('');
       setDebtChange('');
-      window.location.reload();
+
+      // Refresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Adjust failed:', error);
-      alert(`Adjust failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(
+        <div>
+          <div className="font-semibold">Adjustment failed</div>
+          <div className="text-xs mt-1">{errorMessage}</div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
     } finally {
       setIsAdjusting(false);
     }
   }
 
   async function handleClosePosition() {
-    if (!vitaClient || !confirm('Are you sure you want to close this position?')) return;
+    if (!vitaClient) return;
+
+    // Confirmation dialog
+    if (!confirm('Are you sure you want to close this position? All collateral will be returned and all debt must be repaid.')) {
+      return;
+    }
+
+    const toastId = toast.loading('Preparing to close position...');
 
     try {
       setIsClosing(true);
+
+      toast.loading('Waiting for wallet approval...', { id: toastId });
+
       const signature = await vitaClient.closePosition();
-      console.log('Position closed!', signature);
-      alert('Position closed successfully!');
-      window.location.reload();
+
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <div>
+            <div className="font-semibold">Position closed successfully!</div>
+            <a
+              href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+            >
+              View on Explorer <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
+
+      // Refresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error('Close failed:', error);
-      alert(`Close failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(
+        <div>
+          <div className="font-semibold">Failed to close position</div>
+          <div className="text-xs mt-1">{errorMessage}</div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
     } finally {
       setIsClosing(false);
     }
@@ -76,6 +156,36 @@ export default function PositionsPage() {
   const avgHealthFactor = health?.collateralRatio || 0;
   const maxLtv = 90.9; // 110% collateral ratio = 90.9% LTV
   const availableToBorrow = Math.max(0, (totalCollateral * maxLtv) / 100 - totalBorrowed);
+
+  // Calculate projected position after adjustment
+  const projectedPosition = useMemo(() => {
+    const collateralDelta = parseFloat(collateralChange || '0');
+    const debtDelta = parseFloat(debtChange || '0');
+
+    const newCollateralSol = collateralSol + collateralDelta;
+    const newCollateralValue = newCollateralSol * solPrice;
+    const newDebt = debtVusd + debtDelta;
+
+    const newCollateralRatio = newDebt > 0 ? (newCollateralValue / newDebt) * 100 : 0;
+    const newLtv = newCollateralValue > 0 ? (newDebt / newCollateralValue) * 100 : 0;
+
+    const getRisk = (cr: number) => {
+      if (cr >= 200) return { level: 'safe', label: 'Very Safe', color: 'text-success' };
+      if (cr >= 150) return { level: 'moderate', label: 'Safe', color: 'text-success' };
+      if (cr >= 110) return { level: 'risky', label: 'At Risk', color: 'text-warning' };
+      return { level: 'danger', label: 'Danger', color: 'text-error' };
+    };
+
+    return {
+      collateralSol: newCollateralSol,
+      collateralValue: newCollateralValue,
+      debt: newDebt,
+      collateralRatio: newCollateralRatio,
+      ltv: newLtv,
+      risk: getRisk(newCollateralRatio),
+      isValid: newCollateralSol >= 0 && newDebt >= 0 && newCollateralRatio >= 110,
+    };
+  }, [collateralChange, debtChange, collateralSol, debtVusd, solPrice]);
 
   if (!isConnected) {
     return (
@@ -332,55 +442,307 @@ export default function PositionsPage() {
 
         {/* Adjust Position Dialog */}
         <Dialog open={showAdjustModal} onOpenChange={setShowAdjustModal}>
-          <DialogContent className="sm:max-w-[500px] p-6">
-            <div className="space-y-2 mb-4">
-              <DialogTitle className="text-xl font-bold text-text-primary">
-                Adjust Position
-              </DialogTitle>
-              <DialogDescription className="text-sm text-text-tertiary">
-                Modify your collateral or debt. Use negative values to remove collateral or repay debt.
+          <DialogPortal>
+            <DialogOverlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+            <DialogContent className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] sm:max-w-[750px] w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto p-0 rounded-2xl backdrop-blur-2xl bg-gradient-to-br from-surface/95 via-surface/90 to-base/95 border-2 border-primary/20 shadow-2xl shadow-primary/10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]">
+            {/* Header with Gradient */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-6 border-b border-border/50 bg-gradient-to-r from-primary/5 via-transparent to-success/5"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center">
+                  <Edit className="w-5 h-5 text-primary" />
+                </div>
+                <DialogTitle className="text-2xl font-bold text-text-primary">
+                  Adjust Position
+                </DialogTitle>
+              </div>
+              <DialogDescription className="text-sm text-text-tertiary ml-13">
+                Modify your collateral and debt to manage your position health
               </DialogDescription>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-semibold text-text-primary mb-2 block">
-                  Collateral Change (SOL)
-                </label>
-                <input
-                  type="number"
-                  value={collateralChange}
-                  onChange={e => setCollateralChange(e.target.value)}
-                  placeholder="0.00 (positive to add, negative to remove)"
-                  className="w-full px-4 py-3 bg-base border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
-                  step="0.01"
-                />
-                <p className="text-xs text-text-tertiary mt-1">
-                  Current: {formatNumber(collateralSol, 4)} SOL
-                </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="p-6 space-y-6"
+            >
+              {/* Mode Tabs with Animation */}
+              <div className="flex gap-2 p-1.5 bg-gradient-to-r from-base/80 to-surface/80 rounded-xl border border-border/30 shadow-inner">
+                <motion.button
+                  onClick={() => setAdjustMode('collateral')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all ${
+                    adjustMode === 'collateral'
+                      ? 'text-white shadow-xl'
+                      : 'text-text-tertiary hover:text-text-primary hover:bg-surface/50'
+                  }`}
+                >
+                  {adjustMode === 'collateral' && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-lg shadow-lg"
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-lg">◎</span>
+                    Collateral
+                  </span>
+                </motion.button>
+                <motion.button
+                  onClick={() => setAdjustMode('debt')}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative flex-1 py-3 px-4 rounded-lg text-sm font-bold transition-all ${
+                    adjustMode === 'debt'
+                      ? 'text-white shadow-xl'
+                      : 'text-text-tertiary hover:text-text-primary hover:bg-surface/50'
+                  }`}
+                >
+                  {adjustMode === 'debt' && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-lg shadow-lg"
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-lg">💵</span>
+                    Debt
+                  </span>
+                </motion.button>
               </div>
 
-              <div>
-                <label className="text-sm font-semibold text-text-primary mb-2 block">
-                  Debt Change (vUSD)
-                </label>
-                <input
-                  type="number"
-                  value={debtChange}
-                  onChange={e => setDebtChange(e.target.value)}
-                  placeholder="0.00 (positive to borrow, negative to repay)"
-                  className="w-full px-4 py-3 bg-base border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
-                  step="0.01"
-                />
-                <p className="text-xs text-text-tertiary mt-1">
-                  Current: {formatNumber(debtVusd, 2)} vUSD
-                </p>
-              </div>
+              {/* Current Position Stats with Enhanced Styling */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
+                <Card className="p-5 bg-gradient-to-br from-surface/60 via-surface/40 to-base/60 border-border/30 backdrop-blur-sm shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-success/20 flex items-center justify-center">
+                      <Info className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="text-xs font-bold text-text-primary uppercase tracking-wide">
+                      Current Position
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-3 rounded-lg bg-base/40 border border-border/20">
+                      <div className="text-xs text-text-tertiary mb-1.5 uppercase tracking-wider font-semibold">Collateral</div>
+                      <div className="text-xl font-bold text-text-primary mb-1">
+                        {formatNumber(collateralSol, 4)} SOL
+                      </div>
+                      <div className="text-xs text-text-tertiary">{formatUSD(totalCollateral)}</div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-base/40 border border-border/20">
+                      <div className="text-xs text-text-tertiary mb-1.5 uppercase tracking-wider font-semibold">Debt</div>
+                      <div className="text-xl font-bold text-text-primary mb-1">
+                        {formatNumber(debtVusd, 2)} vUSD
+                      </div>
+                      <div className="text-xs text-text-tertiary">{formatUSD(debtVusd)}</div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gradient-to-br from-success/10 to-primary/10 border border-success/20">
+                      <div className="text-xs text-text-tertiary mb-1.5 uppercase tracking-wider font-semibold">Health Factor</div>
+                      <div className={`text-xl font-bold mb-1 ${(health?.collateralRatio || 0) >= 150 ? 'text-success' : (health?.collateralRatio || 0) >= 110 ? 'text-warning' : 'text-error'}`}>
+                        {avgHealthFactor.toFixed(0)}%
+                      </div>
+                      <div className="text-xs font-semibold text-success">{health?.status}</div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
 
-              <div className="flex gap-2 pt-4">
+              {/* Adjustment Input */}
+              {adjustMode === 'collateral' ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                      Collateral Amount
+                    </span>
+                    <span className="text-xs text-text-tertiary">
+                      Available: <span className="font-semibold text-text-secondary">0.00 SOL</span>
+                    </span>
+                  </div>
+
+                  <AmountInput
+                    value={collateralChange}
+                    onChange={setCollateralChange}
+                    placeholder="0.00"
+                    leftElement={
+                      <div className="flex items-center gap-2 px-3 py-2">
+                        <span className="text-xl">◎</span>
+                        <span className="font-semibold text-text-primary">SOL</span>
+                      </div>
+                    }
+                  />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCollateralChange((collateralSol * 0.5).toFixed(4))}
+                      className="gap-2"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add 50%
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setCollateralChange((-collateralSol * 0.5).toFixed(4))}
+                      className="gap-2"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                      Remove 50%
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                      Debt Amount
+                    </span>
+                    <span className="text-xs text-text-tertiary">
+                      Max Borrow: <span className="font-semibold text-text-secondary">{formatUSD(availableToBorrow)}</span>
+                    </span>
+                  </div>
+
+                  <AmountInput
+                    value={debtChange}
+                    onChange={setDebtChange}
+                    placeholder="0.00"
+                    leftElement={
+                      <div className="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-border">
+                        <span className="text-lg">💵</span>
+                        <span className="font-semibold text-text-primary">vUSD</span>
+                      </div>
+                    }
+                  />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDebtChange(availableToBorrow.toFixed(2))}
+                      className="gap-2"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Borrow Max
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setDebtChange((-debtVusd).toFixed(2))}
+                      className="gap-2"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                      Repay All
+                    </Button>
+                  </div>
+
+                  {parseFloat(debtChange || '0') > 0 && (
+                    <div className="p-3 bg-success/10 rounded-xl border border-success/30">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Zap className="w-3.5 h-3.5 text-success" />
+                        <span className="text-xs font-bold text-text-primary">0% Interest</span>
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        Borrowing fee: <span className="font-bold text-primary">{formatUSD((parseFloat(debtChange) * 0.005))}</span> (0.5% one-time)
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Projected Position */}
+              {(collateralChange || debtChange) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center gap-2">
+                    <ArrowDown className="w-4 h-4 text-text-tertiary" />
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                      New Position Preview
+                    </span>
+                  </div>
+
+                  <Card className={`p-4 border-2 ${
+                    projectedPosition.isValid
+                      ? projectedPosition.collateralRatio >= 150
+                        ? 'bg-success/5 border-success/30'
+                        : 'bg-warning/5 border-warning/30'
+                      : 'bg-error/5 border-error/30'
+                  }`}>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <div className="text-xs text-text-tertiary mb-1">New Collateral</div>
+                        <div className="text-lg font-bold text-text-primary">
+                          {formatNumber(projectedPosition.collateralSol, 4)} SOL
+                        </div>
+                        <div className="text-xs text-text-tertiary">
+                          {formatUSD(projectedPosition.collateralValue)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-text-tertiary mb-1">New Debt</div>
+                        <div className="text-lg font-bold text-text-primary">
+                          {formatNumber(projectedPosition.debt, 2)} vUSD
+                        </div>
+                        <div className="text-xs text-text-tertiary">{formatUSD(projectedPosition.debt)}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-text-tertiary mb-1">New Health</div>
+                        <div className={`text-lg font-bold ${projectedPosition.risk.color}`}>
+                          {projectedPosition.collateralRatio.toFixed(0)}%
+                        </div>
+                        <div className={`text-xs font-semibold ${projectedPosition.risk.color}`}>
+                          {projectedPosition.risk.label}
+                        </div>
+                      </div>
+                    </div>
+
+                    {!projectedPosition.isValid && (
+                      <div className="flex items-center gap-2 p-2 bg-error/10 rounded-lg border border-error/30">
+                        <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+                        <span className="text-xs text-error font-semibold">
+                          Invalid adjustment: Health factor must be ≥ 110%
+                        </span>
+                      </div>
+                    )}
+
+                    {projectedPosition.isValid && projectedPosition.collateralRatio < 150 && (
+                      <div className="flex items-center gap-2 p-2 bg-warning/10 rounded-lg border border-warning/30">
+                        <Info className="w-4 h-4 text-warning shrink-0" />
+                        <span className="text-xs text-warning font-semibold">
+                          Warning: Health factor below recommended 150%
+                        </span>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => setShowAdjustModal(false)}
+                  onClick={() => {
+                    setShowAdjustModal(false);
+                    setCollateralChange('');
+                    setDebtChange('');
+                  }}
                   disabled={isAdjusting}
                 >
                   Cancel
@@ -388,20 +750,22 @@ export default function PositionsPage() {
                 <Button
                   fullWidth
                   onClick={handleAdjustPosition}
-                  disabled={isAdjusting || (!collateralChange && !debtChange)}
+                  disabled={isAdjusting || (!collateralChange && !debtChange) || !projectedPosition.isValid}
+                  className="shadow-lg shadow-primary/20"
                 >
                   {isAdjusting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       Adjusting...
-                    </>
+                    </span>
                   ) : (
-                    'Adjust Position'
+                    'Confirm Adjustment'
                   )}
                 </Button>
               </div>
-            </div>
+            </motion.div>
           </DialogContent>
+          </DialogPortal>
         </Dialog>
       </div>
     </AppLayout>

@@ -161,49 +161,130 @@ export class V1TAClient {
 
   // Adjust Position
   async adjustPosition(collateralChangeSol: number, debtChangeVusd: number) {
+    console.log('=== adjustPosition Debug ===');
+    console.log('Wallet publicKey:', this.provider.wallet.publicKey.toBase58());
+
     const collateralChange = new BN(collateralChangeSol * LAMPORTS_PER_SOL);
     const debtChange = new BN(debtChangeVusd * 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS);
+
+    console.log('Collateral change:', collateralChange.toString(), 'lamports');
+    console.log('Debt change:', debtChange.toString(), 'VUSD (6 decimals)');
 
     const userVusdAccount = await getAssociatedTokenAddress(
       this.pdas.vusdMint,
       this.provider.wallet.publicKey
     );
 
-    return await this.program.methods
-      .adjustPosition(collateralChange, debtChange)
-      .accounts({
-        user: this.provider.wallet.publicKey,
-        globalState: this.pdas.globalState,
-        position: this.pdas.position,
-        vusdMint: this.pdas.vusdMint,
-        userVusdAccount,
-        protocolSolVault: this.pdas.protocolVault,
-        priceUpdate: PYTH_SOL_USD_FEED,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    console.log('PDAs:');
+    console.log('- globalState:', this.pdas.globalState.toBase58());
+    console.log('- position:', this.pdas.position.toBase58());
+    console.log('- vusdMint:', this.pdas.vusdMint.toBase58());
+    console.log('- protocolSolVault:', this.pdas.protocolVault.toBase58());
+    console.log('- userVusdAccount:', userVusdAccount.toBase58());
+
+    console.log('Sending adjust position transaction...');
+
+    try {
+      const signature = await this.program.methods
+        .adjustPosition(collateralChange, debtChange)
+        .accounts({
+          user: this.provider.wallet.publicKey,
+          globalState: this.pdas.globalState,
+          position: this.pdas.position,
+          vusdMint: this.pdas.vusdMint,
+          userVusdAccount,
+          protocolSolVault: this.pdas.protocolVault,
+          priceUpdate: PYTH_SOL_USD_FEED,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      console.log('✅ Position adjusted successfully!');
+      console.log('Signature:', signature);
+      console.log(
+        `View on Solana Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`
+      );
+
+      return signature;
+    } catch (error) {
+      console.error('=== Adjust Position Failed ===');
+      console.error('Error type:', error?.constructor?.name);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      console.error('Full error:', error);
+
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.logs) {
+          console.error('Program logs:', err.logs);
+        }
+        if (err.error) {
+          console.error('Anchor error:', err.error);
+        }
+      }
+
+      throw error;
+    }
   }
 
   // Close Position
   async closePosition() {
+    console.log('=== closePosition Debug ===');
+    console.log('Wallet publicKey:', this.provider.wallet.publicKey.toBase58());
+
     const userVusdAccount = await getAssociatedTokenAddress(
       this.pdas.vusdMint,
       this.provider.wallet.publicKey
     );
 
-    return await this.program.methods
-      .closePosition()
-      .accounts({
-        user: this.provider.wallet.publicKey,
-        globalState: this.pdas.globalState,
-        position: this.pdas.position,
-        vusdMint: this.pdas.vusdMint,
-        userVusdAccount,
-        protocolSolVault: this.pdas.protocolVault,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    console.log('PDAs:');
+    console.log('- globalState:', this.pdas.globalState.toBase58());
+    console.log('- position:', this.pdas.position.toBase58());
+    console.log('- vusdMint:', this.pdas.vusdMint.toBase58());
+    console.log('- protocolSolVault:', this.pdas.protocolVault.toBase58());
+    console.log('- userVusdAccount:', userVusdAccount.toBase58());
+
+    console.log('Sending close position transaction...');
+
+    try {
+      const signature = await this.program.methods
+        .closePosition()
+        .accounts({
+          user: this.provider.wallet.publicKey,
+          globalState: this.pdas.globalState,
+          position: this.pdas.position,
+          vusdMint: this.pdas.vusdMint,
+          userVusdAccount,
+          protocolSolVault: this.pdas.protocolVault,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      console.log('✅ Position closed successfully!');
+      console.log('Signature:', signature);
+      console.log(
+        `View on Solana Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`
+      );
+
+      return signature;
+    } catch (error) {
+      console.error('=== Close Position Failed ===');
+      console.error('Error type:', error?.constructor?.name);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      console.error('Full error:', error);
+
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.logs) {
+          console.error('Program logs:', err.logs);
+        }
+        if (err.error) {
+          console.error('Anchor error:', err.error);
+        }
+      }
+
+      throw error;
+    }
   }
 
   // Deposit to Stability Pool
