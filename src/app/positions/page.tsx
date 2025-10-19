@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { AppLayout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,10 +20,12 @@ import {
   DialogOverlay,
 } from '@/components/ui/dialog';
 import { AmountInput } from '@/components/ui/amount-input';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 export default function PositionsPage() {
   const router = useRouter();
-  const { isConnected } = useAppKitAccount();
+  const { isConnected, address } = useAppKitAccount();
   const { price: solPrice } = useSolPrice();
   const { health, collateralSol, debtVusd, hasPosition, isLoading } = usePosition(solPrice);
   const { client: vitaClient } = useVitaClient();
@@ -37,6 +39,44 @@ export default function PositionsPage() {
   const [debtChange, setDebtChange] = useState('');
   const [repayAmount, setRepayAmount] = useState('');
   const [adjustMode, setAdjustMode] = useState<'collateral' | 'debt'>('collateral');
+  const [vusdBalance, setVusdBalance] = useState<number>(0);
+
+  // Fetch vUSD balance
+  const fetchVusdBalance = useCallback(async () => {
+    if (!vitaClient || !address || !isConnected) {
+      setVusdBalance(0);
+      return;
+    }
+
+    try {
+      const connection = vitaClient.provider.connection;
+      const userVusdAccount = await getAssociatedTokenAddress(
+        vitaClient.pdas.vusdMint,
+        new PublicKey(address)
+      );
+
+      const accountInfo = await connection.getAccountInfo(userVusdAccount);
+      if (!accountInfo) {
+        setVusdBalance(0);
+        return;
+      }
+
+      const balance = await connection.getTokenAccountBalance(userVusdAccount);
+      const uiAmount = parseFloat(balance.value.uiAmount?.toString() || '0');
+      setVusdBalance(uiAmount);
+      console.log('vUSD Balance fetched:', uiAmount);
+    } catch (error) {
+      console.error('Failed to fetch vUSD balance:', error);
+      setVusdBalance(0);
+    }
+  }, [vitaClient, address, isConnected]);
+
+  // Fetch balance when modal opens or when dependencies change
+  useEffect(() => {
+    if (showRepayModal) {
+      fetchVusdBalance();
+    }
+  }, [showRepayModal, fetchVusdBalance]);
 
   async function handleAdjustPosition() {
     if (!vitaClient) return;
@@ -92,6 +132,60 @@ export default function PositionsPage() {
       );
     } finally {
       setIsAdjusting(false);
+    }
+  }
+
+  async function handleRepay() {
+    if (!vitaClient || !repayAmount) return;
+
+    const toastId = toast.loading('Preparing repayment...');
+
+    try {
+      setIsRepaying(true);
+
+      toast.loading('Waiting for wallet approval...', { id: toastId });
+
+      // Repay is just adjustPosition with negative debt change
+      const signature = await vitaClient.adjustPosition(0, -parseFloat(repayAmount));
+
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <div>
+            <div className="font-semibold">Debt repaid successfully!</div>
+            <a
+              href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+            >
+              View on Explorer <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
+
+      setShowRepayModal(false);
+      setRepayAmount('');
+
+      // Refresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Repay failed:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(
+        <div>
+          <div className="font-semibold">Repayment failed</div>
+          <div className="text-xs mt-1">{errorMessage}</div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
+    } finally {
+      setIsRepaying(false);
     }
   }
 
@@ -186,6 +280,29 @@ export default function PositionsPage() {
       isValid: newCollateralSol >= 0 && newDebt >= 0 && newCollateralRatio >= 110,
     };
   }, [collateralChange, debtChange, collateralSol, debtVusd, solPrice]);
+
+  // Calculate projected position after repayment
+  const projectedRepay = useMemo(() => {
+    const repayDelta = parseFloat(repayAmount || '0');
+
+    const newDebt = Math.max(0, debtVusd - repayDelta);
+    const newCollateralValue = collateralSol * solPrice;
+    const newCollateralRatio = newDebt > 0 ? (newCollateralValue / newDebt) * 100 : Infinity;
+
+    const getRisk = (cr: number) => {
+      if (cr >= 200 || cr === Infinity) return { level: 'safe', label: 'Very Safe', color: 'text-success' };
+      if (cr >= 150) return { level: 'moderate', label: 'Safe', color: 'text-success' };
+      if (cr >= 110) return { level: 'risky', label: 'At Risk', color: 'text-warning' };
+      return { level: 'danger', label: 'Danger', color: 'text-error' };
+    };
+
+    return {
+      debt: newDebt,
+      collateralRatio: newCollateralRatio === Infinity ? 0 : newCollateralRatio,
+      risk: getRisk(newCollateralRatio),
+      isValid: repayDelta > 0 && repayDelta <= Math.min(debtVusd, vusdBalance),
+    };
+  }, [repayAmount, debtVusd, collateralSol, solPrice, vusdBalance]);
 
   if (!isConnected) {
     return (
@@ -397,7 +514,13 @@ export default function PositionsPage() {
                           <Edit className="w-3.5 h-3.5" />
                           Adjust
                         </Button>
-                        <Button size="sm" variant="outline" className="gap-2" disabled>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={() => setShowRepayModal(true)}
+                          disabled={isRepaying || isAdjusting || isClosing}
+                        >
                           <ArrowUpRight className="w-3.5 h-3.5" />
                           Repay
                         </Button>
@@ -765,6 +888,209 @@ export default function PositionsPage() {
               </div>
             </motion.div>
           </DialogContent>
+          </DialogPortal>
+        </Dialog>
+
+        {/* Repay Modal */}
+        <Dialog open={showRepayModal} onOpenChange={setShowRepayModal}>
+          <DialogPortal>
+            <DialogOverlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
+            <DialogContent className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] sm:max-w-[600px] w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto p-0 rounded-2xl backdrop-blur-2xl bg-gradient-to-br from-surface/95 via-surface/90 to-base/95 border-2 border-success/20 shadow-2xl shadow-success/10 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
+              {/* Header */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="p-6 border-b border-border/50 bg-gradient-to-r from-success/5 via-transparent to-primary/5"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-success/20 to-primary/20 flex items-center justify-center">
+                    <ArrowUpRight className="w-5 h-5 text-success" />
+                  </div>
+                  <DialogTitle className="text-2xl font-bold text-text-primary">
+                    Repay Debt
+                  </DialogTitle>
+                </div>
+                <DialogDescription className="text-sm text-text-tertiary ml-13">
+                  Repay your vUSD debt to improve your position health
+                </DialogDescription>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="p-6 space-y-6"
+              >
+                {/* Current Debt Display */}
+                <Card className="p-5 bg-gradient-to-br from-surface/60 via-surface/40 to-base/60 border-border/30 backdrop-blur-sm shadow-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-warning/20 to-error/20 flex items-center justify-center">
+                      <Info className="w-4 h-4 text-warning" />
+                    </div>
+                    <div className="text-xs font-bold text-text-primary uppercase tracking-wide">
+                      Current Debt
+                    </div>
+                  </div>
+                  <div className="text-center py-4">
+                    <div className="text-4xl font-bold text-text-primary mb-2">
+                      {formatNumber(debtVusd, 2)} vUSD
+                    </div>
+                    <div className="text-sm text-text-tertiary">{formatUSD(debtVusd)}</div>
+                  </div>
+                </Card>
+
+                {/* Repay Amount Input */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                      Repay Amount
+                    </span>
+                    <span className="text-xs text-text-tertiary">
+                      Available: <span className="font-semibold text-text-secondary">{formatNumber(vusdBalance, 2)} vUSD</span>
+                    </span>
+                  </div>
+
+                  <AmountInput
+                    value={repayAmount}
+                    onChange={setRepayAmount}
+                    placeholder="0.00"
+                    leftElement={
+                      <div className="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-border">
+                        <span className="text-lg">💵</span>
+                        <span className="font-semibold text-text-primary">vUSD</span>
+                      </div>
+                    }
+                  />
+
+                  <div className="grid grid-cols-4 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setRepayAmount((debtVusd * 0.25).toFixed(2))}
+                      className="text-xs"
+                    >
+                      25%
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setRepayAmount((debtVusd * 0.5).toFixed(2))}
+                      className="text-xs"
+                    >
+                      50%
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setRepayAmount((debtVusd * 0.75).toFixed(2))}
+                      className="text-xs"
+                    >
+                      75%
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setRepayAmount(debtVusd.toFixed(2))}
+                      className="text-xs font-bold"
+                    >
+                      MAX
+                    </Button>
+                  </div>
+
+                  {/* Insufficient Balance Warning */}
+                  {repayAmount && parseFloat(repayAmount) > vusdBalance && (
+                    <div className="p-3 bg-error/10 rounded-xl border border-error/30">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="w-3.5 h-3.5 text-error" />
+                        <span className="text-xs font-bold text-error">Insufficient vUSD Balance</span>
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        You're trying to repay {formatNumber(parseFloat(repayAmount), 2)} vUSD but only have {formatNumber(vusdBalance, 2)} vUSD available.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Projected Health After Repayment */}
+                {repayAmount && projectedRepay.isValid && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ArrowDown className="w-4 h-4 text-text-tertiary" />
+                      <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
+                        After Repayment
+                      </span>
+                    </div>
+
+                    <Card className="p-4 border-2 bg-success/5 border-success/30">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <div className="text-xs text-text-tertiary mb-1">Remaining Debt</div>
+                          <div className="text-2xl font-bold text-text-primary">
+                            {formatNumber(projectedRepay.debt, 2)} vUSD
+                          </div>
+                          <div className="text-xs text-text-tertiary">{formatUSD(projectedRepay.debt)}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-text-tertiary mb-1">New Health</div>
+                          <div className={`text-2xl font-bold ${projectedRepay.risk.color}`}>
+                            {projectedRepay.debt > 0 ? `${projectedRepay.collateralRatio.toFixed(0)}%` : 'Debt Free'}
+                          </div>
+                          <div className={`text-xs font-semibold ${projectedRepay.risk.color}`}>
+                            {projectedRepay.risk.label}
+                          </div>
+                        </div>
+                      </div>
+
+                      {projectedRepay.debt === 0 && (
+                        <div className="mt-4 p-3 bg-success/10 rounded-lg border border-success/30">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success" />
+                            <span className="text-xs text-success font-semibold">
+                              All debt repaid! You can withdraw your collateral.
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    fullWidth
+                    onClick={() => {
+                      setShowRepayModal(false);
+                      setRepayAmount('');
+                    }}
+                    disabled={isRepaying}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    fullWidth
+                    onClick={handleRepay}
+                    disabled={isRepaying || !repayAmount || !projectedRepay.isValid}
+                    className="shadow-lg shadow-success/20 bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70"
+                  >
+                    {isRepaying ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Repaying...
+                      </span>
+                    ) : (
+                      'Confirm Repayment'
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            </DialogContent>
           </DialogPortal>
         </Dialog>
       </div>
