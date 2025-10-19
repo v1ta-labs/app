@@ -13,6 +13,7 @@ import { Menu, X } from 'lucide-react';
 const NAV_ITEMS = [
   { label: 'Borrow', href: '/', scrollTo: 'borrow-section' },
   { label: 'Positions', href: '/positions' },
+  { label: 'Stability Pool', href: '/stability' },
   { label: 'Redeem', href: '/redeem' },
   { label: 'Liquidations', href: '/liquidations' },
 ];

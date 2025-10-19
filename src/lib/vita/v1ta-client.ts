@@ -23,7 +23,7 @@ import {
   getStabilityDepositPda,
   calculateCollateralRatio,
 } from './constants';
-import type { GlobalState, Position, PositionHealth, StabilityPool } from './types';
+import type { GlobalState, Position, PositionHealth, StabilityPool, StabilityDeposit } from './types';
 import IDL from './idl/v1ta_devnet.json';
 import { ReownWalletAdapter } from './reown-wallet-adapter';
 
@@ -256,6 +256,7 @@ export class V1TAClient {
           vusdMint: this.pdas.vusdMint,
           userVusdAccount,
           protocolSolVault: this.pdas.protocolVault,
+          systemProgram: SystemProgram.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
@@ -296,6 +297,12 @@ export class V1TAClient {
       this.provider.wallet.publicKey
     );
 
+    const stabilityPoolVusdAccount = await getAssociatedTokenAddress(
+      this.pdas.vusdMint,
+      this.pdas.stabilityPool,
+      true // allowOwnerOffCurve - stability pool is a PDA
+    );
+
     return await this.program.methods
       .depositStability(amount)
       .accounts({
@@ -304,9 +311,11 @@ export class V1TAClient {
         stabilityPool: this.pdas.stabilityPool,
         vusdMint: this.pdas.vusdMint,
         depositorVusdAccount,
+        stabilityPoolVusdAccount,
         stabilityDeposit: this.pdas.stabilityDeposit,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       })
       .rpc();
   }
@@ -320,6 +329,12 @@ export class V1TAClient {
       this.provider.wallet.publicKey
     );
 
+    const stabilityPoolVusdAccount = await getAssociatedTokenAddress(
+      this.pdas.vusdMint,
+      this.pdas.stabilityPool,
+      true // allowOwnerOffCurve - stability pool is a PDA
+    );
+
     return await this.program.methods
       .withdrawStability(amount)
       .accounts({
@@ -327,6 +342,7 @@ export class V1TAClient {
         stabilityPool: this.pdas.stabilityPool,
         stabilityDeposit: this.pdas.stabilityDeposit,
         vusdMint: this.pdas.vusdMint,
+        stabilityPoolVusdAccount,
         depositorVusdAccount,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
@@ -351,6 +367,7 @@ export class V1TAClient {
         redeemerVusdAccount,
         protocolSolVault: this.pdas.protocolVault,
         priceUpdate: PYTH_SOL_USD_FEED,
+        systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
@@ -365,7 +382,8 @@ export class V1TAClient {
     );
     const stabilityPoolVusdAccount = await getAssociatedTokenAddress(
       this.pdas.vusdMint,
-      this.pdas.stabilityPool
+      this.pdas.stabilityPool,
+      true // allowOwnerOffCurve - stability pool is a PDA
     );
 
     return await this.program.methods
@@ -409,6 +427,16 @@ export class V1TAClient {
   async getStabilityPool(): Promise<StabilityPool | null> {
     try {
       return await (this.program.account as any).stabilityPool.fetch(this.pdas.stabilityPool);
+    } catch {
+      return null;
+    }
+  }
+
+  // Fetch User's Stability Deposit
+  async getStabilityDeposit(user?: PublicKey): Promise<StabilityDeposit | null> {
+    try {
+      const [depositPDA] = getStabilityDepositPda(user || this.provider.wallet.publicKey);
+      return await (this.program.account as any).stabilityDeposit.fetch(depositPDA);
     } catch {
       return null;
     }

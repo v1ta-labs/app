@@ -39,6 +39,8 @@ export default function PositionsPage() {
   const [debtChange, setDebtChange] = useState('');
   const [repayAmount, setRepayAmount] = useState('');
   const [adjustMode, setAdjustMode] = useState<'collateral' | 'debt'>('collateral');
+  const [collateralAction, setCollateralAction] = useState<'add' | 'remove'>('add');
+  const [debtAction, setDebtAction] = useState<'borrow' | 'repay'>('borrow');
   const [vusdBalance, setVusdBalance] = useState<number>(0);
 
   // Fetch vUSD balance
@@ -73,10 +75,10 @@ export default function PositionsPage() {
 
   // Fetch balance when modal opens or when dependencies change
   useEffect(() => {
-    if (showRepayModal) {
+    if (showRepayModal || showAdjustModal) {
       fetchVusdBalance();
     }
-  }, [showRepayModal, fetchVusdBalance]);
+  }, [showRepayModal, showAdjustModal, fetchVusdBalance]);
 
   async function handleAdjustPosition() {
     if (!vitaClient) return;
@@ -88,10 +90,16 @@ export default function PositionsPage() {
 
       toast.loading('Waiting for wallet approval...', { id: toastId });
 
-      const signature = await vitaClient.adjustPosition(
-        parseFloat(collateralChange || '0'),
-        parseFloat(debtChange || '0')
-      );
+      // Convert action modes to signed values
+      const collateralDelta = collateralAction === 'add'
+        ? parseFloat(collateralChange || '0')
+        : -parseFloat(collateralChange || '0');
+
+      const debtDelta = debtAction === 'borrow'
+        ? parseFloat(debtChange || '0')
+        : -parseFloat(debtChange || '0');
+
+      const signature = await vitaClient.adjustPosition(collateralDelta, debtDelta);
 
       toast.success(
         <div className="flex items-center gap-2">
@@ -114,6 +122,8 @@ export default function PositionsPage() {
       setShowAdjustModal(false);
       setCollateralChange('');
       setDebtChange('');
+      setCollateralAction('add');
+      setDebtAction('borrow');
 
       // Refresh data
       setTimeout(() => {
@@ -253,8 +263,14 @@ export default function PositionsPage() {
 
   // Calculate projected position after adjustment
   const projectedPosition = useMemo(() => {
-    const collateralDelta = parseFloat(collateralChange || '0');
-    const debtDelta = parseFloat(debtChange || '0');
+    // Convert action modes to signed values
+    const collateralDelta = collateralAction === 'add'
+      ? parseFloat(collateralChange || '0')
+      : -parseFloat(collateralChange || '0');
+
+    const debtDelta = debtAction === 'borrow'
+      ? parseFloat(debtChange || '0')
+      : -parseFloat(debtChange || '0');
 
     const newCollateralSol = collateralSol + collateralDelta;
     const newCollateralValue = newCollateralSol * solPrice;
@@ -270,6 +286,11 @@ export default function PositionsPage() {
       return { level: 'danger', label: 'Danger', color: 'text-error' };
     };
 
+    // Check if user has enough vUSD when repaying
+    const hasEnoughVusd = debtAction === 'repay'
+      ? parseFloat(debtChange || '0') <= vusdBalance
+      : true;
+
     return {
       collateralSol: newCollateralSol,
       collateralValue: newCollateralValue,
@@ -277,9 +298,10 @@ export default function PositionsPage() {
       collateralRatio: newCollateralRatio,
       ltv: newLtv,
       risk: getRisk(newCollateralRatio),
-      isValid: newCollateralSol >= 0 && newDebt >= 0 && newCollateralRatio >= 110,
+      isValid: newCollateralSol >= 0 && newDebt >= 0 && newCollateralRatio >= 110 && hasEnoughVusd,
+      hasEnoughVusd,
     };
-  }, [collateralChange, debtChange, collateralSol, debtVusd, solPrice]);
+  }, [collateralChange, debtChange, collateralSol, debtVusd, solPrice, collateralAction, debtAction, vusdBalance]);
 
   // Calculate projected position after repayment
   const projectedRepay = useMemo(() => {
@@ -686,12 +708,41 @@ export default function PositionsPage() {
               {/* Adjustment Input */}
               {adjustMode === 'collateral' ? (
                 <div className="space-y-3">
+                  {/* Action Mode Toggle */}
+                  <div className="flex gap-2 p-1 bg-base/60 rounded-lg border border-border/30">
+                    <button
+                      onClick={() => setCollateralAction('add')}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${
+                        collateralAction === 'add'
+                          ? 'bg-success text-white shadow-md'
+                          : 'text-text-tertiary hover:text-text-primary'
+                      }`}
+                    >
+                      <Plus className="w-3.5 h-3.5 inline mr-1" />
+                      Add Collateral
+                    </button>
+                    <button
+                      onClick={() => setCollateralAction('remove')}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${
+                        collateralAction === 'remove'
+                          ? 'bg-warning text-white shadow-md'
+                          : 'text-text-tertiary hover:text-text-primary'
+                      }`}
+                    >
+                      <Minus className="w-3.5 h-3.5 inline mr-1" />
+                      Remove Collateral
+                    </button>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
-                      Collateral Amount
+                      {collateralAction === 'add' ? 'Add' : 'Remove'} Amount
                     </span>
                     <span className="text-xs text-text-tertiary">
-                      Available: <span className="font-semibold text-text-secondary">0.00 SOL</span>
+                      {collateralAction === 'add' ? 'Available in wallet: ' : 'Current collateral: '}
+                      <span className="font-semibold text-text-secondary">
+                        {collateralAction === 'add' ? '0.00' : formatNumber(collateralSol, 4)} SOL
+                      </span>
                     </span>
                   </div>
 
@@ -712,30 +763,57 @@ export default function PositionsPage() {
                       size="sm"
                       variant="outline"
                       onClick={() => setCollateralChange((collateralSol * 0.5).toFixed(4))}
-                      className="gap-2"
+                      className="text-xs"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add 50%
+                      50% {collateralAction === 'add' ? 'Wallet' : 'Current'}
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setCollateralChange((-collateralSol * 0.5).toFixed(4))}
-                      className="gap-2"
+                      onClick={() => setCollateralChange(collateralSol.toFixed(4))}
+                      className="text-xs font-bold"
                     >
-                      <Minus className="w-3.5 h-3.5" />
-                      Remove 50%
+                      {collateralAction === 'add' ? 'ALL Wallet' : 'ALL Current'}
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {/* Action Mode Toggle */}
+                  <div className="flex gap-2 p-1 bg-base/60 rounded-lg border border-border/30">
+                    <button
+                      onClick={() => setDebtAction('borrow')}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${
+                        debtAction === 'borrow'
+                          ? 'bg-primary text-white shadow-md'
+                          : 'text-text-tertiary hover:text-text-primary'
+                      }`}
+                    >
+                      <Plus className="w-3.5 h-3.5 inline mr-1" />
+                      Borrow More
+                    </button>
+                    <button
+                      onClick={() => setDebtAction('repay')}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-bold transition-all ${
+                        debtAction === 'repay'
+                          ? 'bg-success text-white shadow-md'
+                          : 'text-text-tertiary hover:text-text-primary'
+                      }`}
+                    >
+                      <Minus className="w-3.5 h-3.5 inline mr-1" />
+                      Repay Debt
+                    </button>
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
-                      Debt Amount
+                      {debtAction === 'borrow' ? 'Borrow' : 'Repay'} Amount
                     </span>
                     <span className="text-xs text-text-tertiary">
-                      Max Borrow: <span className="font-semibold text-text-secondary">{formatUSD(availableToBorrow)}</span>
+                      {debtAction === 'borrow' ? 'Max available: ' : 'vUSD Balance: '}
+                      <span className="font-semibold text-text-secondary">
+                        {debtAction === 'borrow' ? formatNumber(availableToBorrow, 2) : formatNumber(vusdBalance, 2)} vUSD
+                      </span>
                     </span>
                   </div>
 
@@ -755,24 +833,23 @@ export default function PositionsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setDebtChange(availableToBorrow.toFixed(2))}
-                      className="gap-2"
+                      onClick={() => setDebtChange(debtAction === 'borrow' ? (availableToBorrow * 0.5).toFixed(2) : (Math.min(debtVusd, vusdBalance) * 0.5).toFixed(2))}
+                      className="text-xs"
                     >
-                      <Plus className="w-3.5 h-3.5" />
-                      Borrow Max
+                      50%
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setDebtChange((-debtVusd).toFixed(2))}
-                      className="gap-2"
+                      onClick={() => setDebtChange(debtAction === 'borrow' ? availableToBorrow.toFixed(2) : Math.min(debtVusd, vusdBalance).toFixed(2))}
+                      className="text-xs font-bold"
                     >
-                      <Minus className="w-3.5 h-3.5" />
-                      Repay All
+                      MAX
                     </Button>
                   </div>
 
-                  {parseFloat(debtChange || '0') > 0 && (
+                  {/* Warnings and Info */}
+                  {debtAction === 'borrow' && parseFloat(debtChange || '0') > 0 && (
                     <div className="p-3 bg-success/10 rounded-xl border border-success/30">
                       <div className="flex items-center gap-2 mb-1">
                         <Zap className="w-3.5 h-3.5 text-success" />
@@ -780,6 +857,18 @@ export default function PositionsPage() {
                       </div>
                       <div className="text-xs text-text-secondary">
                         Borrowing fee: <span className="font-bold text-primary">{formatUSD((parseFloat(debtChange) * 0.005))}</span> (0.5% one-time)
+                      </div>
+                    </div>
+                  )}
+
+                  {debtAction === 'repay' && !projectedPosition.hasEnoughVusd && parseFloat(debtChange || '0') > 0 && (
+                    <div className="p-3 bg-error/10 rounded-xl border border-error/30">
+                      <div className="flex items-center gap-2 mb-1">
+                        <AlertTriangle className="w-3.5 h-3.5 text-error" />
+                        <span className="text-xs font-bold text-error">Insufficient vUSD Balance</span>
+                      </div>
+                      <div className="text-xs text-text-secondary">
+                        You're trying to repay {formatNumber(parseFloat(debtChange), 2)} vUSD but only have {formatNumber(vusdBalance, 2)} vUSD available.
                       </div>
                     </div>
                   )}
@@ -865,6 +954,8 @@ export default function PositionsPage() {
                     setShowAdjustModal(false);
                     setCollateralChange('');
                     setDebtChange('');
+                    setCollateralAction('add');
+                    setDebtAction('borrow');
                   }}
                   disabled={isAdjusting}
                 >
