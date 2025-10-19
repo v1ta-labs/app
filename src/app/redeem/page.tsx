@@ -21,23 +21,46 @@ export default function RedeemPage() {
   const [vusdBalance, setVusdBalance] = useState(0);
 
   const { isConnected, address } = useAppKitAccount();
-  const vitaClient = useVitaClient();
+  const { client: vitaClient } = useVitaClient();
   const { price: solPrice } = useSolPrice();
   const { connection } = useConnection();
 
   // Fetch vUSD balance
   useEffect(() => {
     async function fetchBalance() {
-      if (!vitaClient || !address || !isConnected) return;
+      if (!vitaClient || !address || !isConnected) {
+        console.log('Cannot fetch balance - missing:', {
+          vitaClient: !!vitaClient,
+          address: !!address,
+          isConnected,
+        });
+        return;
+      }
 
       try {
+        console.log('=== Fetching vUSD Balance ===');
+        console.log('User address:', address);
+        console.log('vUSD Mint:', vitaClient.pdas.vusdMint.toBase58());
+
         const userVusdAccount = await getAssociatedTokenAddress(
           vitaClient.pdas.vusdMint,
           new PublicKey(address)
         );
 
+        console.log('User vUSD ATA:', userVusdAccount.toBase58());
+
+        // Check if account exists
+        const accountInfo = await connection.getAccountInfo(userVusdAccount);
+
+        if (!accountInfo) {
+          console.log('vUSD token account does not exist yet - balance is 0');
+          setVusdBalance(0);
+          return;
+        }
+
         const balance = await connection.getTokenAccountBalance(userVusdAccount);
-        setVusdBalance(parseFloat(balance.value.uiAmount || '0'));
+        console.log('vUSD balance:', balance.value.uiAmount);
+        setVusdBalance(parseFloat(balance.value.uiAmount?.toString() || '0'));
       } catch (error) {
         console.error('Error fetching vUSD balance:', error);
         setVusdBalance(0);

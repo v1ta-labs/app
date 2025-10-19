@@ -188,6 +188,18 @@ export function BorrowInterface() {
   const handleBorrow = async () => {
     if (!isConnected || !publicKey || !walletProvider) return;
 
+    // Check if user already has a position
+    if (hasPosition) {
+      toast.error(
+        <div>
+          <div className="font-semibold">You already have a position</div>
+          <div className="text-xs mt-1">Please use the Adjust Position feature to modify your existing position.</div>
+        </div>,
+        { duration: 5000 }
+      );
+      return;
+    }
+
     console.log('=== Transaction Debug Info ===');
     console.log('Connected:', isConnected);
     console.log('Public Key:', publicKey.toBase58());
@@ -467,36 +479,62 @@ export function BorrowInterface() {
         </div>
       )}
 
-      <Button
-        fullWidth
-        size="lg"
-        disabled={!isValidTransaction}
-        onClick={handleBorrow}
-        className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
-      >
-        {isTransacting ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Opening Position...
-          </span>
-        ) : !isConnected ? (
-          'Connect Wallet to Continue'
-        ) : isPriceLoading ? (
-          'Loading Price...'
-        ) : !collateralAmount ? (
-          'Enter Collateral Amount'
-        ) : isBelowMinimum ? (
-          'Minimum 0.01 SOL Required'
-        ) : hasInsufficientBalance ? (
-          'Insufficient SOL Balance'
-        ) : !borrowAmount ? (
-          'Enter Borrow Amount'
-        ) : healthFactor < 110 ? (
-          'Collateral Ratio Too Low (Min 110%)'
-        ) : (
-          'Open Position & Mint VUSD'
-        )}
-      </Button>
+      {hasPosition ? (
+        <div className="space-y-3">
+          <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl flex items-start gap-3">
+            <Info className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <div className="text-sm font-semibold text-text-primary mb-1">
+                You already have an active position
+              </div>
+              <div className="text-xs text-text-secondary">
+                You currently have {formatNumber(userCollateral, 2)} SOL as collateral with {formatNumber(userDebt, 2)} VUSD borrowed.
+                To modify your position, use the Adjust Position feature.
+              </div>
+            </div>
+          </div>
+          <Button
+            fullWidth
+            size="lg"
+            variant="outline"
+            onClick={() => window.location.href = '/positions'}
+            className="shadow-lg h-11 text-sm font-bold"
+          >
+            Go to Positions Page
+          </Button>
+        </div>
+      ) : (
+        <Button
+          fullWidth
+          size="lg"
+          disabled={!isValidTransaction}
+          onClick={handleBorrow}
+          className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
+        >
+          {isTransacting ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Opening Position...
+            </span>
+          ) : !isConnected ? (
+            'Connect Wallet to Continue'
+          ) : isPriceLoading ? (
+            'Loading Price...'
+          ) : !collateralAmount ? (
+            'Enter Collateral Amount'
+          ) : isBelowMinimum ? (
+            'Minimum 0.01 SOL Required'
+          ) : hasInsufficientBalance ? (
+            'Insufficient SOL Balance'
+          ) : !borrowAmount ? (
+            'Enter Borrow Amount'
+          ) : healthFactor < 110 ? (
+            'Collateral Ratio Too Low (Min 110%)'
+          ) : (
+            'Open Position & Mint VUSD'
+          )}
+        </Button>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <motion.div

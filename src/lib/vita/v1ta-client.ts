@@ -139,7 +139,22 @@ export class V1TAClient {
 
       return signature;
     } catch (error) {
-      console.error('Transaction failed:', error);
+      console.error('=== Transaction Failed ===');
+      console.error('Error type:', error?.constructor?.name);
+      console.error('Error message:', error instanceof Error ? error.message : String(error));
+      console.error('Full error:', error);
+
+      // Try to extract more details from Anchor errors
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        if (err.logs) {
+          console.error('Program logs:', err.logs);
+        }
+        if (err.error) {
+          console.error('Anchor error:', err.error);
+        }
+      }
+
       throw error;
     }
   }

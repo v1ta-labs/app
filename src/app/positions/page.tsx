@@ -14,7 +14,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 
@@ -23,7 +22,7 @@ export default function PositionsPage() {
   const { isConnected } = useAppKitAccount();
   const { price: solPrice } = useSolPrice();
   const { health, collateralSol, debtVusd, hasPosition, isLoading } = usePosition(solPrice);
-  const vitaClient = useVitaClient();
+  const { client: vitaClient } = useVitaClient();
 
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [isAdjusting, setIsAdjusting] = useState(false);
@@ -282,7 +281,8 @@ export default function PositionsPage() {
                         <Button
                           size="sm"
                           className="gap-2"
-                          onClick={() => router.push('/#borrow-section')}
+                          onClick={() => setShowAdjustModal(true)}
+                          disabled={isAdjusting || isClosing}
                         >
                           <Edit className="w-3.5 h-3.5" />
                           Adjust
@@ -295,10 +295,15 @@ export default function PositionsPage() {
                           size="sm"
                           variant="outline"
                           className="gap-2 text-error border-error/30 hover:bg-error/10"
-                          disabled
+                          onClick={handleClosePosition}
+                          disabled={isClosing || isAdjusting}
                         >
-                          <X className="w-3.5 h-3.5" />
-                          Close
+                          {isClosing ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <X className="w-3.5 h-3.5" />
+                          )}
+                          {isClosing ? 'Closing...' : 'Close'}
                         </Button>
                       </div>
                     </div>
@@ -324,6 +329,80 @@ export default function PositionsPage() {
             </Card>
           )}
         </div>
+
+        {/* Adjust Position Dialog */}
+        <Dialog open={showAdjustModal} onOpenChange={setShowAdjustModal}>
+          <DialogContent className="sm:max-w-[500px] p-6">
+            <div className="space-y-2 mb-4">
+              <DialogTitle className="text-xl font-bold text-text-primary">
+                Adjust Position
+              </DialogTitle>
+              <DialogDescription className="text-sm text-text-tertiary">
+                Modify your collateral or debt. Use negative values to remove collateral or repay debt.
+              </DialogDescription>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-text-primary mb-2 block">
+                  Collateral Change (SOL)
+                </label>
+                <input
+                  type="number"
+                  value={collateralChange}
+                  onChange={e => setCollateralChange(e.target.value)}
+                  placeholder="0.00 (positive to add, negative to remove)"
+                  className="w-full px-4 py-3 bg-base border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
+                  step="0.01"
+                />
+                <p className="text-xs text-text-tertiary mt-1">
+                  Current: {formatNumber(collateralSol, 4)} SOL
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-text-primary mb-2 block">
+                  Debt Change (vUSD)
+                </label>
+                <input
+                  type="number"
+                  value={debtChange}
+                  onChange={e => setDebtChange(e.target.value)}
+                  placeholder="0.00 (positive to borrow, negative to repay)"
+                  className="w-full px-4 py-3 bg-base border border-border rounded-xl text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
+                  step="0.01"
+                />
+                <p className="text-xs text-text-tertiary mt-1">
+                  Current: {formatNumber(debtVusd, 2)} vUSD
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => setShowAdjustModal(false)}
+                  disabled={isAdjusting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  fullWidth
+                  onClick={handleAdjustPosition}
+                  disabled={isAdjusting || (!collateralChange && !debtChange)}
+                >
+                  {isAdjusting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Adjusting...
+                    </>
+                  ) : (
+                    'Adjust Position'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
