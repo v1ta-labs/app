@@ -1,5 +1,12 @@
-import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
-import { Connection, PublicKey, LAMPORTS_PER_SOL, SystemProgram } from '@solana/web3.js';
+import { AnchorProvider, Program, BN, Wallet } from '@coral-xyz/anchor';
+import {
+  Connection,
+  PublicKey,
+  LAMPORTS_PER_SOL,
+  SystemProgram,
+  ComputeBudgetProgram,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
   TOKEN_PROGRAM_ID,
@@ -18,6 +25,7 @@ import {
 } from './constants';
 import type { GlobalState, Position, PositionHealth, StabilityPool } from './types';
 import IDL from './idl/v1ta_devnet.json';
+import { ReownWalletAdapter } from './reown-wallet-adapter';
 
 export class V1TAClient {
   constructor(
@@ -25,11 +33,46 @@ export class V1TAClient {
     public provider: AnchorProvider
   ) {}
 
-  static async create(connection: Connection, wallet: any): Promise<V1TAClient> {
+  static async create(
+    connection: Connection,
+    walletProviderOrAdapter: any,
+    publicKey?: PublicKey
+  ): Promise<V1TAClient> {
+    console.log('V1TAClient.create called');
+    console.log('walletProviderOrAdapter type:', typeof walletProviderOrAdapter);
+    console.log('walletProviderOrAdapter keys:', Object.keys(walletProviderOrAdapter || {}));
+    console.log('publicKey provided:', publicKey?.toBase58());
+
+    let wallet: Wallet;
+
+    // Always use ReownWalletAdapter when publicKey is provided
+    // This ensures we access window.phantom.solana directly
+    if (publicKey) {
+      console.log('Creating ReownWalletAdapter to access Phantom directly');
+      wallet = new ReownWalletAdapter(walletProviderOrAdapter, publicKey) as any;
+      console.log('Adapter created successfully');
+    } else if (
+      walletProviderOrAdapter?.publicKey instanceof PublicKey &&
+      walletProviderOrAdapter?.signTransaction
+    ) {
+      console.log('Using existing wallet adapter (already a proper Wallet)');
+      wallet = walletProviderOrAdapter as Wallet;
+    } else {
+      throw new Error('Invalid wallet provider - must provide publicKey or a proper Wallet adapter');
+    }
+
+    console.log('Creating AnchorProvider with wallet publicKey:', wallet.publicKey.toBase58());
+
     const provider = new AnchorProvider(connection, wallet, {
       commitment: 'confirmed',
+      preflightCommitment: 'confirmed',
     });
+
+    console.log('Provider created, wallet publicKey:', provider.wallet.publicKey.toBase58());
+
     const program = new Program(IDL as any, provider);
+    console.log('Program created');
+
     return new V1TAClient(program, provider);
   }
 
@@ -47,29 +90,58 @@ export class V1TAClient {
 
   // Open Position
   async openPosition(collateralSol: number, borrowVusd: number) {
+    console.log('=== openPosition Debug ===');
+    console.log('Wallet publicKey:', this.provider.wallet.publicKey.toBase58());
+
     const collateral = new BN(collateralSol * LAMPORTS_PER_SOL);
     const borrow = new BN(borrowVusd * 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS);
+
+    console.log('Collateral:', collateral.toString(), 'lamports');
+    console.log('Borrow:', borrow.toString(), 'VUSD (6 decimals)');
 
     const userVusdAccount = await getAssociatedTokenAddress(
       this.pdas.vusdMint,
       this.provider.wallet.publicKey
     );
 
-    return await this.program.methods
-      .openPosition(collateral, borrow)
-      .accounts({
-        user: this.provider.wallet.publicKey,
-        globalState: this.pdas.globalState,
-        position: this.pdas.position,
-        vusdMint: this.pdas.vusdMint,
-        userVusdAccount,
-        protocolSolVault: this.pdas.protocolVault,
-        priceUpdate: PYTH_SOL_USD_FEED,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    console.log('PDAs:');
+    console.log('- globalState:', this.pdas.globalState.toBase58());
+    console.log('- position:', this.pdas.position.toBase58());
+    console.log('- vusdMint:', this.pdas.vusdMint.toBase58());
+    console.log('- protocolSolVault:', this.pdas.protocolVault.toBase58());
+    console.log('- userVusdAccount:', userVusdAccount.toBase58());
+
+    console.log('Sending transaction via Anchor RPC (no compute budget - let Phantom handle it)...');
+
+    try {
+      // Use Anchor's .rpc() - let Phantom add compute budget automatically
+      const signature = await this.program.methods
+        .openPosition(collateral, borrow)
+        .accounts({
+          user: this.provider.wallet.publicKey,
+          globalState: this.pdas.globalState,
+          position: this.pdas.position,
+          vusdMint: this.pdas.vusdMint,
+          userVusdAccount,
+          protocolSolVault: this.pdas.protocolVault,
+          priceUpdate: PYTH_SOL_USD_FEED,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      console.log('✅ Transaction confirmed!');
+      console.log('Signature:', signature);
+      console.log(
+        `View on Solana Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`
+      );
+
+      return signature;
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      throw error;
+    }
   }
 
   // Adjust Position

@@ -5,16 +5,70 @@ import { AppLayout } from '@/components/layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowDown, Info, TrendingUp, AlertCircle, Coins } from 'lucide-react';
+import { ArrowDown, Info, TrendingUp, AlertCircle, Coins, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useVitaClient, useSolPrice } from '@/hooks';
+import { useAppKitAccount } from '@reown/appkit/react';
+import { useConnection } from '@solana/wallet-adapter-react';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { useEffect } from 'react';
+import { PublicKey } from '@solana/web3.js';
 
 export default function RedeemPage() {
   const [vusdAmount, setVusdAmount] = useState('');
   const [selectedCollateral, setSelectedCollateral] = useState('SOL');
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [vusdBalance, setVusdBalance] = useState(0);
 
-  const vusdBalance = 0;
+  const { isConnected, address } = useAppKitAccount();
+  const vitaClient = useVitaClient();
+  const { price: solPrice } = useSolPrice();
+  const { connection } = useConnection();
+
+  // Fetch vUSD balance
+  useEffect(() => {
+    async function fetchBalance() {
+      if (!vitaClient || !address || !isConnected) return;
+
+      try {
+        const userVusdAccount = await getAssociatedTokenAddress(
+          vitaClient.pdas.vusdMint,
+          new PublicKey(address)
+        );
+
+        const balance = await connection.getTokenAccountBalance(userVusdAccount);
+        setVusdBalance(parseFloat(balance.value.uiAmount || '0'));
+      } catch (error) {
+        console.error('Error fetching vUSD balance:', error);
+        setVusdBalance(0);
+      }
+    }
+
+    fetchBalance();
+  }, [vitaClient, address, isConnected, connection]);
+
+  async function handleRedeem() {
+    if (!vitaClient || !vusdAmount) return;
+
+    try {
+      setIsRedeeming(true);
+      const signature = await vitaClient.redeem(parseFloat(vusdAmount));
+      console.log('Redeem successful!', signature);
+      alert(`Successfully redeemed ${vusdAmount} vUSD!`);
+      setVusdAmount('');
+      // Refresh balance
+      window.location.reload();
+    } catch (error) {
+      console.error('Redeem failed:', error);
+      alert(`Redeem failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRedeeming(false);
+    }
+  }
   const redemptionRate = 0.995; // 0.5% redemption fee
-  const estimatedReceive = (parseFloat(vusdAmount || '0') * redemptionRate) / 1; // Price placeholder
+  const estimatedReceive = solPrice > 0
+    ? (parseFloat(vusdAmount || '0') * redemptionRate) / solPrice
+    : 0; // Calculate SOL amount based on price
 
   const collateralOptions = [
     { symbol: 'SOL', price: 0, available: 0, total: 0 },
@@ -206,13 +260,23 @@ export default function RedeemPage() {
                 <Button
                   fullWidth
                   size="lg"
-                  disabled={!vusdAmount || parseFloat(vusdAmount) > vusdBalance}
+                  disabled={!vusdAmount || parseFloat(vusdAmount) > vusdBalance || isRedeeming || !isConnected}
+                  onClick={handleRedeem}
                 >
-                  {!vusdAmount
-                    ? 'Enter Amount to Redeem'
-                    : parseFloat(vusdAmount) > vusdBalance
-                      ? 'Insufficient VUSD Balance'
-                      : 'Redeem VUSD'}
+                  {isRedeeming ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Redeeming...
+                    </>
+                  ) : !isConnected ? (
+                    'Connect Wallet'
+                  ) : !vusdAmount ? (
+                    'Enter Amount to Redeem'
+                  ) : parseFloat(vusdAmount) > vusdBalance ? (
+                    'Insufficient VUSD Balance'
+                  ) : (
+                    'Redeem VUSD'
+                  )}
                 </Button>
               </Card>
             </div>

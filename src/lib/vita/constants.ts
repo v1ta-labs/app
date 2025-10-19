@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 /**
  * V1TA Protocol Constants - Devnet v0.1
  */
-export const VITA_PROGRAM_ID = new PublicKey('D4PzAjCQtGL5n6b79fBJh5Z84GKJk1ruPCYn8914dsST');
+export const VITA_PROGRAM_ID = new PublicKey('6BMtX4X6i7bxr9P7uGfqr2XMG1RUeM5isxVVwtJdJsMR');
 
 /**
  * PDA Seeds (must match Rust program exactly)

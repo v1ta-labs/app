@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
 
 // V1TA Protocol Constants
-export const V1TA_PROGRAM_ID = new PublicKey('D4PzAjCQtGL5n6b79fBJh5Z84GKJk1ruPCYn8914dsST');
+export const V1TA_PROGRAM_ID = new PublicKey('6BMtX4X6i7bxr9P7uGfqr2XMG1RUeM5isxVVwtJdJsMR');
 
 // Pyth Oracle (Devnet)
 export const PYTH_SOL_USD_FEED = new PublicKey('J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix');

@@ -1,18 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAppKitAccount } from '@reown/appkit/react';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import { LAMPORTS_PER_SOL, Connection, PublicKey } from '@solana/web3.js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AmountInput } from '@/components/ui/amount-input';
 import { StatDisplay } from '@/components/ui/stat-display';
 import { HealthGauge } from '@/components/ui/health-gauge';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowDown, Info, AlertTriangle, Zap, Loader2 } from 'lucide-react';
+import { ArrowDown, Info, AlertTriangle, Zap, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { V1TAClient } from '@/lib/vita';
+import { toast } from 'sonner';
 
 interface TokenInfo {
   symbol: string;
@@ -49,9 +49,9 @@ const getLiquidationRisk = (
 };
 
 export function BorrowInterface() {
-  const { isConnected } = useAppKitAccount();
-  const { connection } = useConnection();
-  const wallet = useWallet();
+  const { isConnected, address } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider('solana');
+
   const [selectedToken, setSelectedToken] = useState<TokenInfo>(DEFAULT_TOKEN);
   const [collateralAmount, setCollateralAmount] = useState('');
   const [borrowAmount, setBorrowAmount] = useState('');
@@ -64,52 +64,56 @@ export function BorrowInterface() {
   const [userDebt, setUserDebt] = useState<number>(0);
   const [hasPosition, setHasPosition] = useState(false);
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!wallet.publicKey) return;
+  // Create connection instance for devnet
+  const connection = useMemo(() => new Connection('https://api.devnet.solana.com', 'confirmed'), []);
+  const publicKey = useMemo(() => (address ? new PublicKey(address) : null), [address]);
 
-      try {
-        const balance = await connection.getBalance(wallet.publicKey);
-        const solBal = balance / LAMPORTS_PER_SOL;
-        setSelectedToken(prev => ({ ...prev, balance: solBal }));
-      } catch (error) {
-        console.error('Failed to fetch SOL balance:', error);
+  // Fetch wallet balance
+  const fetchBalance = useCallback(async () => {
+    if (!publicKey) return;
+
+    try {
+      const balance = await connection.getBalance(publicKey);
+      const solBal = balance / LAMPORTS_PER_SOL;
+      setSelectedToken(prev => ({ ...prev, balance: solBal }));
+    } catch (error) {
+      console.error('Failed to fetch SOL balance:', error);
+    }
+  }, [publicKey, connection]);
+
+  // Fetch user position
+  const fetchPosition = useCallback(async () => {
+    if (!publicKey || !walletProvider) return;
+
+    try {
+      const client = await V1TAClient.create(connection, walletProvider, publicKey);
+      const position = await client.getPosition();
+
+      if (position) {
+        setHasPosition(true);
+        setUserCollateral(position.collateral.toNumber() / LAMPORTS_PER_SOL);
+        setUserDebt(position.debt.toNumber() / 1_000_000); // VUSD has 6 decimals
+      } else {
+        setHasPosition(false);
+        setUserCollateral(0);
+        setUserDebt(0);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch position:', error);
+    }
+  }, [publicKey, connection, walletProvider]);
 
+  useEffect(() => {
     fetchBalance();
     const interval = setInterval(fetchBalance, 10000); // Update every 10s
-
     return () => clearInterval(interval);
-  }, [wallet.publicKey, connection]);
+  }, [fetchBalance]);
 
   useEffect(() => {
-    const fetchPosition = async () => {
-      if (!wallet.publicKey) return;
-
-      try {
-        const client = await V1TAClient.create(connection, wallet);
-        const position = await client.getPosition();
-
-        if (position) {
-          setHasPosition(true);
-          setUserCollateral(position.collateral.toNumber() / LAMPORTS_PER_SOL);
-          setUserDebt(position.debt.toNumber() / 1_000_000); // VUSD has 6 decimals
-        } else {
-          setHasPosition(false);
-          setUserCollateral(0);
-          setUserDebt(0);
-        }
-      } catch (error) {
-        console.error('Failed to fetch position:', error);
-      }
-    };
-
     fetchPosition();
     const interval = setInterval(fetchPosition, 10000); // Update every 10s
-
     return () => clearInterval(interval);
-  }, [wallet.publicKey, connection, wallet]);
+  }, [fetchPosition]);
 
   // Fetch SOL price from Pyth Hermes API
   useEffect(() => {
@@ -159,33 +163,96 @@ export function BorrowInterface() {
     totalDebt > 0 ? (totalDebt * 1.1) / parseFloat(collateralAmount || '1') : 0;
 
   const handleMaxCollateral = () => {
-    setCollateralAmount(selectedToken.balance.toString());
+    // Leave a small amount for transaction fees (0.01 SOL)
+    const maxAmount = Math.max(0, selectedToken.balance - 0.01);
+    setCollateralAmount(maxAmount.toFixed(4));
   };
 
   const handleMaxBorrow = () => {
     setBorrowAmount(maxBorrow.toFixed(2));
   };
 
+  // Validation checks
+  const hasInsufficientBalance = parseFloat(collateralAmount || '0') > selectedToken.balance;
+  const isBelowMinimum = parseFloat(collateralAmount || '0') > 0 && parseFloat(collateralAmount) < 0.01;
+  const isValidTransaction =
+    isConnected &&
+    collateralAmount &&
+    borrowAmount &&
+    !hasInsufficientBalance &&
+    !isBelowMinimum &&
+    healthFactor >= 110 &&
+    !isPriceLoading &&
+    !isTransacting;
+
   const handleBorrow = async () => {
-    if (!isConnected || !wallet.publicKey) return;
+    if (!isConnected || !publicKey || !walletProvider) return;
+
+    console.log('=== Transaction Debug Info ===');
+    console.log('Connected:', isConnected);
+    console.log('Public Key:', publicKey.toBase58());
+    console.log('Wallet Provider:', walletProvider);
+    console.log('Provider type:', typeof walletProvider);
+    console.log('Provider keys:', Object.keys(walletProvider || {}));
+    console.log('=============================');
+
+    const toastId = toast.loading('Preparing transaction...');
 
     try {
       setIsTransacting(true);
       setTxError(null);
 
-      const client = await V1TAClient.create(connection, wallet);
+      const client = await V1TAClient.create(connection, walletProvider, publicKey);
 
       const collateralSol = parseFloat(collateralAmount);
       const borrowVusd = parseFloat(borrowAmount);
 
-      await client.openPosition(collateralSol, borrowVusd);
+      toast.loading('Waiting for wallet approval...', { id: toastId });
+
+      // openPosition already confirms the transaction internally with polling
+      const signature = await client.openPosition(collateralSol, borrowVusd);
+
+      // Success! (already confirmed)
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
+          <div>
+            <div className="font-semibold">Position opened successfully!</div>
+            <a
+              href={`https://explorer.solana.com/tx/${signature}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+            >
+              View on Explorer <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
 
       // Clear form on success
       setCollateralAmount('');
       setBorrowAmount('');
+
+      // Refresh data
+      setTimeout(() => {
+        fetchBalance();
+        fetchPosition();
+      }, 1000);
     } catch (error) {
       console.error('Failed to open position:', error);
-      setTxError(error instanceof Error ? error.message : 'Transaction failed');
+
+      const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
+      setTxError(errorMessage);
+
+      toast.error(
+        <div>
+          <div className="font-semibold">Transaction failed</div>
+          <div className="text-xs mt-1">{errorMessage}</div>
+        </div>,
+        { id: toastId, duration: 5000 }
+      );
     } finally {
       setIsTransacting(false);
     }
@@ -403,14 +470,7 @@ export function BorrowInterface() {
       <Button
         fullWidth
         size="lg"
-        disabled={
-          !isConnected ||
-          !collateralAmount ||
-          !borrowAmount ||
-          healthFactor < 110 ||
-          isPriceLoading ||
-          isTransacting
-        }
+        disabled={!isValidTransaction}
         onClick={handleBorrow}
         className="shadow-lg shadow-primary/20 h-11 text-sm font-bold"
       >
@@ -425,8 +485,12 @@ export function BorrowInterface() {
           'Loading Price...'
         ) : !collateralAmount ? (
           'Enter Collateral Amount'
+        ) : isBelowMinimum ? (
+          'Minimum 0.01 SOL Required'
+        ) : hasInsufficientBalance ? (
+          'Insufficient SOL Balance'
         ) : !borrowAmount ? (
-          'Mint VUSD'
+          'Enter Borrow Amount'
         ) : healthFactor < 110 ? (
           'Collateral Ratio Too Low (Min 110%)'
         ) : (

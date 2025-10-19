@@ -11,27 +11,34 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
-    const user = await db.user.findUnique({
-      where: { walletAddress },
-      select: {
-        id: true,
-        walletAddress: true,
-        username: true,
-        email: true,
-        emailVerified: true,
-        avatar: true,
-        bio: true,
-        twitter: true,
-        createdAt: true,
-        lastLoginAt: true,
-      },
-    });
+    // Handle database connection errors gracefully
+    try {
+      const user = await db.user.findUnique({
+        where: { walletAddress },
+        select: {
+          id: true,
+          walletAddress: true,
+          username: true,
+          email: true,
+          emailVerified: true,
+          avatar: true,
+          bio: true,
+          twitter: true,
+          createdAt: true,
+          lastLoginAt: true,
+        },
+      });
 
-    if (!user) {
+      if (!user) {
+        return NextResponse.json({ exists: false, user: null });
+      }
+
+      return NextResponse.json({ exists: true, user });
+    } catch (dbError) {
+      // Database unavailable - return no user found
+      console.warn('Database unavailable, returning no user:', dbError);
       return NextResponse.json({ exists: false, user: null });
     }
-
-    return NextResponse.json({ exists: true, user });
   } catch (error) {
     console.error('Get user error:', error);
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
