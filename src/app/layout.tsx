@@ -20,7 +20,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'V1ta Protocol - Solana Lending & Borrowing',
+  title: 'V1ta Protocol - Borrow truly decentralised stablecoin',
   description:
     'Decentralized lending protocol on Solana. Borrow VUSD against your SOL collateral with zero interest.',
   keywords: ['Solana', 'DeFi', 'Lending', 'Borrowing', 'VUSD', 'Stablecoin'],
