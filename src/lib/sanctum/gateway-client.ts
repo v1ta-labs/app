@@ -2,6 +2,7 @@ import { Transaction, VersionedTransaction } from '@solana/web3.js';
 
 /**
  * Sanctum Gateway Client for optimized transaction delivery
+ * Uses backend proxy to avoid CORS issues
  * Docs: https://gateway.sanctum.so/docs
  */
 
@@ -21,7 +22,7 @@ interface GatewayTransactionResponse {
 }
 
 export class SanctumGateway {
-  private baseUrl = 'https://gateway.sanctum.so';
+  private proxyUrl = '/api/sanctum-gateway';
 
   /**
    * Build and optimize a transaction using Sanctum Gateway
@@ -54,7 +55,7 @@ export class SanctumGateway {
         deliveryMethod: options?.deliveryMethod ?? 'jito',
       };
 
-      const response = await fetch(`${this.baseUrl}/api/v1/tx/build`, {
+      const response = await fetch(this.proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
