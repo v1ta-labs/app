@@ -27,17 +27,35 @@ import {
 import type { GlobalState, Position, PositionHealth, StabilityPool, StabilityDeposit } from './types';
 import IDL from './idl/v1ta_devnet.json';
 import { ReownWalletAdapter } from './reown-wallet-adapter';
+import { sanctumGateway } from '@/lib/sanctum';
+
+export interface V1TAClientOptions {
+  useSanctumGateway?: boolean;
+  cuPriceRange?: 'low' | 'medium' | 'high';
+  jitoTipRange?: 'low' | 'medium' | 'high' | 'max';
+}
 
 export class V1TAClient {
+  private options: V1TAClientOptions;
+
   constructor(
     public program: Program,
-    public provider: AnchorProvider
-  ) {}
+    public provider: AnchorProvider,
+    options?: V1TAClientOptions
+  ) {
+    this.options = {
+      useSanctumGateway: false, // Disabled by default
+      cuPriceRange: 'medium',
+      jitoTipRange: 'medium',
+      ...options,
+    };
+  }
 
   static async create(
     connection: Connection,
     walletProviderOrAdapter: any,
-    publicKey?: PublicKey
+    publicKey?: PublicKey,
+    options?: V1TAClientOptions
   ): Promise<V1TAClient> {
     console.log('V1TAClient.create called');
     console.log('walletProviderOrAdapter type:', typeof walletProviderOrAdapter);
@@ -74,7 +92,7 @@ export class V1TAClient {
     const program = new Program(IDL as any, provider);
     console.log('Program created');
 
-    return new V1TAClient(program, provider);
+    return new V1TAClient(program, provider, options);
   }
 
   // PDAs
@@ -114,6 +132,7 @@ export class V1TAClient {
     console.log('- userVusdAccount:', userVusdAccount.toBase58());
 
     console.log('Sending transaction via Anchor RPC (no compute budget - let Phantom handle it)...');
+    console.log('Sanctum Gateway:', this.options.useSanctumGateway ? 'ENABLED' : 'DISABLED (can enable for optimized delivery)');
 
     try {
       // Convert CollateralType enum to Anchor format
@@ -132,24 +151,65 @@ export class V1TAClient {
         }
       })();
 
-      // Use Anchor's .rpc() - let Phantom add compute budget automatically
-      const signature = await this.program.methods
-        .openPosition(collateralTypeVariant, collateral, borrow)
-        .accounts({
-          user: this.provider.wallet.publicKey,
-          globalState: this.pdas.globalState,
-          position: this.pdas.position,
-          vusdMint: this.pdas.vusdMint,
-          userVusdAccount,
-          protocolSolVault: this.pdas.protocolVault,
-          priceUpdate: PYTH_SOL_USD_FEED,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        })
-        .rpc();
+      let signature: string;
 
-      console.log('✅ Transaction confirmed!');
+      if (this.options.useSanctumGateway) {
+        // Use Sanctum Gateway for optimized transaction delivery
+        console.log('🚀 Using Sanctum Gateway for optimized transaction delivery...');
+
+        const tx = await this.program.methods
+          .openPosition(collateralTypeVariant, collateral, borrow)
+          .accounts({
+            user: this.provider.wallet.publicKey,
+            globalState: this.pdas.globalState,
+            position: this.pdas.position,
+            vusdMint: this.pdas.vusdMint,
+            userVusdAccount,
+            protocolSolVault: this.pdas.protocolVault,
+            priceUpdate: PYTH_SOL_USD_FEED,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          })
+          .transaction();
+
+        // Get recent blockhash
+        const { blockhash } = await this.provider.connection.getLatestBlockhash();
+        tx.recentBlockhash = blockhash;
+        tx.feePayer = this.provider.wallet.publicKey;
+
+        // Sign transaction
+        const signedTx = await this.provider.wallet.signTransaction(tx);
+
+        // Send through Sanctum Gateway with optimizations
+        signature = await sanctumGateway.sendTransaction(signedTx, {
+          cuPriceRange: this.options.cuPriceRange,
+          jitoTipRange: this.options.jitoTipRange,
+          skipSimulation: false,
+        });
+
+        console.log('✅ Transaction sent via Sanctum Gateway!');
+      } else {
+        // Use standard Anchor RPC (let Phantom handle compute budget)
+        signature = await this.program.methods
+          .openPosition(collateralTypeVariant, collateral, borrow)
+          .accounts({
+            user: this.provider.wallet.publicKey,
+            globalState: this.pdas.globalState,
+            position: this.pdas.position,
+            vusdMint: this.pdas.vusdMint,
+            userVusdAccount,
+            protocolSolVault: this.pdas.protocolVault,
+            priceUpdate: PYTH_SOL_USD_FEED,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          })
+          .rpc();
+
+        console.log('✅ Transaction confirmed via standard RPC!');
+      }
+
       console.log('Signature:', signature);
       console.log(
         `View on Solana Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`
