@@ -258,13 +258,39 @@ export function BorrowInterface() {
       const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
       setTxError(errorMessage);
 
-      toast.error(
-        <div>
-          <div className="font-semibold">Transaction failed</div>
-          <div className="text-xs mt-1">{errorMessage}</div>
-        </div>,
-        { id: toastId, duration: 5000 }
-      );
+      // Check if this is a duplicate transaction error (transaction may have actually succeeded)
+      const isDuplicateError =
+        errorMessage.includes('already been processed') ||
+        errorMessage.includes('already processed') ||
+        errorMessage.includes('This transaction has already been processed');
+
+      if (isDuplicateError) {
+        toast.success(
+          <div>
+            <div className="font-semibold">Transaction likely succeeded!</div>
+            <div className="text-xs mt-1">
+              The transaction was already processed. Check your position below.
+            </div>
+          </div>,
+          { id: toastId, duration: 5000 }
+        );
+
+        // Clear form and refresh data
+        setCollateralAmount('');
+        setBorrowAmount('');
+        setTimeout(() => {
+          fetchBalance();
+          fetchPosition();
+        }, 1000);
+      } else {
+        toast.error(
+          <div>
+            <div className="font-semibold">Transaction failed</div>
+            <div className="text-xs mt-1">{errorMessage}</div>
+          </div>,
+          { id: toastId, duration: 5000 }
+        );
+      }
     } finally {
       setIsTransacting(false);
     }
