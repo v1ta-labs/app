@@ -58,33 +58,30 @@ export function LSTSelector({ selectedType, onSelect }: LSTSelectorProps) {
 
   const selectedOption = lstOptions.find(opt => opt.type === selectedType) || lstOptions[0];
 
-  // Fetch APY data from Sanctum (disabled due to CORS issues)
-  // TODO: Implement backend proxy or use alternative LST data source
+  // Fetch APY data from Sanctum via backend proxy
   useEffect(() => {
-    // Temporarily disabled - Sanctum API has CORS restrictions
-    // For now, APY will not be displayed
-    setIsLoadingAPY(false);
+    const fetchAPYData = async () => {
+      setIsLoadingAPY(true);
+      try {
+        const supportedLSTs = await sanctumClient.getSupportedLSTs();
+        setLstOptions(prev =>
+          prev.map(opt => {
+            if (opt.type === 'NativeSOL') return opt;
+            const lstData = supportedLSTs.find(
+              lst => lst.symbol === opt.symbol || lst.mint === opt.mint
+            );
+            return lstData ? { ...opt, mint: lstData.mint, apy: lstData.apy } : opt;
+          })
+        );
+      } catch (error) {
+        console.error('Failed to fetch LST APY data:', error);
+        // Silently fail - UI will work without APY data
+      } finally {
+        setIsLoadingAPY(false);
+      }
+    };
 
-    // const fetchAPYData = async () => {
-    //   setIsLoadingAPY(true);
-    //   try {
-    //     const supportedLSTs = await sanctumClient.getSupportedLSTs();
-    //     setLstOptions(prev =>
-    //       prev.map(opt => {
-    //         if (opt.type === 'NativeSOL') return opt;
-    //         const lstData = supportedLSTs.find(
-    //           lst => lst.symbol === opt.symbol || lst.mint === opt.mint
-    //         );
-    //         return lstData ? { ...opt, mint: lstData.mint, apy: lstData.apy } : opt;
-    //       })
-    //     );
-    //   } catch (error) {
-    //     console.error('Failed to fetch LST APY data:', error);
-    //   } finally {
-    //     setIsLoadingAPY(false);
-    //   }
-    // };
-    // fetchAPYData();
+    fetchAPYData();
   }, []);
 
   return (

@@ -2,17 +2,18 @@ import type { LSTMetadata, LSTListResponse } from './types';
 
 /**
  * Client for interacting with Sanctum LST API
+ * Uses backend proxy to avoid CORS issues
  * Docs: https://api.sanctum.so
  */
 export class SanctumClient {
-  private baseUrl = 'https://api.sanctum.so';
+  private proxyUrl = '/api/sanctum';
 
   /**
-   * Get list of all supported LSTs
+   * Get list of all supported LSTs via backend proxy
    */
   async getLSTs(): Promise<LSTMetadata[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/v1/lsts`);
+      const response = await fetch(`${this.proxyUrl}?endpoint=/v1/lsts`);
       if (!response.ok) {
         throw new Error(`Failed to fetch LSTs: ${response.statusText}`);
       }
@@ -25,11 +26,11 @@ export class SanctumClient {
   }
 
   /**
-   * Get specific LST data by mint address or symbol
+   * Get specific LST data by mint address or symbol via backend proxy
    */
   async getLST(mintOrSymbol: string): Promise<LSTMetadata> {
     try {
-      const response = await fetch(`${this.baseUrl}/v1/lsts/${mintOrSymbol}`);
+      const response = await fetch(`${this.proxyUrl}?endpoint=/v1/lsts/${mintOrSymbol}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch LST ${mintOrSymbol}: ${response.statusText}`);
       }

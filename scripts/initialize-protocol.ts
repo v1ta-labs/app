@@ -35,8 +35,8 @@ async function main() {
     commitment: 'confirmed',
   });
 
-  // Load program
-  const program = new Program(IDL as any, VITA_PROGRAM_ID, provider);
+  // Load program - FIXED: provider is the third argument, programId is the second
+  const program = new Program(IDL as any, provider);
   console.log('Program ID:', program.programId.toString());
 
   // Get PDAs
@@ -103,9 +103,9 @@ async function main() {
 
   } catch (error) {
     console.error('❌ Initialization failed:', error);
-    if (error.logs) {
+    if ((error as any).logs) {
       console.error('\nProgram logs:');
-      error.logs.forEach((log: string) => console.error(log));
+      (error as any).logs.forEach((log: string) => console.error(log));
     }
     throw error;
   }
