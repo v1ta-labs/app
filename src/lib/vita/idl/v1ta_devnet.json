@@ -1,5 +1,5 @@
 {
-  "address": "6BMtX4X6i7bxr9P7uGfqr2XMG1RUeM5isxVVwtJdJsMR",
+  "address": "6iNqEtF85a6ricFvzDvpH5XV6b2F4d5CK75SkyWiSBoW",
   "metadata": {
     "name": "v1ta_devnet",
     "version": "0.1.0",
@@ -1496,6 +1496,14 @@
       ],
       "args": [
         {
+          "name": "collateral_type",
+          "type": {
+            "defined": {
+              "name": "CollateralType"
+            }
+          }
+        },
+        {
           "name": "collateral_amount",
           "type": "u64"
         },
@@ -2137,6 +2145,26 @@
   ],
   "types": [
     {
+      "name": "CollateralType",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "NativeSOL"
+          },
+          {
+            "name": "JitoSOL"
+          },
+          {
+            "name": "MarinadeSOL"
+          },
+          {
+            "name": "USDStar"
+          }
+        ]
+      }
+    },
+    {
       "name": "GlobalState",
       "type": {
         "kind": "struct",
@@ -2188,6 +2216,14 @@
           {
             "name": "owner",
             "type": "pubkey"
+          },
+          {
+            "name": "collateral_type",
+            "type": {
+              "defined": {
+                "name": "CollateralType"
+              }
+            }
           },
           {
             "name": "collateral",

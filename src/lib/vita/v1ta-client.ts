@@ -22,6 +22,7 @@ import {
   getPositionPda,
   getStabilityDepositPda,
   calculateCollateralRatio,
+  CollateralType,
 } from './constants';
 import type { GlobalState, Position, PositionHealth, StabilityPool, StabilityDeposit } from './types';
 import IDL from './idl/v1ta_devnet.json';
@@ -89,9 +90,10 @@ export class V1TAClient {
   }
 
   // Open Position
-  async openPosition(collateralSol: number, borrowVusd: number) {
+  async openPosition(collateralSol: number, borrowVusd: number, collateralType: CollateralType = CollateralType.NativeSOL) {
     console.log('=== openPosition Debug ===');
     console.log('Wallet publicKey:', this.provider.wallet.publicKey.toBase58());
+    console.log('Collateral Type:', CollateralType[collateralType]);
 
     const collateral = new BN(collateralSol * LAMPORTS_PER_SOL);
     const borrow = new BN(borrowVusd * 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS);
@@ -114,9 +116,25 @@ export class V1TAClient {
     console.log('Sending transaction via Anchor RPC (no compute budget - let Phantom handle it)...');
 
     try {
+      // Convert CollateralType enum to Anchor format
+      const collateralTypeVariant = (() => {
+        switch (collateralType) {
+          case CollateralType.NativeSOL:
+            return { nativeSol: {} };
+          case CollateralType.JitoSOL:
+            return { jitoSol: {} };
+          case CollateralType.MarinadeSOL:
+            return { marinadeSol: {} };
+          case CollateralType.USDStar:
+            return { usdStar: {} };
+          default:
+            return { nativeSol: {} };
+        }
+      })();
+
       // Use Anchor's .rpc() - let Phantom add compute budget automatically
       const signature = await this.program.methods
-        .openPosition(collateral, borrow)
+        .openPosition(collateralTypeVariant, collateral, borrow)
         .accounts({
           user: this.provider.wallet.publicKey,
           globalState: this.pdas.globalState,
@@ -139,22 +157,6 @@ export class V1TAClient {
 
       return signature;
     } catch (error) {
-      console.error('=== Transaction Failed ===');
-      console.error('Error type:', error?.constructor?.name);
-      console.error('Error message:', error instanceof Error ? error.message : String(error));
-      console.error('Full error:', error);
-
-      // Try to extract more details from Anchor errors
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.logs) {
-          console.error('Program logs:', err.logs);
-        }
-        if (err.error) {
-          console.error('Anchor error:', err.error);
-        }
-      }
-
       throw error;
     }
   }
@@ -208,21 +210,6 @@ export class V1TAClient {
 
       return signature;
     } catch (error) {
-      console.error('=== Adjust Position Failed ===');
-      console.error('Error type:', error?.constructor?.name);
-      console.error('Error message:', error instanceof Error ? error.message : String(error));
-      console.error('Full error:', error);
-
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.logs) {
-          console.error('Program logs:', err.logs);
-        }
-        if (err.error) {
-          console.error('Anchor error:', err.error);
-        }
-      }
-
       throw error;
     }
   }
@@ -269,21 +256,7 @@ export class V1TAClient {
 
       return signature;
     } catch (error) {
-      console.error('=== Close Position Failed ===');
-      console.error('Error type:', error?.constructor?.name);
-      console.error('Error message:', error instanceof Error ? error.message : String(error));
-      console.error('Full error:', error);
-
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        if (err.logs) {
-          console.error('Program logs:', err.logs);
-        }
-        if (err.error) {
-          console.error('Anchor error:', err.error);
-        }
-      }
-
+      // Let the UI handle error logging and display
       throw error;
     }
   }

@@ -1,9 +1,21 @@
 import { PublicKey } from '@solana/web3.js';
 
 /**
- * V1TA Protocol Constants - Devnet v0.1
+ * V1TA Protocol Constants - Devnet v0.2 (LST Support)
+ * Deployed: 2025-10-31
+ * Upgrade Authority: 8K915LPudGjRrapmMCo6dp3ZCvdVRG8Qy7teCUX9k43B
  */
-export const VITA_PROGRAM_ID = new PublicKey('6BMtX4X6i7bxr9P7uGfqr2XMG1RUeM5isxVVwtJdJsMR');
+export const VITA_PROGRAM_ID = new PublicKey('6iNqEtF85a6ricFvzDvpH5XV6b2F4d5CK75SkyWiSBoW');
+
+/**
+ * Collateral Type Enum (must match Rust on-chain program)
+ */
+export enum CollateralType {
+  NativeSOL = 0,
+  JitoSOL = 1,
+  MarinadeSOL = 2,
+  USDStar = 3,
+}
 
 /**
  * PDA Seeds (must match Rust program exactly)

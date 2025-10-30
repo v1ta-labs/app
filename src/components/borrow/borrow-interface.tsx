@@ -11,8 +11,9 @@ import { HealthGauge } from '@/components/ui/health-gauge';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
 import { ArrowDown, Info, AlertTriangle, Zap, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { V1TAClient } from '@/lib/vita';
+import { V1TAClient, CollateralType as V1TACollateralType } from '@/lib/vita';
 import { toast } from 'sonner';
+import { LSTSelector, type CollateralType } from './lst-selector';
 
 interface TokenInfo {
   symbol: string;
@@ -53,6 +54,7 @@ export function BorrowInterface() {
   const { walletProvider } = useAppKitProvider('solana');
 
   const [selectedToken, setSelectedToken] = useState<TokenInfo>(DEFAULT_TOKEN);
+  const [collateralType, setCollateralType] = useState<CollateralType>('NativeSOL');
   const [collateralAmount, setCollateralAmount] = useState('');
   const [borrowAmount, setBorrowAmount] = useState('');
   const [showFeeTooltip, setShowFeeTooltip] = useState(false);
@@ -219,10 +221,19 @@ export function BorrowInterface() {
       const collateralSol = parseFloat(collateralAmount);
       const borrowVusd = parseFloat(borrowAmount);
 
+      // Convert UI CollateralType to V1TA CollateralType enum
+      const v1taCollateralType = collateralType === 'NativeSOL'
+        ? V1TACollateralType.NativeSOL
+        : collateralType === 'JitoSOL'
+        ? V1TACollateralType.JitoSOL
+        : collateralType === 'MarinadeSOL'
+        ? V1TACollateralType.MarinadeSOL
+        : V1TACollateralType.USDStar;
+
       toast.loading('Waiting for wallet approval...', { id: toastId });
 
       // openPosition already confirms the transaction internally with polling
-      const signature = await client.openPosition(collateralSol, borrowVusd);
+      const signature = await client.openPosition(collateralSol, borrowVusd, v1taCollateralType);
 
       // Success! (already confirmed)
       toast.success(
@@ -355,10 +366,10 @@ export function BorrowInterface() {
               onMax={handleMaxCollateral}
               placeholder="0.00"
               leftElement={
-                <div className="flex items-center gap-2 px-3 py-2">
-                  <span className="text-xl">{selectedToken.icon}</span>
-                  <span className="font-semibold text-text-primary">{selectedToken.symbol}</span>
-                </div>
+                <LSTSelector
+                  selectedType={collateralType}
+                  onSelect={setCollateralType}
+                />
               }
             />
 
@@ -402,7 +413,11 @@ export function BorrowInterface() {
               disabled={!collateralAmount}
               leftElement={
                 <div className="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-border">
-                  <span className="text-lg">💵</span>
+                  <img
+                    src="/assets/logos/vusd.png"
+                    alt="VUSD"
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
                   <span className="font-semibold text-text-primary">VUSD</span>
                 </div>
               }
