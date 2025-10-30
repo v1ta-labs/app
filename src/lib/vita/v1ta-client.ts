@@ -181,14 +181,14 @@ export class V1TAClient {
         // Sign transaction
         const signedTx = await this.provider.wallet.signTransaction(tx);
 
-        // Send through Sanctum Gateway with optimizations
-        signature = await sanctumGateway.sendTransaction(signedTx, {
-          cuPriceRange: this.options.cuPriceRange,
-          jitoTipRange: this.options.jitoTipRange,
-          skipSimulation: false,
-        });
+        // Send through Sanctum Gateway
+        const gatewayResult = await sanctumGateway.sendTransaction(signedTx, 'devnet');
+
+        // Extract signature from Gateway response
+        signature = gatewayResult.result?.signature || gatewayResult.result?.txSignature || '';
 
         console.log('✅ Transaction sent via Sanctum Gateway!');
+        console.log('Gateway result:', gatewayResult);
       } else {
         // Use standard Anchor RPC (let Phantom handle compute budget)
         signature = await this.program.methods

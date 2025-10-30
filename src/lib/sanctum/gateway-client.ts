@@ -32,13 +32,8 @@ export class SanctumGateway {
    */
   async buildGatewayTransaction(
     transaction: Transaction | VersionedTransaction,
-    options?: {
-      skipSimulation?: boolean;
-      cuPriceRange?: 'low' | 'medium' | 'high';
-      jitoTipRange?: 'low' | 'medium' | 'high' | 'max';
-      deliveryMethod?: 'rpc' | 'jito' | 'sanctum-sender';
-    }
-  ): Promise<{ transaction: Transaction | VersionedTransaction; signature: string }> {
+    cluster: 'mainnet' | 'devnet' = 'devnet'
+  ): Promise<{ result: any }> {
     try {
       // Serialize transaction to base64
       const serialized = transaction.serialize({
@@ -47,77 +42,45 @@ export class SanctumGateway {
       });
       const base64Tx = Buffer.from(serialized).toString('base64');
 
-      const requestBody: GatewayTransactionRequest = {
-        tx: base64Tx,
-        skipSimulation: options?.skipSimulation ?? false,
-        cuPriceRange: options?.cuPriceRange ?? 'medium',
-        jitoTipRange: options?.jitoTipRange ?? 'medium',
-        deliveryMethod: options?.deliveryMethod ?? 'jito',
-      };
+      console.log('Sending transaction to Gateway proxy...');
 
       const response = await fetch(this.proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({
+          transaction: base64Tx,
+          cluster,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Gateway request failed: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(`Gateway request failed: ${errorData.error || response.statusText}`);
       }
 
-      const data: GatewayTransactionResponse = await response.json();
+      const data = await response.json();
+      console.log('Gateway optimization complete:', data);
 
-      // Deserialize the optimized transaction
-      const optimizedTxBuffer = Buffer.from(data.tx, 'base64');
-
-      // Determine if it's a versioned transaction
-      const isVersioned = transaction instanceof VersionedTransaction;
-      const optimizedTx = isVersioned
-        ? VersionedTransaction.deserialize(optimizedTxBuffer)
-        : Transaction.from(optimizedTxBuffer);
-
-      console.log('Gateway optimization complete:', {
-        signature: data.signature,
-        cuPrice: data.cuPrice,
-        jitoTip: data.jitoTip,
-      });
-
-      return {
-        transaction: optimizedTx,
-        signature: data.signature,
-      };
+      return data;
     } catch (error) {
       console.error('Gateway transaction optimization failed:', error);
-      // Fallback to original transaction if Gateway fails
-      return {
-        transaction,
-        signature: '',
-      };
+      throw error;
     }
   }
 
   /**
    * Send a transaction through Sanctum Gateway with optimizations
    * @param transaction - The transaction to send
-   * @param options - Gateway options
-   * @returns Transaction signature
+   * @param cluster - The Solana cluster
+   * @returns Gateway result with transaction details
    */
   async sendTransaction(
     transaction: Transaction | VersionedTransaction,
-    options?: {
-      skipSimulation?: boolean;
-      cuPriceRange?: 'low' | 'medium' | 'high';
-      jitoTipRange?: 'low' | 'medium' | 'high' | 'max';
-    }
-  ): Promise<string> {
-    const { signature } = await this.buildGatewayTransaction(transaction, {
-      ...options,
-      deliveryMethod: 'jito', // Use Jito for best success rates
-    });
-
-    return signature;
+    cluster: 'mainnet' | 'devnet' = 'devnet'
+  ): Promise<{ result: any }> {
+    return await this.buildGatewayTransaction(transaction, cluster);
   }
 }
 
