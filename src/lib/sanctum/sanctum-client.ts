@@ -1,24 +1,27 @@
-import type { LSTMetadata, LSTListResponse } from './types';
+import type { LSTMetadata } from './types';
 
 /**
  * Client for interacting with Sanctum LST API
  * Uses backend proxy to avoid CORS issues
- * Docs: https://api.sanctum.so
+ * Base URL: https://sanctum-api.ironforge.network
+ * Docs: https://learn.sanctum.so/docs/for-developers/sanctum-api
  */
 export class SanctumClient {
   private proxyUrl = '/api/sanctum';
 
   /**
    * Get list of all supported LSTs via backend proxy
+   * GET /lsts - Returns all LST metadatas
    */
   async getLSTs(): Promise<LSTMetadata[]> {
     try {
-      const response = await fetch(`${this.proxyUrl}?endpoint=/v1/lsts`);
+      const response = await fetch(`${this.proxyUrl}?endpoint=/lsts`);
       if (!response.ok) {
         throw new Error(`Failed to fetch LSTs: ${response.statusText}`);
       }
-      const data: LSTListResponse = await response.json();
-      return data.lsts;
+      const data = await response.json();
+      // Handle both array and object with lsts property
+      return Array.isArray(data) ? data : data.lsts || [];
     } catch (error) {
       console.error('Error fetching LSTs:', error);
       throw error;
@@ -27,10 +30,11 @@ export class SanctumClient {
 
   /**
    * Get specific LST data by mint address or symbol via backend proxy
+   * GET /lsts/{mintOrSymbol}
    */
   async getLST(mintOrSymbol: string): Promise<LSTMetadata> {
     try {
-      const response = await fetch(`${this.proxyUrl}?endpoint=/v1/lsts/${mintOrSymbol}`);
+      const response = await fetch(`${this.proxyUrl}?endpoint=/lsts/${mintOrSymbol}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch LST ${mintOrSymbol}: ${response.statusText}`);
       }
