@@ -18,7 +18,7 @@ const SIDEBAR_FOOTER = [
   {
     icon: BookOpen,
     label: 'Docs',
-    href: 'https://docs.v1ta.fi',
+    href: 'https://docs.v1ta.xyz',
     description: 'Documentation',
     external: true,
   },

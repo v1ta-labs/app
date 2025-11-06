@@ -27,8 +27,8 @@ const NAV_ITEMS = [
 ];
 
 const BOTTOM_ITEMS = [
-  { label: 'Docs', href: 'https://docs.v1ta.fi', icon: BookOpen, external: true },
-  { label: 'Support', href: 'https://t.me/v1ta_help', icon: MessageCircle, external: true },
+  { label: 'Docs', href: 'https://docs.v1ta.xyz', icon: BookOpen, external: true },
+  { label: 'Community', href: 'https://t.me/v1ta_fi', icon: MessageCircle, external: true },
 ];
 
 export function NavigationSidebar() {
