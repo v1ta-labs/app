@@ -1,268 +1,495 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Twitter, Github, BookOpen, Clock, Send } from 'lucide-react';
+import { Github, BookOpen, Send, Zap, Layers, Binary, Calculator } from 'lucide-react';
 import { Logotype } from '@/components/ui/logotype';
-
-interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-}
+import { MysticalBranches } from '@/components/home/mystical-branches';
 
 export default function LaunchingSoonPage() {
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  // Countdown to launch (set to 30 days from now, adjust as needed)
   useEffect(() => {
-    const launchDate = new Date();
-    launchDate.setDate(launchDate.getDate() + 30); // 30 days from now
+    let trailId = 0;
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = e.clientX;
+      const y = e.clientY;
+      setMousePosition({ x, y });
+      mouseX.set(x);
+      mouseY.set(y);
 
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = launchDate.getTime() - now;
-
-      setTimeLeft({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000),
+      // Add trail particles
+      setTrail(prev => {
+        const newTrail = [...prev, { x, y, id: trailId++ }];
+        return newTrail.slice(-8); // Keep only last 8 particles
       });
-    }, 1000);
+    };
 
-    return () => clearInterval(timer);
-  }, []);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-base">
-      {/* Mystical Background */}
-      <MysticalBackground />
+      {/* Mystical Branches Background */}
+      <MysticalBranches />
 
-      {/* Animated particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+      {/* Enhanced cursor effects */}
+      <div className="pointer-events-none fixed inset-0 z-30">
+        {/* Main cursor glow - stronger */}
+        <motion.div
+          className="absolute w-96 h-96 rounded-full"
+          style={{
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+            background: `radial-gradient(circle, rgba(42, 73, 48, 0.3), rgba(42, 73, 48, 0.1) 40%, transparent 70%)`,
+            filter: 'blur(40px)',
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+
+        {/* Cursor ring */}
+        <motion.div
+          className="absolute w-8 h-8 rounded-full border-2 border-primary/50"
+          style={{
+            left: mousePosition.x - 16,
+            top: mousePosition.y - 16,
+          }}
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.5, 0, 0.5],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: 'easeOut',
+          }}
+        />
+
+        {/* Trailing particles */}
+        {trail.map((point, index) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
+            key={point.id}
+            className="absolute w-3 h-3 rounded-full bg-primary"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: point.x - 6,
+              top: point.y - 6,
             }}
+            initial={{ opacity: 0.8, scale: 1 }}
             animate={{
-              y: [0, -30, 0],
-              opacity: [0, 0.6, 0],
-              scale: [0, 1.5, 0],
+              opacity: 0,
+              scale: 0,
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 0.6,
+              ease: 'easeOut',
+            }}
+          />
+        ))}
+
+        {/* Orbiting particles around cursor */}
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-2 h-2 rounded-full bg-success/60"
+            style={{
+              left: mousePosition.x - 4,
+              top: mousePosition.y - 4,
+            }}
+            animate={{
+              x: [0, Math.cos((i * 120 * Math.PI) / 180) * 40],
+              y: [0, Math.sin((i * 120 * Math.PI) / 180) * 40],
+              opacity: [0, 0.8, 0],
+            }}
+            transition={{
+              duration: 2,
               repeat: Infinity,
-              delay: Math.random() * 2,
+              delay: i * 0.3,
+              ease: 'easeInOut',
             }}
           />
         ))}
       </div>
 
-      {/* Glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-      <div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-success/10 rounded-full blur-3xl animate-pulse"
-        style={{ animationDelay: '1s' }}
-      />
+      {/* Grid overlay for futuristic feel */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]">
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(42, 73, 48, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(42, 73, 48, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+          }}
+        />
+      </div>
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="w-full max-w-4xl"
-        >
-          {/* Logo */}
+      {/* Logo - Fixed position top left */}
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="fixed top-8 left-8 z-20"
+      >
+        <div className="relative">
+          <Logotype size="md" showSubheading={false} interactive={true} />
+
+          {/* Scanning line effect */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="flex justify-center mb-12"
-          >
-            <Logotype size="lg" showSubheading={true} interactive={true} />
-          </motion.div>
+            className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent"
+            animate={{
+              top: ['0%', '100%', '0%'],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+        </div>
+      </motion.div>
 
-          {/* Main Card */}
-          <Card className="p-8 md:p-12 backdrop-blur-xl bg-surface/80 border-border/50 text-center relative overflow-hidden">
-            {/* Sparkle decoration */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-              className="absolute top-4 right-4"
-            >
-              <Sparkles className="w-6 h-6 text-primary/50" />
-            </motion.div>
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 md:p-8 pt-32 md:pt-24">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          className="w-full max-w-7xl"
+        >
 
-            {/* Title */}
+          {/* Main Hero Section */}
+          <div className="grid lg:grid-cols-[1.3fr,0.9fr] gap-16 mb-16 items-start">
+            {/* Left: Hero Message */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex flex-col justify-start space-y-8"
             >
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-br from-text-primary via-primary to-text-primary bg-clip-text text-transparent">
-                Emerging from the Depths
-              </h1>
-              <p className="text-lg md:text-xl text-text-secondary mb-2">
-                V1ta Protocol is preparing to launch
-              </p>
-              <p className="text-sm text-text-tertiary mb-12">
-                A new era of decentralized lending is coming to Solana
-              </p>
-            </motion.div>
+              {/* Main Title */}
+              <div className="space-y-4 mt-8">
+                <div className="inline-block">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="h-px w-16 bg-gradient-to-r from-transparent to-primary" />
+                    <span className="text-xs font-mono text-primary tracking-[0.3em] uppercase">
+                      Protocol v0
+                    </span>
+                  </div>
 
-            {/* Countdown Timer */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="mb-12"
-            >
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <Clock className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-semibold text-text-primary">Launching In</h2>
-              </div>
-              <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
-                {[
-                  { label: 'Days', value: timeLeft.days },
-                  { label: 'Hours', value: timeLeft.hours },
-                  { label: 'Minutes', value: timeLeft.minutes },
-                  { label: 'Seconds', value: timeLeft.seconds },
-                ].map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 + i * 0.1, duration: 0.4 }}
-                  >
-                    <Card className="p-4 md:p-6 bg-elevated/50 border-border/30">
-                      <div className="text-3xl md:text-5xl font-bold text-primary mb-2">
-                        {item.value.toString().padStart(2, '0')}
+                  <h1 className="text-6xl md:text-8xl font-bold leading-[0.9] tracking-tight mb-6">
+                    <motion.span
+                      className="block text-text-primary relative"
+                      animate={{
+                        x: [0, -2, 2, 0],
+                      }}
+                      transition={{
+                        duration: 0.3,
+                        repeat: Infinity,
+                        repeatDelay: 5,
+                      }}
+                    >
+                      Decentralized
+                      {/* Glitch layers */}
+                      <motion.span
+                        className="absolute inset-0 text-primary/30"
+                        animate={{
+                          x: [-2, 2, -2],
+                          opacity: [0, 0.5, 0],
+                        }}
+                        transition={{
+                          duration: 0.2,
+                          repeat: Infinity,
+                          repeatDelay: 5,
+                        }}
+                      >
+                        Decentralized
+                      </motion.span>
+                    </motion.span>
+                    <motion.span
+                      className="block bg-gradient-to-r from-primary via-success to-primary bg-clip-text text-transparent relative"
+                      animate={{
+                        x: [0, 2, -2, 0],
+                      }}
+                      transition={{
+                        duration: 0.3,
+                        repeat: Infinity,
+                        repeatDelay: 5,
+                        delay: 0.1,
+                      }}
+                    >
+                      Stablecoins.
+                      {/* Glitch layers */}
+                      <motion.span
+                        className="absolute inset-0 text-success/30"
+                        animate={{
+                          x: [2, -2, 2],
+                          opacity: [0, 0.5, 0],
+                        }}
+                        transition={{
+                          duration: 0.2,
+                          repeat: Infinity,
+                          repeatDelay: 5,
+                          delay: 0.1,
+                        }}
+                      >
+                        Stablecoins.
+                      </motion.span>
+                    </motion.span>
+                    <motion.span
+                      className="block text-text-primary relative"
+                      animate={{
+                        x: [0, -2, 2, 0],
+                      }}
+                      transition={{
+                        duration: 0.3,
+                        repeat: Infinity,
+                        repeatDelay: 5,
+                        delay: 0.2,
+                      }}
+                    >
+                      Redefined.
+                      {/* Glitch layers */}
+                      <motion.span
+                        className="absolute inset-0 text-primary/30"
+                        animate={{
+                          x: [-2, 2, -2],
+                          opacity: [0, 0.5, 0],
+                        }}
+                        transition={{
+                          duration: 0.2,
+                          repeat: Infinity,
+                          repeatDelay: 5,
+                          delay: 0.2,
+                        }}
+                      >
+                        Redefined.
+                      </motion.span>
+                    </motion.span>
+                  </h1>
+
+                  <p className="text-xl md:text-2xl text-text-secondary leading-relaxed max-w-2xl font-light">
+                    Borrow VUSD stablecoin with only{' '}
+                    <span className="text-primary font-medium">110% collateral</span>.
+                    No governance. No banks. Pure{' '}
+                    <span className="text-primary font-medium">on-chain mathematics</span>.
+                  </p>
+                </div>
+
+                {/* Stats Row */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex gap-8 pt-4"
+                >
+                  {[
+                    { value: '110%', label: 'Collateral Ratio', icon: Calculator },
+                    { value: '<1s', label: 'Settlement', icon: Zap },
+                    { value: '100%', label: 'On-Chain', icon: Binary },
+                  ].map((stat, i) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.7 + i * 0.1 }}
+                      className="group cursor-default"
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <stat.icon className="w-4 h-4 text-primary/60 group-hover:text-primary transition-colors" />
+                        <span className="text-2xl font-bold text-primary font-mono">
+                          {stat.value}
+                        </span>
                       </div>
-                      <div className="text-xs md:text-sm text-text-tertiary uppercase tracking-wider">
-                        {item.label}
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
+                      <p className="text-xs text-text-tertiary uppercase tracking-wider font-mono">
+                        {stat.label}
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
               </div>
-            </motion.div>
 
-            {/* Features Preview */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.6 }}
-              className="mb-12"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                {[
-                  {
-                    title: 'Zero Interest',
-                    description: 'Borrow VUSD with no interest fees',
-                  },
-                  {
-                    title: 'True Decentralization',
-                    description: 'No central authority, pure DeFi',
-                  },
-                  {
-                    title: 'Built on Solana',
-                    description: 'Fast, secure, and scalable',
-                  },
-                ].map((feature, i) => (
-                  <motion.div
-                    key={feature.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.2 + i * 0.1, duration: 0.4 }}
-                  >
-                    <Card className="p-4 bg-elevated/30 border-border/20 h-full">
-                      <h3 className="text-sm font-bold text-text-primary mb-2">
-                        {feature.title}
-                      </h3>
-                      <p className="text-xs text-text-tertiary">{feature.description}</p>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Community Link - Highlighted */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.4, duration: 0.6 }}
-              className="mb-6"
-            >
-              <Button
-                className="gap-2 px-6 py-6 bg-primary hover:bg-primary-hover shadow-lg"
-                onClick={() => window.open('https://t.me/v1ta_fi', '_blank')}
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                className="flex flex-col sm:flex-row gap-4"
               >
-                <Send className="w-5 h-5" />
-                <span className="font-semibold">Join V1ta Community</span>
-              </Button>
-            </motion.div>
+                <Button
+                  className="gap-3 px-8 py-7 bg-primary hover:bg-primary-hover shadow-2xl shadow-primary/20 text-base font-semibold group relative overflow-hidden border border-primary/50"
+                  onClick={() => window.open('https://t.me/v1ta_fi', '_blank')}
+                >
+                  {/* Animated background */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-success/20 via-primary to-success/20"
+                    animate={{
+                      x: ['-100%', '100%'],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  />
+                  <Send className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+                  <span className="relative z-10">Join the Community</span>
+                </Button>
 
-            {/* Social Links */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 0.6 }}
-            >
-              <p className="text-sm text-text-tertiary mb-4">Follow us</p>
-              <div className="flex gap-3 justify-center flex-wrap">
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => window.open('https://x.com/v1ta_fi', '_blank')}
-                >
-                  <Twitter className="w-4 h-4" />
-                  X
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => window.open('https://github.com/v1ta-labs', '_blank')}
-                >
-                  <Github className="w-4 h-4" />
-                  GitHub
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
+                  className="gap-3 px-8 py-7 text-base border-2 border-primary/30 hover:border-primary hover:bg-primary/5 group"
                   onClick={() => window.open('https://docs.v1ta.xyz', '_blank')}
                 >
-                  <BookOpen className="w-4 h-4" />
-                  Docs
+                  <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <span>Documentation</span>
                 </Button>
+              </motion.div>
+
+              {/* Social proof */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1 }}
+                className="flex items-center gap-6 pt-4"
+              >
+                <a
+                  href="https://x.com/v1ta_fi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-tertiary hover:text-primary transition-colors"
+                >
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </a>
+                <a
+                  href="https://github.com/v1ta-labs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-text-tertiary hover:text-primary transition-colors"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+                <div className="h-4 w-px bg-border" />
+                <span className="text-xs text-text-tertiary font-mono">DEVNET</span>
+              </motion.div>
+            </motion.div>
+
+            {/* Right: Feature Grid */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="mt-8"
+            >
+              {/* Feature Grid */}
+              <div className="grid gap-5">
+                {[
+                  {
+                    icon: Layers,
+                    title: 'Capital Efficiency',
+                    description: '110% collateralization ratio vs 150-200% in legacy systems',
+                    metric: '1.8x more efficient',
+                    gradient: 'from-primary/10 via-primary/5 to-transparent',
+                  },
+                  {
+                    icon: Binary,
+                    title: 'Algorithmic Stability',
+                    description: 'Dual oracle pricing with 60s staleness detection',
+                    metric: 'Pyth + Switchboard',
+                    gradient: 'from-success/10 via-success/5 to-transparent',
+                  },
+                  {
+                    icon: Zap,
+                    title: 'Instant Redemption',
+                    description: 'On-chain arbitrage maintains $1 peg with mathematical precision',
+                    metric: 'Sub-second finality',
+                    gradient: 'from-primary/10 via-primary/5 to-transparent',
+                  },
+                ].map((feature, i) => (
+                  <FeatureCard key={feature.title} feature={feature} index={i} />
+                ))}
               </div>
             </motion.div>
-          </Card>
+          </div>
 
-          {/* Footer */}
+          {/* Status Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3 }}
+            className="flex justify-center"
+          >
+            <a
+              href="https://alpha.v1ta.xyz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/status"
+            >
+              <Card className="inline-flex items-center gap-6 px-8 py-4 backdrop-blur-xl bg-surface/30 border-primary/20 relative overflow-hidden group cursor-pointer hover:border-primary/40 transition-all">
+                {/* Animated border */}
+                <motion.div
+                  className="absolute inset-0 border border-primary/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                  animate={{
+                    borderRadius: ['0%', '2%', '0%'],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                />
+
+                <div className="flex items-center gap-3">
+                  <motion.div
+                    className="w-2 h-2 rounded-full bg-primary"
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [1, 0.5, 1],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                    }}
+                  />
+                  <span className="text-sm font-mono text-text-secondary">
+                    Protocol Status: <span className="text-primary">Development</span>
+                  </span>
+                </div>
+
+                <div className="h-4 w-px bg-border/50" />
+
+                <span className="text-xs text-text-tertiary font-mono group-hover/status:text-primary transition-colors">
+                  Try Alpha →
+                </span>
+              </Card>
+            </a>
+          </motion.div>
+
+          {/* Footer Tagline */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.6, duration: 0.6 }}
-            className="text-center mt-8 text-sm text-text-tertiary"
+            transition={{ delay: 1.5 }}
+            className="text-center mt-16"
           >
-            <p>Borrow from the depths. Survive the storm.</p>
+            <p className="text-text-tertiary font-serif text-lg italic">
+              "Money without masters"
+            </p>
           </motion.div>
         </motion.div>
       </div>
@@ -270,92 +497,129 @@ export default function LaunchingSoonPage() {
   );
 }
 
-// Mystical animated background component
-function MysticalBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+// Enhanced Feature Card Component
+function FeatureCard({
+  feature,
+  index,
+}: {
+  feature: {
+    icon: any;
+    title: string;
+    description: string;
+    metric: string;
+    gradient: string;
+  };
+  index: number;
+}) {
+  const [isHovered, setIsHovered] = useState(false);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    interface Node {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-    }
-
-    const nodes: Node[] = [];
-    const maxNodes = 30;
-
-    for (let i = 0; i < 8; i++) {
-      nodes.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        life: 1,
-      });
-    }
-
-    const animate = () => {
-      ctx.fillStyle = 'rgba(5, 15, 5, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = nodes.length - 1; i >= 0; i--) {
-        const node = nodes[i];
-
-        node.x += node.vx;
-        node.y += node.vy;
-
-        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
-        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
-
-        for (let j = i + 1; j < nodes.length; j++) {
-          const other = nodes[j];
-          const dx = other.x - node.x;
-          const dy = other.y - node.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 200) {
-            const opacity = (1 - dist / 200) * 0.15;
-            ctx.strokeStyle = `rgba(42, 73, 48, ${opacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(other.x, other.y);
-            ctx.stroke();
-          }
-        }
-
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, 1.5, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(42, 73, 48, 0.4)';
-        ctx.fill();
-      }
-
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  };
 
   return (
-    <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6 + index * 0.15 }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="relative group"
+    >
+      {/* Cursor spotlight effect */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{
+          background: isHovered
+            ? `radial-gradient(200px circle at ${mouseX.get()}px ${mouseY.get()}px, rgba(42, 73, 48, 0.15), transparent 70%)`
+            : 'transparent',
+        }}
+      />
+
+      <Card
+        className={`p-6 backdrop-blur-xl bg-gradient-to-br ${feature.gradient} border-border/30 hover:border-primary/50 transition-all duration-500 relative overflow-hidden group-hover:shadow-xl group-hover:shadow-primary/5 h-full`}
+      >
+        {/* Corner accents */}
+        <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-primary/20 group-hover:border-primary/50 transition-colors" />
+        <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-primary/20 group-hover:border-primary/50 transition-colors" />
+
+        {/* Animated scan line */}
+        <motion.div
+          className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100"
+          animate={
+            isHovered
+              ? {
+                  top: ['0%', '100%'],
+                }
+              : {}
+          }
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'linear',
+          }}
+        />
+
+        <div className="relative z-10 h-full flex flex-col">
+          {/* Top: Icon and Title */}
+          <div className="flex items-start gap-4 mb-4">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 group-hover:border-primary/40 transition-all flex-shrink-0">
+              <feature.icon className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-text-primary mb-1 group-hover:text-primary transition-colors leading-tight">
+                {feature.title}
+              </h3>
+            </div>
+          </div>
+
+          {/* Middle: Description */}
+          <p className="text-sm text-text-tertiary leading-relaxed mb-4 flex-1">
+            {feature.description}
+          </p>
+
+          {/* Bottom: Metric and Progress */}
+          <div className="space-y-2.5 mt-auto">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono text-primary/70 uppercase tracking-wider">
+                Performance
+              </span>
+              <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full border border-primary/30 group-hover:bg-primary/20 transition-all">
+                {feature.metric}
+              </span>
+            </div>
+
+            {/* Progress indicator */}
+            <div className="flex gap-1.5">
+              {[...Array(4)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="h-1 flex-1 bg-primary/20 rounded-full"
+                  initial={{ scaleX: 0 }}
+                  animate={
+                    isHovered
+                      ? {
+                          scaleX: 1,
+                          backgroundColor: 'rgba(42, 73, 48, 0.5)',
+                        }
+                      : { scaleX: 0 }
+                  }
+                  transition={{
+                    delay: i * 0.1,
+                    duration: 0.3,
+                  }}
+                  style={{ transformOrigin: 'left' }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+    </motion.div>
   );
 }
