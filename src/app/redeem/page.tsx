@@ -117,11 +117,18 @@ export default function RedeemPage() {
   const redemptionFeeRate = 0.5; // 0.5%
 
   const vusdAmountNum = parseFloat(vusdAmount || '0');
-  const fee = vusdAmountNum * (redemptionFeeRate / 100);
-  const totalToBurn = vusdAmountNum + fee;
 
-  // Estimate SOL to receive (matches on-chain calculation now)
-  const estimatedReceiveSol = solPrice > 0 ? vusdAmountNum / solPrice : 0;
+  // Fee comes OUT of the input amount, not added on top
+  // If user inputs 20 vUSD total to burn:
+  // - Fee = 20 * 0.5% = 0.1 vUSD (burned as fee)
+  // - Redemption = 20 * 99.5% = 19.9 vUSD (actual value redeemed)
+  // - Total burned = 20 vUSD (19.9 + 0.1)
+  const totalToBurn = vusdAmountNum;
+  const fee = totalToBurn * (redemptionFeeRate / 100);
+  const actualRedemptionAmount = totalToBurn - fee;
+
+  // Estimate SOL to receive (based on actual redemption amount after fee)
+  const estimatedReceiveSol = solPrice > 0 ? actualRedemptionAmount / solPrice : 0;
   const estimatedReceiveLamports = Math.floor(estimatedReceiveSol * LAMPORTS_PER_SOL);
   const vaultLamports = Math.floor(vaultBalance * LAMPORTS_PER_SOL);
 
@@ -138,9 +145,8 @@ export default function RedeemPage() {
   // Validation - use vault balance
   const isValid = useMemo(() => {
     if (!vusdAmount || vusdAmountNum <= 0) return false;
-    if (vusdAmountNum > vusdBalance) return false;
     if (totalToBurn > vusdBalance) return false;
-    // Check if vault has enough SOL
+    // Check if vault has enough SOL for the actual redemption amount
     if (estimatedReceiveLamports > vaultLamports) return false;
     return true;
   }, [vusdAmount, vusdAmountNum, vusdBalance, totalToBurn, estimatedReceiveLamports, vaultLamports]);
@@ -253,7 +259,7 @@ export default function RedeemPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
               <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2 flex items-center gap-2">
                 <DollarSign className="w-3.5 h-3.5" />
@@ -331,8 +337,8 @@ export default function RedeemPage() {
                         How Redemption Works
                       </div>
                       <div className="text-xs text-text-tertiary">
-                        Redeem your vUSD at face value ($1) for SOL at the current market price. A{' '}
-                        {redemptionFeeRate}% redemption fee is burned.
+                        Redeem your vUSD at face value ($1) for SOL at current market price. A{' '}
+                        {redemptionFeeRate}% fee is deducted from your redemption amount.
                       </div>
                       {vaultBalance < totalCollateralSol && (
                         <div className="text-xs text-text-tertiary mt-2">
@@ -370,7 +376,14 @@ export default function RedeemPage() {
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                       <button
-                        onClick={() => setVusdAmount((vaultBalance * solPrice).toString())}
+                        onClick={() => {
+                          // Calculate max VUSD that can be redeemed based on vault balance
+                          const maxRedeemableVusd = Math.min(
+                            vusdBalance,
+                            vaultBalance * solPrice
+                          );
+                          setVusdAmount(maxRedeemableVusd.toFixed(2));
+                        }}
                         disabled={vaultBalance === 0}
                         className="px-2 py-1 bg-primary/10 hover:bg-primary/20 rounded-lg text-xs font-bold text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -401,6 +414,26 @@ export default function RedeemPage() {
                       </span>
                     </div>
                   )}
+
+                  {/* Quick Amount Buttons */}
+                  {vaultBalance > 0 && vusdBalance > 0 && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-text-tertiary">Quick amount:</span>
+                      {[25, 50, 75].map(percent => {
+                        const maxRedeemable = Math.min(vusdBalance, vaultBalance * solPrice);
+                        const amount = (maxRedeemable * percent) / 100;
+                        return (
+                          <button
+                            key={percent}
+                            onClick={() => setVusdAmount(amount.toFixed(2))}
+                            className="px-3 py-1 bg-elevated hover:bg-elevated/80 border border-border hover:border-primary/50 rounded-lg text-xs font-semibold text-text-secondary hover:text-primary transition-all"
+                          >
+                            {percent}%
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Arrow Divider */}
@@ -419,32 +452,41 @@ export default function RedeemPage() {
                         <span className="text-xs text-text-tertiary font-semibold">
                           You will receive
                         </span>
-                        <span className="text-xl font-bold text-success">
+                        <span className="text-xl font-bold text-success flex items-center gap-2">
+                          <span className="text-2xl">◎</span>
                           {formatNumber(estimatedReceiveSol, 6)} SOL
                         </span>
                       </div>
                       <div className="text-xs text-text-tertiary">
                         ≈ {formatUSD(estimatedReceiveSol * solPrice)} at current price
                       </div>
+                      {vaultBalance > 0 && (
+                        <div className="mt-2 pt-2 border-t border-success/20 flex items-center justify-between text-xs">
+                          <span className="text-text-tertiary">Vault remaining after</span>
+                          <span className="font-semibold text-text-primary">
+                            {formatNumber(Math.max(0, vaultBalance - estimatedReceiveSol), 4)} SOL
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-4 bg-base rounded-xl border border-border space-y-2">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-text-tertiary">vUSD to redeem</span>
+                        <span className="text-text-tertiary">Total to burn</span>
                         <span className="font-semibold text-text-primary">
-                          {formatNumber(vusdAmountNum, 2)} vUSD
+                          {formatNumber(totalToBurn, 2)} vUSD
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-text-tertiary">Redemption fee ({redemptionFeeRate}%)</span>
                         <span className="font-semibold text-warning">
-                          {formatNumber(fee, 2)} vUSD
+                          -{formatNumber(fee, 2)} vUSD
                         </span>
                       </div>
                       <div className="pt-2 border-t border-border/50 flex items-center justify-between text-xs">
-                        <span className="text-text-tertiary font-bold">Total to burn</span>
-                        <span className="font-bold text-text-primary">
-                          {formatNumber(totalToBurn, 2)} vUSD
+                        <span className="text-text-tertiary font-bold">Redemption</span>
+                        <span className="font-bold text-success">
+                          {formatNumber(actualRedemptionAmount, 2)} vUSD
                         </span>
                       </div>
                     </div>
@@ -452,11 +494,11 @@ export default function RedeemPage() {
                 )}
 
                 {/* Validation Warnings */}
-                {vusdAmount && parseFloat(vusdAmount) > vusdBalance && (
+                {vusdAmount && totalToBurn > vusdBalance && (
                   <div className="flex items-start gap-3 p-4 bg-error/10 rounded-xl border border-error/30 mb-6">
                     <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
                     <div className="text-xs font-semibold text-error">
-                      Insufficient vUSD balance
+                      Insufficient vUSD balance (need {formatNumber(totalToBurn, 2)} vUSD, have {formatNumber(vusdBalance, 2)} vUSD)
                     </div>
                   </div>
                 )}
@@ -482,12 +524,12 @@ export default function RedeemPage() {
                     'No SOL Available - Close Your Position First'
                   ) : !vusdAmount ? (
                     'Enter Amount to Redeem'
-                  ) : parseFloat(vusdAmount) > vusdBalance ? (
+                  ) : totalToBurn > vusdBalance ? (
                     'Insufficient vUSD Balance'
                   ) : estimatedReceiveLamports > vaultLamports ? (
                     `Only ${formatNumber(vaultBalance * solPrice, 2)} vUSD Worth Available`
                   ) : (
-                    `Redeem ${formatNumber(vusdAmountNum, 2)} vUSD`
+                    `Burn ${formatNumber(totalToBurn, 2)} vUSD → Receive ${formatNumber(estimatedReceiveSol, 4)} SOL`
                   )}
                 </Button>
               </Card>
@@ -551,7 +593,7 @@ export default function RedeemPage() {
                         <div>
                           <div className="font-semibold text-text-primary mb-1">Burn vUSD</div>
                           <div className="text-sm text-text-secondary">
-                            Your vUSD (plus {redemptionFeeRate}% fee) is burned, reducing total supply
+                            Your vUSD is burned ({redemptionFeeRate}% fee deducted from redemption value)
                           </div>
                         </div>
                       </div>
@@ -607,6 +649,10 @@ export default function RedeemPage() {
                       </div>
                     </div>
 
+                    <div className='text-sm text-pretty'>
+
+                    </div>
+
                     <div className="flex items-center justify-between p-3 bg-base rounded-xl">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -620,6 +666,19 @@ export default function RedeemPage() {
                       <div className="text-right">
                         <div className="text-lg font-bold text-text-primary">$1.00</div>
                         <div className="text-xs text-text-tertiary">Fixed peg</div>
+                      </div>
+                    </div>
+
+                    {/* Exchange Rate */}
+                    <div className="p-3 bg-gradient-to-r from-primary/10 to-success/10 rounded-xl border border-primary/30">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-text-tertiary font-semibold">Exchange Rate (after fee)</span>
+                        <span className="text-sm font-bold text-text-primary">
+                          1 vUSD = {formatNumber((1 / solPrice) * 0.995, 6)} SOL
+                        </span>
+                      </div>
+                      <div className="text-xs text-text-tertiary">
+                        Effective rate after {redemptionFeeRate}% fee deduction
                       </div>
                     </div>
                   </div>

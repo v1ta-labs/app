@@ -995,7 +995,8 @@
           }
         },
         {
-          "name": "position_owner"
+          "name": "position_owner",
+          "writable": true
         },
         {
           "name": "stability_pool",
