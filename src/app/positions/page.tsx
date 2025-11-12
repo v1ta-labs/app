@@ -119,6 +119,69 @@ export default function PositionsPage() {
         { id: toastId, duration: 5000 }
       );
 
+      // Create notification based on action
+      if (address) {
+        try {
+          if (debtDelta > 0) {
+            // Borrowed more
+            await fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                walletAddress: address,
+                type: 'BORROW_SUCCESS',
+                title: 'Borrow Successful',
+                message: `Successfully borrowed ${debtDelta.toFixed(2)} vUSD`,
+                link: `/transactions/${signature}`,
+              }),
+            });
+          } else if (debtDelta < 0) {
+            // Repaid debt
+            await fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                walletAddress: address,
+                type: 'REPAY_SUCCESS',
+                title: 'Repayment Successful',
+                message: `Successfully repaid ${Math.abs(debtDelta).toFixed(2)} vUSD`,
+                link: `/transactions/${signature}`,
+              }),
+            });
+          }
+
+          if (collateralDelta > 0) {
+            // Added collateral
+            await fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                walletAddress: address,
+                type: 'COLLATERAL_ADDED',
+                title: 'Collateral Added',
+                message: `Added ${collateralDelta.toFixed(4)} SOL as collateral`,
+                link: `/transactions/${signature}`,
+              }),
+            });
+          } else if (collateralDelta < 0) {
+            // Removed collateral
+            await fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                walletAddress: address,
+                type: 'COLLATERAL_REMOVED',
+                title: 'Collateral Removed',
+                message: `Removed ${Math.abs(collateralDelta).toFixed(4)} SOL from collateral`,
+                link: `/transactions/${signature}`,
+              }),
+            });
+          }
+        } catch (notifError) {
+          console.error('Failed to create notification:', notifError);
+        }
+      }
+
       setShowAdjustModal(false);
       setCollateralChange('');
       setDebtChange('');
@@ -175,6 +238,25 @@ export default function PositionsPage() {
         </div>,
         { id: toastId, duration: 5000 }
       );
+
+      // Create notification
+      if (address) {
+        try {
+          await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              walletAddress: address,
+              type: 'REPAY_SUCCESS',
+              title: 'Repayment Successful',
+              message: `Successfully repaid ${parseFloat(repayAmount).toFixed(2)} vUSD`,
+              link: `/transactions/${signature}`,
+            }),
+          });
+        } catch (notifError) {
+          console.error('Failed to create notification:', notifError);
+        }
+      }
 
       setShowRepayModal(false);
       setRepayAmount('');

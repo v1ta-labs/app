@@ -5,3 +5,5 @@ export { useVitaClient } from './use-vita-client';
 export { usePosition } from './use-position';
 export { useSolPrice } from './use-sol-price';
 export { useTransactions } from './use-transactions';
+export { useNotifications } from './useNotifications';
+export { useDialectNotifications } from './useDialectNotifications';

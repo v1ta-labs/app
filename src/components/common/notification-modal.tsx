@@ -1,80 +1,51 @@
 'use client';
 
 import * as Popover from '@radix-ui/react-popover';
-import { Bell, Check, X, ExternalLink } from 'lucide-react';
+import { Bell, Check, X, ExternalLink, Loader2, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useState } from 'react';
-
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-  type: 'info' | 'success' | 'warning' | 'error';
-  link?: string;
-}
+import { useNotifications } from '@/hooks';
+import { formatDistanceToNow } from 'date-fns';
+import { NotificationSettings } from './notification-settings';
 
 interface NotificationModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-// Mock notifications - replace with real data
-const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    title: 'Position Health Alert',
-    message: 'Your collateral ratio is approaching liquidation threshold',
-    timestamp: '2 hours ago',
-    read: false,
-    type: 'warning',
-    link: '/positions',
-  },
-  {
-    id: '2',
-    title: 'Borrow Successful',
-    message: 'Successfully borrowed 1,000 VUSD',
-    timestamp: '1 day ago',
-    read: true,
-    type: 'success',
-  },
-  {
-    id: '3',
-    title: 'Protocol Update',
-    message: 'New interest rate model deployed',
-    timestamp: '3 days ago',
-    read: true,
-    type: 'info',
-  },
-];
-
 export function NotificationModal({ open, onOpenChange }: NotificationModalProps) {
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    isConnected,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+  } = useNotifications();
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  const clearNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  const getTypeColor = (type: Notification['type']) => {
+  const getTypeColor = (type: string) => {
     switch (type) {
-      case 'success':
+      case 'BORROW_SUCCESS':
+      case 'REPAY_SUCCESS':
+      case 'COLLATERAL_ADDED':
         return 'text-success';
-      case 'warning':
+      case 'POSITION_HEALTH_WARNING':
         return 'text-warning';
-      case 'error':
+      case 'POSITION_LIQUIDATED':
         return 'text-error';
-      default:
+      case 'PROTOCOL_UPDATE':
+      case 'SYSTEM_ALERT':
         return 'text-primary';
+      default:
+        return 'text-text-primary';
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+    } catch {
+      return 'Recently';
     }
   };
 
@@ -104,6 +75,17 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
                   {unreadCount} new
                 </span>
               )}
+              {/* Real-time connection indicator */}
+              {isConnected ? (
+                <div className="flex items-center gap-1 text-[9px] text-success" title="Real-time updates active">
+                  <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
+                  <span className="font-medium">Live</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 text-[9px] text-text-tertiary" title="Reconnecting...">
+                  <WifiOff className="w-2.5 h-2.5" />
+                </div>
+              )}
             </div>
             {unreadCount > 0 && (
               <button
@@ -117,7 +99,12 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
 
           {/* Notifications List */}
           <div className="max-h-[400px] overflow-y-auto">
-            {notifications.length === 0 ? (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
+                <p className="text-sm text-text-tertiary">Loading notifications...</p>
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
                 <div className="w-12 h-12 rounded-xl bg-elevated border border-border/50 flex items-center justify-center mb-3">
                   <Bell className="w-6 h-6 text-text-tertiary" />
@@ -149,7 +136,7 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
                             {notification.title}
                           </h4>
                           <button
-                            onClick={() => clearNotification(notification.id)}
+                            onClick={() => deleteNotification(notification.id)}
                             className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-surface rounded"
                           >
                             <X className="w-3.5 h-3.5 text-text-tertiary hover:text-text-primary" />
@@ -160,7 +147,7 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
                         </p>
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-text-tertiary">
-                            {notification.timestamp}
+                            {formatTimestamp(notification.createdAt)}
                           </span>
                           <div className="flex items-center gap-2">
                             {!notification.read && (
@@ -175,6 +162,7 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
                             {notification.link && (
                               <a
                                 href={notification.link}
+                                onClick={() => onOpenChange(false)}
                                 className="text-[10px] font-medium text-primary hover:text-primary-hover transition-colors flex items-center gap-1"
                               >
                                 View
@@ -191,14 +179,10 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
             )}
           </div>
 
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-border/30">
-              <button className="w-full text-center text-xs font-medium text-primary hover:text-primary-hover transition-colors">
-                View all notifications
-              </button>
-            </div>
-          )}
+          {/* Footer - Settings */}
+          <div className="px-4 py-3 border-t border-border/30">
+            <NotificationSettings />
+          </div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

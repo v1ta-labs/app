@@ -28,6 +28,17 @@ enum TransactionType {
   REDEMPTION
 }
 
+enum NotificationType {
+  POSITION_HEALTH_WARNING
+  POSITION_LIQUIDATED
+  BORROW_SUCCESS
+  REPAY_SUCCESS
+  COLLATERAL_ADDED
+  COLLATERAL_REMOVED
+  PROTOCOL_UPDATE
+  SYSTEM_ALERT
+}
+
 model User {
   id              String    @id @default(cuid())
   walletAddress   String    @unique
@@ -40,8 +51,9 @@ model User {
   createdAt       DateTime  @default(now())
   lastLoginAt     DateTime  @default(now())
 
-  positions       Position[]
-  transactions    Transaction[]
+  positions         Position[]
+  transactions      Transaction[]
+  notifications     Notification[]
 
   @@index([walletAddress])
   @@index([username])
@@ -122,4 +134,27 @@ model PriceHistory {
   jitoSOLPrice Float?
 
   @@index([timestamp])
+}
+
+model Notification {
+  id              String           @id @default(cuid())
+  walletAddress   String
+  user            User             @relation(fields: [walletAddress], references: [walletAddress], onDelete: Cascade)
+
+  type            NotificationType
+  title           String
+  message         String
+  link            String?
+
+  read            Boolean          @default(false)
+  readAt          DateTime?
+
+  metadata        Json?            // Store additional data (transaction hash, amounts, etc.)
+
+  createdAt       DateTime         @default(now())
+  expiresAt       DateTime?        // Auto-delete after certain time
+
+  @@index([walletAddress, read])
+  @@index([createdAt])
+  @@index([type])
 }

@@ -6,6 +6,7 @@ import { ReownProvider } from '@/providers/reown-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
 import { QueryProvider } from '@/providers/query-provider';
+import { ServiceWorkerProvider } from '@/components/providers/service-worker-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${cormorant.variable} font-sans`}>
+        <ServiceWorkerProvider />
         <QueryProvider>
           <ReownProvider>
             <TooltipProvider>
@@ -44,6 +46,7 @@ export default function RootLayout({
               <Toaster
                 position="top-right"
                 theme="dark"
+                closeButton
                 toastOptions={{
                   style: {
                     background: 'var(--elevated)',
