@@ -41,10 +41,32 @@ export default function LiquidationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [liquidatingPosition, setLiquidatingPosition] = useState<string | null>(null);
   const [vusdBalance, setVusdBalance] = useState<number>(0);
+  const [stabilityPoolVusd, setStabilityPoolVusd] = useState<number>(0);
 
   const { isConnected, address } = useAppKitAccount();
   const { client: vitaClient } = useVitaClient();
   const { price: solPrice } = useSolPrice();
+
+  // Fetch stability pool vUSD
+  const fetchStabilityPoolVusd = useCallback(async () => {
+    if (!vitaClient) {
+      setStabilityPoolVusd(0);
+      return;
+    }
+
+    try {
+      const stabilityPool = await vitaClient.getStabilityPool();
+      if (stabilityPool) {
+        const vusdDeposited = stabilityPool.totalVusdDeposited.toNumber() / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS;
+        setStabilityPoolVusd(vusdDeposited);
+      } else {
+        setStabilityPoolVusd(0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stability pool vUSD:', error);
+      setStabilityPoolVusd(0);
+    }
+  }, [vitaClient]);
 
   // Fetch vUSD balance
   const fetchVusdBalance = useCallback(async () => {
@@ -136,13 +158,15 @@ export default function LiquidationsPage() {
   useEffect(() => {
     fetchAtRiskPositions();
     fetchVusdBalance();
+    fetchStabilityPoolVusd();
     // Refresh every 30 seconds
     const interval = setInterval(() => {
       fetchAtRiskPositions();
       fetchVusdBalance();
+      fetchStabilityPoolVusd();
     }, 30000);
     return () => clearInterval(interval);
-  }, [fetchAtRiskPositions, fetchVusdBalance]);
+  }, [fetchAtRiskPositions, fetchVusdBalance, fetchStabilityPoolVusd]);
 
   // Calculate stats
   const totalAtRisk = atRiskPositions.reduce((sum, p) => sum + p.collateralValue, 0);
@@ -158,6 +182,20 @@ export default function LiquidationsPage() {
   // Handle liquidation
   async function handleLiquidate(position: AtRiskPosition) {
     if (!vitaClient || !isConnected || liquidatingPosition) return;
+
+    // Check if stability pool has enough vUSD
+    if (stabilityPoolVusd < position.debt) {
+      toast.error(
+        <div>
+          <div className="font-semibold">Insufficient Stability Pool Funds</div>
+          <div className="text-xs mt-1">
+            Stability pool has {formatNumber(stabilityPoolVusd, 2)} vUSD but needs {formatNumber(position.debt, 2)} vUSD to liquidate this position
+          </div>
+        </div>,
+        { duration: 5000 }
+      );
+      return;
+    }
 
     // Check if user has enough vUSD to liquidate
     if (vusdBalance < position.debt) {
@@ -207,6 +245,7 @@ export default function LiquidationsPage() {
       setTimeout(() => {
         fetchAtRiskPositions();
         fetchVusdBalance();
+        fetchStabilityPoolVusd();
       }, 2000);
     } catch (error) {
       console.error('Liquidation failed:', error);
@@ -303,14 +342,14 @@ export default function LiquidationsPage() {
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
               <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2 flex items-center gap-2">
-                <Coins className="w-3.5 h-3.5" />
-                Your vUSD Balance
+                <Shield className="w-3.5 h-3.5" />
+                Stability Pool vUSD
               </div>
-              <div className="text-2xl font-bold text-primary">
-                {isLoading ? '-' : formatNumber(vusdBalance, 2)}
+              <div className="text-2xl font-bold text-success">
+                {isLoading ? '-' : formatNumber(stabilityPoolVusd, 2)}
               </div>
               <div className="text-xs text-text-tertiary mt-1">
-                {formatUSD(vusdBalance)} available to liquidate
+                {formatUSD(stabilityPoolVusd)} available for liquidations
               </div>
             </Card>
           </div>
@@ -454,10 +493,11 @@ export default function LiquidationsPage() {
                           disabled={
                             position.healthFactor >= 100 ||
                             liquidatingPosition === position.owner ||
-                            vusdBalance < position.debt
+                            vusdBalance < position.debt ||
+                            stabilityPoolVusd < position.debt
                           }
                           className={`gap-2 shrink-0 ${
-                            position.healthFactor < 100 && vusdBalance >= position.debt
+                            position.healthFactor < 100 && vusdBalance >= position.debt && stabilityPoolVusd >= position.debt
                               ? 'bg-error/20 text-error border border-error/40 hover:bg-error/30'
                               : 'bg-warning/20 text-warning border border-warning/40 hover:bg-warning/30 opacity-50 cursor-not-allowed'
                           }`}
@@ -466,6 +506,11 @@ export default function LiquidationsPage() {
                             <>
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               Liquidating...
+                            </>
+                          ) : stabilityPoolVusd < position.debt ? (
+                            <>
+                              <Shield className="w-3.5 h-3.5" />
+                              Pool: {formatNumber(stabilityPoolVusd, 2)} vUSD
                             </>
                           ) : vusdBalance < position.debt ? (
                             <>
