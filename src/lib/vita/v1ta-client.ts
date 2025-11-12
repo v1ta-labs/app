@@ -432,8 +432,8 @@ export class V1TAClient {
         liquidatorVusdAccount,
         protocolSolVault: this.pdas.protocolVault,
         priceUpdate: PYTH_SOL_USD_FEED,
-        systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
       })
       .rpc();
   }
