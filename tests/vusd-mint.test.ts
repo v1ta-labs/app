@@ -35,7 +35,10 @@ async function main() {
     // Try to request airdrop
     try {
       console.log('   Requesting airdrop...');
-      const airdropSignature = await connection.requestAirdrop(payer.publicKey, 2 * LAMPORTS_PER_SOL);
+      const airdropSignature = await connection.requestAirdrop(
+        payer.publicKey,
+        2 * LAMPORTS_PER_SOL
+      );
       const latestBlockhash = await connection.getLatestBlockhash();
       await connection.confirmTransaction({
         signature: airdropSignature,
@@ -99,7 +102,7 @@ async function main() {
 
     // Wait a bit for full confirmation
     console.log('⏳ Waiting for final confirmation...');
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Check vUSD balance after
     console.log('📊 Checking vUSD balance...');
@@ -160,7 +163,7 @@ async function main() {
 }
 
 // Run tests
-main().catch((error) => {
+main().catch(error => {
   console.error('Fatal error:', error);
   process.exit(1);
 });

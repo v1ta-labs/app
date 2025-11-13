@@ -13,10 +13,7 @@ export async function POST(request: NextRequest) {
     const walletAddress = searchParams.get('wallet');
 
     if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
     const result = await NotificationService.markAllAsRead(walletAddress);

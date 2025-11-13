@@ -141,7 +141,8 @@ export default function DebugPage() {
                   <div className="flex justify-between">
                     <span className="text-text-tertiary">Collateral:</span>
                     <span className="text-text-primary">
-                      {formatNumber(collateralSol, 4)} SOL ({formatUSD(health?.collateralValue || 0)})
+                      {formatNumber(collateralSol, 4)} SOL (
+                      {formatUSD(health?.collateralValue || 0)})
                     </span>
                   </div>
                   <div className="flex justify-between">

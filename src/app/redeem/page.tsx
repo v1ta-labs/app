@@ -36,7 +36,6 @@ export default function RedeemPage() {
   const { client: vitaClient } = useVitaClient();
   const { price: solPrice } = useSolPrice();
 
-
   // Fetch vUSD balance
   const fetchVusdBalance = useCallback(async () => {
     if (!vitaClient || !address || !isConnected) {
@@ -149,7 +148,14 @@ export default function RedeemPage() {
     // Check if vault has enough SOL for the actual redemption amount
     if (estimatedReceiveLamports > vaultLamports) return false;
     return true;
-  }, [vusdAmount, vusdAmountNum, vusdBalance, totalToBurn, estimatedReceiveLamports, vaultLamports]);
+  }, [
+    vusdAmount,
+    vusdAmountNum,
+    vusdBalance,
+    totalToBurn,
+    estimatedReceiveLamports,
+    vaultLamports,
+  ]);
 
   // Handle redeem
   async function handleRedeem() {
@@ -271,12 +277,16 @@ export default function RedeemPage() {
               <div className="text-xs text-text-tertiary mt-1">{formatUSD(vusdBalance)}</div>
             </Card>
 
-            <Card className={`p-4 backdrop-blur-xl border-border/50 ${vaultBalance === 0 ? 'bg-warning/5 border-warning/30' : 'bg-surface/70'}`}>
+            <Card
+              className={`p-4 backdrop-blur-xl border-border/50 ${vaultBalance === 0 ? 'bg-warning/5 border-warning/30' : 'bg-surface/70'}`}
+            >
               <div className="text-xs text-text-tertiary uppercase tracking-wider font-bold mb-2 flex items-center gap-2">
                 <Vault className="w-3.5 h-3.5" />
                 Available to Redeem
               </div>
-              <div className={`text-2xl font-bold ${vaultBalance === 0 ? 'text-warning' : 'text-text-primary'}`}>
+              <div
+                className={`text-2xl font-bold ${vaultBalance === 0 ? 'text-warning' : 'text-text-primary'}`}
+              >
                 {formatNumber(vaultBalance, 4)} SOL
               </div>
               <div className="text-xs text-text-tertiary mt-1">
@@ -343,8 +353,8 @@ export default function RedeemPage() {
                       {vaultBalance < totalCollateralSol && (
                         <div className="text-xs text-text-tertiary mt-2">
                           <span className="font-semibold">Note:</span>{' '}
-                          {formatNumber(totalCollateralSol - vaultBalance, 4)} SOL is locked in active
-                          positions and not available for redemption.
+                          {formatNumber(totalCollateralSol - vaultBalance, 4)} SOL is locked in
+                          active positions and not available for redemption.
                         </div>
                       )}
                     </div>
@@ -378,10 +388,7 @@ export default function RedeemPage() {
                       <button
                         onClick={() => {
                           // Calculate max VUSD that can be redeemed based on vault balance
-                          const maxRedeemableVusd = Math.min(
-                            vusdBalance,
-                            vaultBalance * solPrice
-                          );
+                          const maxRedeemableVusd = Math.min(vusdBalance, vaultBalance * solPrice);
                           setVusdAmount(maxRedeemableVusd.toFixed(2));
                         }}
                         disabled={vaultBalance === 0}
@@ -478,7 +485,9 @@ export default function RedeemPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-text-tertiary">Redemption fee ({redemptionFeeRate}%)</span>
+                        <span className="text-text-tertiary">
+                          Redemption fee ({redemptionFeeRate}%)
+                        </span>
                         <span className="font-semibold text-warning">
                           -{formatNumber(fee, 2)} vUSD
                         </span>
@@ -498,7 +507,8 @@ export default function RedeemPage() {
                   <div className="flex items-start gap-3 p-4 bg-error/10 rounded-xl border border-error/30 mb-6">
                     <AlertCircle className="w-5 h-5 text-error shrink-0 mt-0.5" />
                     <div className="text-xs font-semibold text-error">
-                      Insufficient vUSD balance (need {formatNumber(totalToBurn, 2)} vUSD, have {formatNumber(vusdBalance, 2)} vUSD)
+                      Insufficient vUSD balance (need {formatNumber(totalToBurn, 2)} vUSD, have{' '}
+                      {formatNumber(vusdBalance, 2)} vUSD)
                     </div>
                   </div>
                 )}
@@ -514,7 +524,12 @@ export default function RedeemPage() {
                 )}
 
                 {/* Action Button */}
-                <Button fullWidth size="lg" disabled={!isValid || isRedeeming || vaultBalance === 0} onClick={handleRedeem}>
+                <Button
+                  fullWidth
+                  size="lg"
+                  disabled={!isValid || isRedeeming || vaultBalance === 0}
+                  onClick={handleRedeem}
+                >
                   {isRedeeming ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -540,9 +555,7 @@ export default function RedeemPage() {
               {/* No SOL Available Info */}
               {vaultBalance === 0 && (
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary mb-4">
-                    Why Can't I Redeem?
-                  </h2>
+                  <h2 className="text-xl font-bold text-text-primary mb-4">Why Can't I Redeem?</h2>
                   <Card className="p-6 backdrop-blur-xl bg-gradient-to-br from-warning/5 to-surface/70 border-warning/30">
                     <div className="space-y-4">
                       <div className="flex gap-3">
@@ -554,8 +567,8 @@ export default function RedeemPage() {
                             All SOL is Locked
                           </div>
                           <div className="text-sm text-text-secondary">
-                            The {formatNumber(totalCollateralSol, 4)} SOL in the protocol is currently
-                            locked in active positions as collateral.
+                            The {formatNumber(totalCollateralSol, 4)} SOL in the protocol is
+                            currently locked in active positions as collateral.
                           </div>
                         </div>
                       </div>
@@ -565,7 +578,9 @@ export default function RedeemPage() {
                           <span className="text-xs font-bold text-primary">→</span>
                         </div>
                         <div>
-                          <div className="font-semibold text-text-primary mb-1">What You Can Do</div>
+                          <div className="font-semibold text-text-primary mb-1">
+                            What You Can Do
+                          </div>
                           <div className="text-sm text-text-secondary">
                             1. Close your position to release collateral to the vault
                             <br />
@@ -593,7 +608,8 @@ export default function RedeemPage() {
                         <div>
                           <div className="font-semibold text-text-primary mb-1">Burn vUSD</div>
                           <div className="text-sm text-text-secondary">
-                            Your vUSD is burned ({redemptionFeeRate}% fee deducted from redemption value)
+                            Your vUSD is burned ({redemptionFeeRate}% fee deducted from redemption
+                            value)
                           </div>
                         </div>
                       </div>
@@ -668,7 +684,9 @@ export default function RedeemPage() {
                     {/* Exchange Rate */}
                     <div className="p-3 bg-gradient-to-r from-primary/10 to-success/10 rounded-xl border border-primary/30">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-text-tertiary font-semibold">Exchange Rate (after fee)</span>
+                        <span className="text-xs text-text-tertiary font-semibold">
+                          Exchange Rate (after fee)
+                        </span>
                         <span className="text-sm font-bold text-text-primary">
                           1 vUSD = {formatNumber((1 / solPrice) * 0.995, 6)} SOL
                         </span>

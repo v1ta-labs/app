@@ -1,22 +1,22 @@
 // Service Worker for Push Notifications
 // This handles incoming push notifications when the app is in the background
 
-self.addEventListener('install', (event) => {
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(clients.claim());
 });
 
 // Handle push notifications
-self.addEventListener('push', (event) => {
+self.addEventListener('push', event => {
   let data = {};
 
   if (event.data) {
     try {
       data = event.data.json();
-    } catch (e) {
+    } catch (_e) {
       data = { title: 'V1ta Notification', body: event.data.text() };
     }
   }
@@ -30,19 +30,19 @@ self.addEventListener('push', (event) => {
     data: data.data || { url: '/' },
     vibrate: [200, 100, 200],
     requireInteraction: false,
-    actions: data.data?.url ? [
-      { action: 'view', title: 'View' },
-      { action: 'close', title: 'Dismiss' }
-    ] : [],
+    actions: data.data?.url
+      ? [
+          { action: 'view', title: 'View' },
+          { action: 'close', title: 'Dismiss' },
+        ]
+      : [],
   };
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
 // Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
   event.notification.close();
 
   // Handle action buttons
@@ -51,13 +51,11 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Navigate to the notification URL
-  const urlToOpen = new URL(
-    event.notification.data?.url || '/positions',
-    self.location.origin
-  ).href;
+  const urlToOpen = new URL(event.notification.data?.url || '/positions', self.location.origin)
+    .href;
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
       // Check if there's already a window open with the app
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
@@ -77,4 +75,3 @@ self.addEventListener('notificationclick', (event) => {
     })
   );
 });
-

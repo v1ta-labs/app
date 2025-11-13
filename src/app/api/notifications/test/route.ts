@@ -13,10 +13,7 @@ async function createTestNotifications(request: NextRequest) {
     const walletAddress = searchParams.get('wallet');
 
     if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
     // Ensure user exists in database first
@@ -39,7 +36,7 @@ async function createTestNotifications(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Database unavailable',
-          details: 'Please check your database connection'
+          details: 'Please check your database connection',
         },
         { status: 503 }
       );

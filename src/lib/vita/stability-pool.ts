@@ -190,7 +190,8 @@ export async function getStabilityPoolMetrics(
   for (const [collateralType, totalGain] of Object.entries(pool.totalCollateralGains)) {
     const userGain = calculateExpectedGains(userDeposit, pool.totalVusd, totalGain);
     const alreadyClaimed = deposit?.collateralGains[collateralType] || BigInt(0);
-    pendingGains[collateralType] = userGain > alreadyClaimed ? userGain - alreadyClaimed : BigInt(0);
+    pendingGains[collateralType] =
+      userGain > alreadyClaimed ? userGain - alreadyClaimed : BigInt(0);
   }
 
   // TODO: Calculate APR based on historical liquidation data

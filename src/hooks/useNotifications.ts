@@ -52,9 +52,7 @@ export function useNotifications(): UseNotificationsReturn {
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `/api/notifications?wallet=${address}&limit=50`
-      );
+      const response = await fetch(`/api/notifications?wallet=${address}&limit=50`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch notifications');
@@ -97,7 +95,7 @@ export function useNotifications(): UseNotificationsReturn {
       setIsConnected(true);
     };
 
-    eventSource.onmessage = (event) => {
+    eventSource.onmessage = event => {
       try {
         const data = JSON.parse(event.data);
 
@@ -112,41 +110,40 @@ export function useNotifications(): UseNotificationsReturn {
 
               // Detect new notifications (ones we haven't seen before)
               const currentIds = previousNotificationsRef.current;
-              const newOnes = newNotifications.filter(
-                (n) => !n.read && !currentIds.has(n.id)
-              );
+              const newOnes = newNotifications.filter(n => !n.read && !currentIds.has(n.id));
 
               // Update state
               setNotifications(newNotifications);
               setUnreadCount(data.data.unreadCount || 0);
 
               // Update tracked IDs
-              previousNotificationsRef.current = new Set(
-                newNotifications.map((n) => n.id)
-              );
+              previousNotificationsRef.current = new Set(newNotifications.map(n => n.id));
 
               // Show toast and browser notification for new ones
               // Skip on initial load (those are old notifications)
               if (newOnes.length > 0 && !isInitialLoadRef.current) {
-                newOnes.forEach((notification) => {
+                newOnes.forEach(notification => {
                   // Show toast notification with close button
                   toast(notification.title, {
                     description: notification.message,
                     duration: 5000,
                     dismissible: true,
                     closeButton: true,
-                    action: notification.link ? {
-                      label: 'View',
-                      onClick: () => {
-                        if (notification.link) {
-                          window.location.href = notification.link;
+                    action: notification.link
+                      ? {
+                          label: 'View',
+                          onClick: () => {
+                            if (notification.link) {
+                              window.location.href = notification.link;
+                            }
+                          },
                         }
-                      },
-                    } : undefined,
+                      : undefined,
                   });
 
                   // Show browser notification if enabled and permission granted
-                  const actualPermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+                  const actualPermission =
+                    typeof Notification !== 'undefined' ? Notification.permission : 'default';
                   const shouldShowBrowserNotification = actualPermission === 'granted';
 
                   if (shouldShowBrowserNotification) {
@@ -197,7 +194,7 @@ export function useNotifications(): UseNotificationsReturn {
       }
     };
 
-    eventSource.onerror = (error) => {
+    eventSource.onerror = error => {
       console.error('SSE connection error:', error);
       setIsConnected(false);
 
@@ -229,12 +226,9 @@ export function useNotifications(): UseNotificationsReturn {
       if (!address) return;
 
       try {
-        const response = await fetch(
-          `/api/notifications/${id}?wallet=${address}`,
-          {
-            method: 'PATCH',
-          }
-        );
+        const response = await fetch(`/api/notifications/${id}?wallet=${address}`, {
+          method: 'PATCH',
+        });
 
         if (!response.ok) {
           throw new Error('Failed to mark notification as read');
@@ -242,9 +236,7 @@ export function useNotifications(): UseNotificationsReturn {
 
         // Optimistically update local state
         setNotifications(prev =>
-          prev.map(n =>
-            n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n
-          )
+          prev.map(n => (n.id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n))
         );
         setUnreadCount(prev => Math.max(0, prev - 1));
       } catch (error) {
@@ -261,12 +253,9 @@ export function useNotifications(): UseNotificationsReturn {
     if (!address) return;
 
     try {
-      const response = await fetch(
-        `/api/notifications/mark-all-read?wallet=${address}`,
-        {
-          method: 'POST',
-        }
-      );
+      const response = await fetch(`/api/notifications/mark-all-read?wallet=${address}`, {
+        method: 'POST',
+      });
 
       if (!response.ok) {
         throw new Error('Failed to mark all notifications as read');
@@ -290,12 +279,9 @@ export function useNotifications(): UseNotificationsReturn {
       if (!address) return;
 
       try {
-        const response = await fetch(
-          `/api/notifications/${id}?wallet=${address}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        const response = await fetch(`/api/notifications/${id}?wallet=${address}`, {
+          method: 'DELETE',
+        });
 
         if (!response.ok) {
           throw new Error('Failed to delete notification');

@@ -20,7 +20,7 @@ export const Logotype = ({
   size = 'xl',
   showSubheading = true,
   interactive = true,
-  className = ''
+  className = '',
 }: LogotypeProps) => {
   const [transform, setTransform] = useState<React.CSSProperties>({});
 
@@ -56,7 +56,7 @@ export const Logotype = ({
       <div
         style={{
           transition: interactive ? 'transform 0.2s cubic-bezier(0.23, 1, 0.32, 1)' : 'none',
-          ...transform
+          ...transform,
         }}
       >
         <h1
@@ -65,13 +65,14 @@ export const Logotype = ({
             fontFamily: 'var(--font-cormorant), Georgia, serif',
             fontWeight: 400,
             fontVariantNumeric: 'lining-nums',
-            textShadow: size === 'sm'
-              ? '0 0 8px rgba(42, 73, 48, 0.3)'
-              : `
+            textShadow:
+              size === 'sm'
+                ? '0 0 8px rgba(42, 73, 48, 0.3)'
+                : `
               0 0 15px rgba(42, 73, 48, 0.4),
               0 0 30px rgba(42, 73, 48, 0.2)
             `,
-            letterSpacing: size === 'sm' ? '0.15em' : '0.2em'
+            letterSpacing: size === 'sm' ? '0.15em' : '0.2em',
           }}
         >
           v<span style={{ fontStyle: 'italic' }}>1</span>ta
@@ -82,7 +83,7 @@ export const Logotype = ({
           className="text-text-secondary text-sm font-light tracking-[0.4em] uppercase mt-6 animate-fadeInUp opacity-0"
           style={{
             animationDelay: '0.5s',
-            animationFillMode: 'forwards'
+            animationFillMode: 'forwards',
           }}
         >
           <span className="line-through opacity-50">CeDeFi</span> DeFi

@@ -117,10 +117,7 @@ export class PositionHealthMonitor {
   /**
    * Check health of a single position
    */
-  private async checkPositionHealth(
-    position: any,
-    solPrice: number
-  ): Promise<PositionHealth> {
+  private async checkPositionHealth(position: any, solPrice: number): Promise<PositionHealth> {
     // Calculate collateral value in USD
     const collateralValue = position.collateralAmount * solPrice;
 
@@ -183,10 +180,7 @@ export class PositionHealthMonitor {
    * Check if we should send a warning (avoid spam)
    * Only send if we haven't sent one in the last 4 hours
    */
-  private async shouldSendWarning(
-    walletAddress: string,
-    positionPubkey: string
-  ): Promise<boolean> {
+  private async shouldSendWarning(walletAddress: string, positionPubkey: string): Promise<boolean> {
     try {
       // Check last notification time from database
       const lastNotification = await db.notification.findFirst({

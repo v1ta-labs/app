@@ -1,9 +1,5 @@
 import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
-import {
-  VITA_PROGRAM_ID,
-  getPositionPda,
-  calculateCollateralRatioFromBigInt,
-} from './constants';
+import { VITA_PROGRAM_ID, getPositionPda, calculateCollateralRatioFromBigInt } from './constants';
 
 /**
  * Position State (matches on-chain account)

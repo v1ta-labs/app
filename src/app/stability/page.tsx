@@ -19,7 +19,7 @@ import {
   DollarSign,
   Award,
   Plus,
-  Minus
+  Minus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -162,12 +162,13 @@ export default function StabilityPoolPage() {
 
       toast.error(
         <div>
-          <div className="font-semibold">Deposit {isDuplicateError ? 'may have succeeded' : 'failed'}</div>
+          <div className="font-semibold">
+            Deposit {isDuplicateError ? 'may have succeeded' : 'failed'}
+          </div>
           <div className="text-xs mt-1">
             {isDuplicateError
               ? 'Please check your deposit balance - the transaction may have gone through'
-              : errorMessage
-            }
+              : errorMessage}
           </div>
         </div>,
         { id: toastId, duration: 5000 }
@@ -226,12 +227,13 @@ export default function StabilityPoolPage() {
 
       toast.error(
         <div>
-          <div className="font-semibold">Withdrawal {isDuplicateError ? 'may have succeeded' : 'failed'}</div>
+          <div className="font-semibold">
+            Withdrawal {isDuplicateError ? 'may have succeeded' : 'failed'}
+          </div>
           <div className="text-xs mt-1">
             {isDuplicateError
               ? 'Please check your deposit balance - the transaction may have gone through'
-              : errorMessage
-            }
+              : errorMessage}
           </div>
         </div>,
         { id: toastId, duration: 5000 }
@@ -253,17 +255,13 @@ export default function StabilityPoolPage() {
     ? poolData.totalVusdDeposited.toNumber() / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS
     : 0;
 
-  const totalRewards = poolData
-    ? poolData.totalSolRewards.toNumber() / LAMPORTS_PER_SOL
-    : 0;
+  const totalRewards = poolData ? poolData.totalSolRewards.toNumber() / LAMPORTS_PER_SOL : 0;
 
   const userDepositAmount = userDeposit
     ? userDeposit.amount.toNumber() / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS
     : 0;
 
-  const userRewards = userDeposit
-    ? userDeposit.solRewardEarned.toNumber() / LAMPORTS_PER_SOL
-    : 0;
+  const userRewards = userDeposit ? userDeposit.solRewardEarned.toNumber() / LAMPORTS_PER_SOL : 0;
 
   const userSharePercent = totalDeposited > 0 ? (userDepositAmount / totalDeposited) * 100 : 0;
 
@@ -322,9 +320,7 @@ export default function StabilityPoolPage() {
               <div className="text-2xl font-bold text-text-primary">
                 {formatNumber(totalDeposited, 2)} vUSD
               </div>
-              <div className="text-xs text-text-tertiary mt-1">
-                {formatUSD(totalDeposited)}
-              </div>
+              <div className="text-xs text-text-tertiary mt-1">{formatUSD(totalDeposited)}</div>
             </Card>
 
             <Card className="p-4 backdrop-blur-xl bg-surface/70 border-border/50">
@@ -350,7 +346,9 @@ export default function StabilityPoolPage() {
                 {formatNumber(userDepositAmount, 2)} vUSD
               </div>
               <div className="text-xs text-text-tertiary mt-1">
-                {userSharePercent > 0 ? `${formatNumber(userSharePercent, 2)}% of pool` : 'No deposit yet'}
+                {userSharePercent > 0
+                  ? `${formatNumber(userSharePercent, 2)}% of pool`
+                  : 'No deposit yet'}
               </div>
             </Card>
 
@@ -387,7 +385,8 @@ export default function StabilityPoolPage() {
                   <div>
                     <div className="font-semibold text-text-primary mb-1">Deposit vUSD</div>
                     <div className="text-sm text-text-secondary">
-                      Provide your vUSD to the Stability Pool to help maintain the protocol's stability
+                      Provide your vUSD to the Stability Pool to help maintain the protocol's
+                      stability
                     </div>
                   </div>
                 </div>
@@ -411,7 +410,8 @@ export default function StabilityPoolPage() {
                   <div>
                     <div className="font-semibold text-text-primary mb-1">Earn SOL Rewards</div>
                     <div className="text-sm text-text-secondary">
-                      In return, you receive the liquidated SOL collateral proportional to your pool share
+                      In return, you receive the liquidated SOL collateral proportional to your pool
+                      share
                     </div>
                   </div>
                 </div>
@@ -420,7 +420,8 @@ export default function StabilityPoolPage() {
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                     <div className="text-xs text-text-secondary">
-                      <span className="font-bold text-warning">Note:</span> Your vUSD deposit may decrease during liquidations, but you'll receive SOL in return at a discount.
+                      <span className="font-bold text-warning">Note:</span> Your vUSD deposit may
+                      decrease during liquidations, but you'll receive SOL in return at a discount.
                     </div>
                   </div>
                 </div>
@@ -450,7 +451,9 @@ export default function StabilityPoolPage() {
                         <div className="text-xl font-bold text-text-primary">
                           {formatNumber(userDepositAmount, 2)} vUSD
                         </div>
-                        <div className="text-xs text-text-tertiary">{formatUSD(userDepositAmount)}</div>
+                        <div className="text-xs text-text-tertiary">
+                          {formatUSD(userDepositAmount)}
+                        </div>
                       </div>
                       <div>
                         <div className="text-xs text-text-tertiary mb-1">SOL Earned</div>
@@ -467,8 +470,12 @@ export default function StabilityPoolPage() {
                   {/* Pool Share */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-text-tertiary font-semibold">Your Pool Share</span>
-                      <span className="text-sm font-bold text-text-primary">{formatNumber(userSharePercent, 2)}%</span>
+                      <span className="text-xs text-text-tertiary font-semibold">
+                        Your Pool Share
+                      </span>
+                      <span className="text-sm font-bold text-text-primary">
+                        {formatNumber(userSharePercent, 2)}%
+                      </span>
                     </div>
                     <div className="h-2 bg-base rounded-full overflow-hidden">
                       <div
@@ -508,10 +515,7 @@ export default function StabilityPoolPage() {
                   <p className="text-sm text-text-secondary mb-6">
                     Start earning SOL rewards by depositing vUSD to the Stability Pool
                   </p>
-                  <Button
-                    onClick={() => setShowDepositModal(true)}
-                    className="gap-2"
-                  >
+                  <Button onClick={() => setShowDepositModal(true)} className="gap-2">
                     <ArrowDownCircle className="w-4 h-4" />
                     Make First Deposit
                   </Button>
@@ -551,7 +555,10 @@ export default function StabilityPoolPage() {
                       Deposit Amount
                     </span>
                     <span className="text-xs text-text-tertiary">
-                      Available: <span className="font-semibold text-text-secondary">{formatNumber(vusdBalance, 2)} vUSD</span>
+                      Available:{' '}
+                      <span className="font-semibold text-text-secondary">
+                        {formatNumber(vusdBalance, 2)} vUSD
+                      </span>
                     </span>
                   </div>
 
@@ -606,7 +613,9 @@ export default function StabilityPoolPage() {
                     <div className="p-3 bg-error/10 rounded-xl border border-error/30">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="w-3.5 h-3.5 text-error" />
-                        <span className="text-xs font-bold text-error">Insufficient vUSD Balance</span>
+                        <span className="text-xs font-bold text-error">
+                          Insufficient vUSD Balance
+                        </span>
                       </div>
                     </div>
                   )}
@@ -675,7 +684,10 @@ export default function StabilityPoolPage() {
                       Withdrawal Amount
                     </span>
                     <span className="text-xs text-text-tertiary">
-                      Deposited: <span className="font-semibold text-text-secondary">{formatNumber(userDepositAmount, 2)} vUSD</span>
+                      Deposited:{' '}
+                      <span className="font-semibold text-text-secondary">
+                        {formatNumber(userDepositAmount, 2)} vUSD
+                      </span>
                     </span>
                   </div>
 
@@ -730,7 +742,9 @@ export default function StabilityPoolPage() {
                     <div className="p-3 bg-error/10 rounded-xl border border-error/30">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="w-3.5 h-3.5 text-error" />
-                        <span className="text-xs font-bold text-error">Amount exceeds your deposit</span>
+                        <span className="text-xs font-bold text-error">
+                          Amount exceeds your deposit
+                        </span>
                       </div>
                     </div>
                   )}

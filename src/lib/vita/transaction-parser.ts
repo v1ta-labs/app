@@ -126,8 +126,8 @@ export class TransactionParser {
   ): ParsedV1taTransaction | null {
     try {
       // Check if this transaction involves our program
-      const isV1taTransaction = tx.transaction.message.accountKeys.some(
-        key => key.pubkey.equals(this.programId)
+      const isV1taTransaction = tx.transaction.message.accountKeys.some(key =>
+        key.pubkey.equals(this.programId)
       );
 
       if (!isV1taTransaction) {
@@ -217,7 +217,10 @@ export class TransactionParser {
   /**
    * Parse transaction logs to extract data
    */
-  private parseLogsForData(logs: string[], type: V1taTransactionType): Partial<ParsedV1taTransaction> {
+  private parseLogsForData(
+    logs: string[],
+    type: V1taTransactionType
+  ): Partial<ParsedV1taTransaction> {
     const data: Partial<ParsedV1taTransaction> = {};
 
     try {

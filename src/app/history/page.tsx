@@ -75,9 +75,7 @@ export default function HistoryPage() {
     return {
       totalVolume,
       totalCount: transactions.length,
-      mostActiveType: mostActiveType
-        ? { type: mostActiveType[0], count: mostActiveType[1] }
-        : null,
+      mostActiveType: mostActiveType ? { type: mostActiveType[0], count: mostActiveType[1] } : null,
     };
   }, [transactions, solPrice]);
 
@@ -96,7 +94,7 @@ export default function HistoryPage() {
     return date.toLocaleDateString();
   };
 
-  const getTransactionDescription = (tx: typeof transactions[0]) => {
+  const getTransactionDescription = (tx: (typeof transactions)[0]) => {
     switch (tx.type) {
       case 'open_position':
         return `${formatNumber(tx.collateralAmount || 0, 4)} SOL collateral, ${formatNumber(tx.borrowAmount || 0, 2)} vUSD borrowed`;
@@ -119,7 +117,7 @@ export default function HistoryPage() {
     }
   };
 
-  const getTransactionValue = (tx: typeof transactions[0]) => {
+  const getTransactionValue = (tx: (typeof transactions)[0]) => {
     let value = 0;
     if (tx.collateralAmount) value += tx.collateralAmount * solPrice;
     if (tx.borrowAmount) value += tx.borrowAmount;
@@ -290,9 +288,7 @@ export default function HistoryPage() {
                             </div>
                             <div
                               className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
-                                tx.success
-                                  ? 'bg-success/10 text-success'
-                                  : 'bg-error/10 text-error'
+                                tx.success ? 'bg-success/10 text-success' : 'bg-error/10 text-error'
                               }`}
                             >
                               {tx.success ? '✓' : '✕'} {tx.success ? 'success' : 'failed'}

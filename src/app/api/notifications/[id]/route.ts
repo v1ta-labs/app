@@ -7,33 +7,22 @@ export const dynamic = 'force-dynamic';
  * PATCH /api/notifications/[id]?wallet=<address>
  * Mark a notification as read
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const walletAddress = searchParams.get('wallet');
 
     if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
-    const notification = await NotificationService.markAsRead(
-      params.id,
-      walletAddress
-    );
+    const notification = await NotificationService.markAsRead(id, walletAddress);
 
     return NextResponse.json(notification);
   } catch (error) {
     console.error('Error marking notification as read:', error);
-    return NextResponse.json(
-      { error: 'Failed to mark notification as read' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to mark notification as read' }, { status: 500 });
   }
 }
 
@@ -43,27 +32,22 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const searchParams = request.nextUrl.searchParams;
     const walletAddress = searchParams.get('wallet');
 
     if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
-    await NotificationService.delete(params.id, walletAddress);
+    await NotificationService.delete(id, walletAddress);
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting notification:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete notification' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete notification' }, { status: 500 });
   }
 }

@@ -24,7 +24,13 @@ import {
   calculateCollateralRatio,
   CollateralType,
 } from './constants';
-import type { GlobalState, Position, PositionHealth, StabilityPool, StabilityDeposit } from './types';
+import type {
+  GlobalState,
+  Position,
+  PositionHealth,
+  StabilityPool,
+  StabilityDeposit,
+} from './types';
 import IDL from './idl/v1ta_devnet.json';
 import { ReownWalletAdapter } from './reown-wallet-adapter';
 import { sanctumGateway } from '@/lib/sanctum';
@@ -77,7 +83,9 @@ export class V1TAClient {
       console.log('Using existing wallet adapter (already a proper Wallet)');
       wallet = walletProviderOrAdapter as Wallet;
     } else {
-      throw new Error('Invalid wallet provider - must provide publicKey or a proper Wallet adapter');
+      throw new Error(
+        'Invalid wallet provider - must provide publicKey or a proper Wallet adapter'
+      );
     }
 
     console.log('Creating AnchorProvider with wallet publicKey:', wallet.publicKey.toBase58());
@@ -108,7 +116,11 @@ export class V1TAClient {
   }
 
   // Open Position
-  async openPosition(collateralSol: number, borrowVusd: number, collateralType: CollateralType = CollateralType.NativeSOL) {
+  async openPosition(
+    collateralSol: number,
+    borrowVusd: number,
+    collateralType: CollateralType = CollateralType.NativeSOL
+  ) {
     console.log('=== openPosition Debug ===');
     console.log('Wallet publicKey:', this.provider.wallet.publicKey.toBase58());
     console.log('Collateral Type:', CollateralType[collateralType]);
@@ -131,8 +143,13 @@ export class V1TAClient {
     console.log('- protocolSolVault:', this.pdas.protocolVault.toBase58());
     console.log('- userVusdAccount:', userVusdAccount.toBase58());
 
-    console.log('Sending transaction via Anchor RPC (no compute budget - let Phantom handle it)...');
-    console.log('Sanctum Gateway:', this.options.useSanctumGateway ? 'ENABLED' : 'DISABLED (can enable for optimized delivery)');
+    console.log(
+      'Sending transaction via Anchor RPC (no compute budget - let Phantom handle it)...'
+    );
+    console.log(
+      'Sanctum Gateway:',
+      this.options.useSanctumGateway ? 'ENABLED' : 'DISABLED (can enable for optimized delivery)'
+    );
 
     try {
       // Convert CollateralType enum to Anchor format

@@ -138,9 +138,7 @@ export function LSTSelector({ selectedType, onSelect }: LSTSelectorProps) {
                       </div>
                     </div>
                   )}
-                  {option.type === selectedType && (
-                    <Check className="w-5 h-5 text-success" />
-                  )}
+                  {option.type === selectedType && <Check className="w-5 h-5 text-success" />}
                 </div>
               </button>
             ))}
@@ -149,12 +147,7 @@ export function LSTSelector({ selectedType, onSelect }: LSTSelectorProps) {
       </AnimatePresence>
 
       {/* Click outside to close */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />}
     </div>
   );
 }

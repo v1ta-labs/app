@@ -104,10 +104,7 @@ export function calculateCollateralRatio(
  * @param debt - Debt in VUSD (as bigint)
  * @returns Collateral ratio as percentage
  */
-export function calculateCollateralRatioFromBigInt(
-  collateralValue: bigint,
-  debt: bigint
-): number {
+export function calculateCollateralRatioFromBigInt(collateralValue: bigint, debt: bigint): number {
   if (debt === BigInt(0)) return Infinity;
   return Number((collateralValue * BigInt(100)) / debt);
 }

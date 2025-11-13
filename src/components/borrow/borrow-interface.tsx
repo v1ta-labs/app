@@ -9,7 +9,15 @@ import { AmountInput } from '@/components/ui/amount-input';
 import { StatDisplay } from '@/components/ui/stat-display';
 import { HealthGauge } from '@/components/ui/health-gauge';
 import { formatUSD, formatNumber } from '@/lib/utils/formatters';
-import { ArrowDown, Info, AlertTriangle, Zap, Loader2, CheckCircle2, ExternalLink } from 'lucide-react';
+import {
+  ArrowDown,
+  Info,
+  AlertTriangle,
+  Zap,
+  Loader2,
+  CheckCircle2,
+  ExternalLink,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { V1TAClient, CollateralType as V1TACollateralType } from '@/lib/vita';
 import { toast } from 'sonner';
@@ -67,7 +75,10 @@ export function BorrowInterface() {
   const [hasPosition, setHasPosition] = useState(false);
 
   // Create connection instance for devnet
-  const connection = useMemo(() => new Connection('https://api.devnet.solana.com', 'confirmed'), []);
+  const connection = useMemo(
+    () => new Connection('https://api.devnet.solana.com', 'confirmed'),
+    []
+  );
   const publicKey = useMemo(() => (address ? new PublicKey(address) : null), [address]);
 
   // Fetch wallet balance
@@ -176,7 +187,8 @@ export function BorrowInterface() {
 
   // Validation checks
   const hasInsufficientBalance = parseFloat(collateralAmount || '0') > selectedToken.balance;
-  const isBelowMinimum = parseFloat(collateralAmount || '0') > 0 && parseFloat(collateralAmount) < 0.01;
+  const isBelowMinimum =
+    parseFloat(collateralAmount || '0') > 0 && parseFloat(collateralAmount) < 0.01;
   const isValidTransaction =
     isConnected &&
     collateralAmount &&
@@ -195,7 +207,9 @@ export function BorrowInterface() {
       toast.error(
         <div>
           <div className="font-semibold">You already have a position</div>
-          <div className="text-xs mt-1">Please use the Adjust Position feature to modify your existing position.</div>
+          <div className="text-xs mt-1">
+            Please use the Adjust Position feature to modify your existing position.
+          </div>
         </div>,
         { duration: 5000 }
       );
@@ -222,13 +236,14 @@ export function BorrowInterface() {
       const borrowVusd = parseFloat(borrowAmount);
 
       // Convert UI CollateralType to V1TA CollateralType enum
-      const v1taCollateralType = collateralType === 'NativeSOL'
-        ? V1TACollateralType.NativeSOL
-        : collateralType === 'JitoSOL'
-        ? V1TACollateralType.JitoSOL
-        : collateralType === 'MarinadeSOL'
-        ? V1TACollateralType.MarinadeSOL
-        : V1TACollateralType.USDStar;
+      const v1taCollateralType =
+        collateralType === 'NativeSOL'
+          ? V1TACollateralType.NativeSOL
+          : collateralType === 'JitoSOL'
+            ? V1TACollateralType.JitoSOL
+            : collateralType === 'MarinadeSOL'
+              ? V1TACollateralType.MarinadeSOL
+              : V1TACollateralType.USDStar;
 
       toast.loading('Waiting for wallet approval...', { id: toastId });
 
@@ -366,10 +381,7 @@ export function BorrowInterface() {
               onMax={handleMaxCollateral}
               placeholder="0.00"
               leftElement={
-                <LSTSelector
-                  selectedType={collateralType}
-                  onSelect={setCollateralType}
-                />
+                <LSTSelector selectedType={collateralType} onSelect={setCollateralType} />
               }
             />
 
@@ -529,8 +541,9 @@ export function BorrowInterface() {
                 You already have an active position
               </div>
               <div className="text-xs text-text-secondary">
-                You currently have {formatNumber(userCollateral, 2)} SOL as collateral with {formatNumber(userDebt, 2)} VUSD borrowed.
-                To modify your position, use the Adjust Position feature.
+                You currently have {formatNumber(userCollateral, 2)} SOL as collateral with{' '}
+                {formatNumber(userDebt, 2)} VUSD borrowed. To modify your position, use the Adjust
+                Position feature.
               </div>
             </div>
           </div>
@@ -538,7 +551,7 @@ export function BorrowInterface() {
             fullWidth
             size="lg"
             variant="outline"
-            onClick={() => window.location.href = '/positions'}
+            onClick={() => (window.location.href = '/positions')}
             className="shadow-lg h-11 text-sm font-bold"
           >
             Go to Positions Page

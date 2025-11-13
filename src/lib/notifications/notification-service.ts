@@ -32,13 +32,13 @@ export class NotificationService {
           title: data.title,
           message: data.message,
           link: data.link,
-          metadata: data.metadata || null,
+          metadata: data.metadata || undefined,
           expiresAt: data.expiresAt,
         },
       });
 
       // Also send via Dialect for multi-channel delivery (async, don't wait)
-      this.sendViaDialect(data).catch((error) => {
+      this.sendViaDialect(data).catch(error => {
         console.error('Failed to send via Dialect:', error);
         // Don't fail the whole operation if Dialect fails
       });
@@ -134,11 +134,7 @@ export class NotificationService {
   /**
    * Create a borrow success notification
    */
-  static async notifyBorrowSuccess(
-    walletAddress: string,
-    amount: number,
-    signature: string
-  ) {
+  static async notifyBorrowSuccess(walletAddress: string, amount: number, signature: string) {
     return this.create({
       walletAddress,
       type: 'BORROW_SUCCESS',
@@ -152,11 +148,7 @@ export class NotificationService {
   /**
    * Create a repay success notification
    */
-  static async notifyRepaySuccess(
-    walletAddress: string,
-    amount: number,
-    signature: string
-  ) {
+  static async notifyRepaySuccess(walletAddress: string, amount: number, signature: string) {
     return this.create({
       walletAddress,
       type: 'REPAY_SUCCESS',
@@ -208,11 +200,7 @@ export class NotificationService {
   /**
    * Create a protocol update notification (broadcast to all users)
    */
-  static async notifyProtocolUpdate(
-    title: string,
-    message: string,
-    link?: string
-  ) {
+  static async notifyProtocolUpdate(title: string, message: string, link?: string) {
     // Get all user wallet addresses
     const users = await db.user.findMany({
       select: { walletAddress: true },

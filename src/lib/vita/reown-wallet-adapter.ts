@@ -23,7 +23,10 @@ export class ReownWalletAdapter {
       console.log('Transaction needs signing for:', this.publicKey.toBase58());
       console.log('Transaction type:', tx.constructor.name);
       console.log('Transaction has feePayer?', 'feePayer' in tx ? tx.feePayer : 'N/A');
-      console.log('Transaction has recentBlockhash?', 'recentBlockhash' in tx ? tx.recentBlockhash : 'N/A');
+      console.log(
+        'Transaction has recentBlockhash?',
+        'recentBlockhash' in tx ? tx.recentBlockhash : 'N/A'
+      );
 
       // Method 1: Try to access browser wallet directly (Phantom/Solflare in window)
       if (typeof window !== 'undefined') {
@@ -45,7 +48,7 @@ export class ReownWalletAdapter {
             console.log(`Signature ${index}:`, {
               publicKey: sig.publicKey?.toBase58(),
               hasSignature: !!sig.signature,
-              signatureLength: sig.signature?.length || 0
+              signatureLength: sig.signature?.length || 0,
             });
           });
 
@@ -115,19 +118,19 @@ export class ReownWalletAdapter {
         const phantomWallet = (window as any).phantom?.solana;
         if (phantomWallet && phantomWallet.publicKey?.toBase58() === this.publicKey.toBase58()) {
           console.log('Using window.phantom.solana.signAllTransactions');
-          return await phantomWallet.signAllTransactions(txs) as T[];
+          return (await phantomWallet.signAllTransactions(txs)) as T[];
         }
 
         const solflareWallet = (window as any).solflare;
         if (solflareWallet && solflareWallet.publicKey?.toBase58() === this.publicKey.toBase58()) {
           console.log('Using window.solflare.signAllTransactions');
-          return await solflareWallet.signAllTransactions(txs) as T[];
+          return (await solflareWallet.signAllTransactions(txs)) as T[];
         }
 
         const solanaWallet = (window as any).solana;
         if (solanaWallet && solanaWallet.publicKey?.toBase58() === this.publicKey.toBase58()) {
           console.log('Using window.solana.signAllTransactions');
-          return await solanaWallet.signAllTransactions(txs) as T[];
+          return (await solanaWallet.signAllTransactions(txs)) as T[];
         }
       }
 

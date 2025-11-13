@@ -130,7 +130,7 @@ export default function MaintenancePage() {
                 Under Maintenance
               </h1>
               <p className="text-lg md:text-xl text-text-secondary mb-2">
-                We're making V1ta Protocol even better
+                We&apos;re making V1ta Protocol even better
               </p>
               <p className="text-sm text-text-tertiary mb-12">
                 Our team is currently performing essential upgrades to enhance your experience
@@ -177,17 +177,13 @@ export default function MaintenancePage() {
                       <motion.div
                         animate={item.animate ? { rotate: 360 } : {}}
                         transition={
-                          item.animate
-                            ? { duration: 2, repeat: Infinity, ease: 'linear' }
-                            : {}
+                          item.animate ? { duration: 2, repeat: Infinity, ease: 'linear' } : {}
                         }
                         className="flex justify-center mb-2"
                       >
                         <item.icon className={`w-6 h-6 ${item.color}`} />
                       </motion.div>
-                      <h3 className="text-sm font-bold text-text-primary mb-1">
-                        {item.title}
-                      </h3>
+                      <h3 className="text-sm font-bold text-text-primary mb-1">{item.title}</h3>
                       <p className="text-xs text-text-tertiary capitalize">{item.status}</p>
                     </Card>
                   </motion.div>
@@ -205,13 +201,11 @@ export default function MaintenancePage() {
               <Card className="p-6 bg-elevated/50 border-warning/30 max-w-2xl mx-auto">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <AlertCircle className="w-5 h-5 text-warning" />
-                  <h3 className="text-lg font-semibold text-text-primary">
-                    Expected Return Time
-                  </h3>
+                  <h3 className="text-lg font-semibold text-text-primary">Expected Return Time</h3>
                 </div>
                 <p className="text-2xl font-bold text-warning mb-2">Within 2-4 hours</p>
                 <p className="text-xs text-text-tertiary">
-                  We'll be back shortly. Thank you for your patience.
+                  We&apos;ll be back shortly. Thank you for your patience.
                 </p>
               </Card>
             </motion.div>
@@ -223,11 +217,7 @@ export default function MaintenancePage() {
               transition={{ delay: 1.2, duration: 0.6 }}
               className="mb-8"
             >
-              <Button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="gap-2 px-6"
-              >
+              <Button onClick={handleRefresh} disabled={isRefreshing} className="gap-2 px-6">
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh Page'}
               </Button>
@@ -255,9 +245,7 @@ export default function MaintenancePage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5, duration: 0.6 }}
             >
-              <p className="text-sm text-text-tertiary mb-4">
-                Get real-time updates
-              </p>
+              <p className="text-sm text-text-tertiary mb-4">Get real-time updates</p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <Button
                   variant="outline"
@@ -265,8 +253,7 @@ export default function MaintenancePage() {
                   className="gap-2"
                   onClick={() => window.open('https://x.com/v1ta_fi', '_blank')}
                 >
-                  <Twitter className="w-4 h-4" />
-                  X
+                  <Twitter className="w-4 h-4" />X
                 </Button>
                 <Button
                   variant="outline"
@@ -390,7 +377,5 @@ function MysticalBackground() {
     };
   }, []);
 
-  return (
-    <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />
-  );
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
 }

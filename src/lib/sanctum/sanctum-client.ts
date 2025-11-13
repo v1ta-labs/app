@@ -30,7 +30,8 @@ const LST_DATA: Record<string, LSTMetadata> = {
     symbol: 'mSOL',
     name: 'Marinade Staked SOL',
     mint: LST_MINTS.mSOL,
-    logoUri: 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png',
+    logoUri:
+      'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So/logo.png',
     poolAddress: '8szGkuLTAux9XMgZ2vtY39jVSowEcpBfFfD8hXSEqdGC',
     validatorFee: 0,
     tvl: 0,
@@ -56,8 +57,8 @@ export class SanctumClient {
    * Get specific LST data by mint address or symbol
    */
   async getLST(mintOrSymbol: string): Promise<LSTMetadata> {
-    const lst = LST_DATA[mintOrSymbol] ||
-                Object.values(LST_DATA).find(l => l.mint === mintOrSymbol);
+    const lst =
+      LST_DATA[mintOrSymbol] || Object.values(LST_DATA).find(l => l.mint === mintOrSymbol);
 
     if (!lst) {
       throw new Error(`LST not found: ${mintOrSymbol}`);

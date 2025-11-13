@@ -27,7 +27,7 @@ export function MysticalBranches() {
   function initCanvas(canvas: HTMLCanvasElement, width: number, height: number) {
     const ctx = canvas.getContext('2d', {
       alpha: true,
-      desynchronized: true // Better performance
+      desynchronized: true, // Better performance
     });
     if (!ctx) return null;
 
@@ -83,8 +83,7 @@ export function MysticalBranches() {
       const rad2 = rad - angleVar;
 
       // Optimized bounds check - early return
-      if (nx < minX || nx > maxX || ny < minY || ny > maxY)
-        return;
+      if (nx < minX || nx > maxX || ny < minY || ny > maxY) return;
 
       // Use ternary for rate calculation (faster than if/else)
       const rate = counter.value <= MIN_BRANCH ? 0.8 : 0.5;
@@ -92,12 +91,10 @@ export function MysticalBranches() {
       const rand2 = random();
 
       // Left branch
-      if (rand1 < rate)
-        stepsRef.current.push(() => step(nx, ny, rad1, counter));
+      if (rand1 < rate) stepsRef.current.push(() => step(nx, ny, rad1, counter));
 
       // Right branch
-      if (rand2 < rate)
-        stepsRef.current.push(() => step(nx, ny, rad2, counter));
+      if (rand2 < rate) stepsRef.current.push(() => step(nx, ny, rad2, counter));
     };
 
     // Cache random calculation
@@ -198,10 +195,7 @@ export function MysticalBranches() {
         WebkitMaskImage: mask,
       }}
     >
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-      />
+      <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
 }

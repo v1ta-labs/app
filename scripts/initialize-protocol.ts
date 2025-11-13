@@ -16,7 +16,13 @@ const __dirname = path.dirname(__filename);
 
 // Import IDL
 import IDL from '../src/lib/vita/idl/v1ta_devnet.json' assert { type: 'json' };
-import { VITA_PROGRAM_ID, getGlobalStatePda, getVusdMintPda, getStabilityPoolPda, getProtocolVaultPda } from '../src/lib/vita/constants';
+import {
+  VITA_PROGRAM_ID,
+  getGlobalStatePda,
+  getVusdMintPda,
+  getStabilityPoolPda,
+  getProtocolVaultPda,
+} from '../src/lib/vita/constants';
 
 async function main() {
   console.log('🚀 Initializing V1TA Protocol on Devnet...\n');
@@ -100,7 +106,6 @@ async function main() {
     console.log('\nStability Pool:');
     console.log('  Total Deposits:', stabilityPoolAccount.totalDeposits.toString());
     console.log('  Total Collateral:', stabilityPoolAccount.totalCollateral.toString());
-
   } catch (error) {
     console.error('❌ Initialization failed:', error);
     if ((error as any).logs) {
@@ -116,7 +121,7 @@ main()
     console.log('\n🎉 Done!');
     process.exit(0);
   })
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
     process.exit(1);
   });

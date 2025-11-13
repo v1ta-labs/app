@@ -24,7 +24,7 @@ export function NotificationSettings() {
 
       if (success) {
         toast.success('Multi-channel notifications enabled!', {
-          description: 'You\'ll receive alerts via push, email, and in-app',
+          description: "You'll receive alerts via push, email, and in-app",
         });
       } else {
         toast.error('Failed to enable notifications');
@@ -62,9 +62,7 @@ export function NotificationSettings() {
         <Bell className="w-4 h-4 text-primary mt-0.5" />
         <div className="flex-1">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-xs font-semibold text-text-primary">
-              Notifications
-            </h3>
+            <h3 className="text-xs font-semibold text-text-primary">Notifications</h3>
             {isSubscribed && (
               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-success/10 text-success text-[9px] font-semibold">
                 <span className="w-1 h-1 bg-success rounded-full animate-pulse" />

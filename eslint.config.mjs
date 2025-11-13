@@ -37,6 +37,9 @@ const eslintConfig = [
       '.turbo/**',
       'next-env.d.ts',
       'prisma/migrations/**',
+      'scripts/**',
+      'tests/**',
+      'public/sw.js',
     ],
   },
 ];

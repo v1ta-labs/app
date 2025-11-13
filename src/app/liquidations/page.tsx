@@ -57,7 +57,8 @@ export default function LiquidationsPage() {
     try {
       const stabilityPool = await vitaClient.getStabilityPool();
       if (stabilityPool) {
-        const vusdDeposited = stabilityPool.totalVusdDeposited.toNumber() / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS;
+        const vusdDeposited =
+          stabilityPool.totalVusdDeposited.toNumber() / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS;
         setStabilityPoolVusd(vusdDeposited);
       } else {
         setStabilityPoolVusd(0);
@@ -189,7 +190,8 @@ export default function LiquidationsPage() {
         <div>
           <div className="font-semibold">Insufficient Stability Pool Funds</div>
           <div className="text-xs mt-1">
-            Stability pool has {formatNumber(stabilityPoolVusd, 2)} vUSD but needs {formatNumber(position.debt, 2)} vUSD to liquidate this position
+            Stability pool has {formatNumber(stabilityPoolVusd, 2)} vUSD but needs{' '}
+            {formatNumber(position.debt, 2)} vUSD to liquidate this position
           </div>
         </div>,
         { duration: 5000 }
@@ -203,8 +205,8 @@ export default function LiquidationsPage() {
         <div>
           <div className="font-semibold">Insufficient vUSD Balance</div>
           <div className="text-xs mt-1">
-            You need {formatNumber(position.debt, 2)} vUSD to liquidate this position, but you only have{' '}
-            {formatNumber(vusdBalance, 2)} vUSD
+            You need {formatNumber(position.debt, 2)} vUSD to liquidate this position, but you only
+            have {formatNumber(vusdBalance, 2)} vUSD
           </div>
         </div>,
         { duration: 5000 }
@@ -323,7 +325,9 @@ export default function LiquidationsPage() {
                 <Flame className="w-3.5 h-3.5" />
                 Avg Health Factor
               </div>
-              <div className={`text-2xl font-bold ${avgHealthFactor < 100 ? 'text-error' : avgHealthFactor < 110 ? 'text-warning' : 'text-success'}`}>
+              <div
+                className={`text-2xl font-bold ${avgHealthFactor < 100 ? 'text-error' : avgHealthFactor < 110 ? 'text-warning' : 'text-success'}`}
+              >
                 {isLoading ? '-' : avgHealthFactor.toFixed(0)}%
               </div>
               <div className="text-xs text-text-tertiary mt-1">
@@ -391,9 +395,12 @@ export default function LiquidationsPage() {
                   // Empty state
                   <Card className="p-12 text-center backdrop-blur-xl bg-surface/70 border-border/50">
                     <Shield className="w-12 h-12 mx-auto mb-4 text-success opacity-50" />
-                    <h3 className="text-lg font-bold text-text-primary mb-2">All Positions Healthy!</h3>
+                    <h3 className="text-lg font-bold text-text-primary mb-2">
+                      All Positions Healthy!
+                    </h3>
                     <p className="text-sm text-text-secondary">
-                      No positions are currently at risk of liquidation. All collateral ratios are above 120%.
+                      No positions are currently at risk of liquidation. All collateral ratios are
+                      above 120%.
                     </p>
                   </Card>
                 ) : (
@@ -404,129 +411,137 @@ export default function LiquidationsPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                     >
-                      <Card className={`p-5 backdrop-blur-xl border ${
-                        position.healthFactor < 100
-                          ? 'bg-error/5 border-error/30'
-                          : 'bg-surface/70 border-warning/30'
-                      }`}>
-                      <div className="flex items-start gap-4">
-                        {/* Warning Icon */}
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                      <Card
+                        className={`p-5 backdrop-blur-xl border ${
                           position.healthFactor < 100
-                            ? 'bg-error/20'
-                            : 'bg-warning/10'
-                        }`}>
-                          <AlertTriangle className={`w-6 h-6 ${
-                            position.healthFactor < 100 ? 'text-error' : 'text-warning'
-                          }`} />
-                        </div>
-
-                        {/* Position Info */}
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div>
-                            <div className="text-xs text-text-tertiary mb-1">Position Owner</div>
-                            <div className="text-sm font-mono font-bold text-text-primary">
-                              {position.owner.slice(0, 4)}...{position.owner.slice(-4)}
-                            </div>
-                            <div className="text-xs text-text-tertiary mt-1">
-                              {position.collateral} collateral
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-text-tertiary mb-1">Collateral</div>
-                            <div className="text-sm font-bold text-text-primary">
-                              {formatNumber(position.collateralAmount, 4)} {position.collateral}
-                            </div>
-                            <div className="text-xs text-text-tertiary">
-                              {formatUSD(position.collateralValue)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-text-tertiary mb-1">Debt</div>
-                            <div className="text-sm font-bold text-text-primary">
-                              {formatNumber(position.debt, 2)} vUSD
-                            </div>
-                            <div className="text-xs text-text-tertiary">
-                              {formatUSD(position.debt)}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Health Factor */}
-                        <div className="w-48 shrink-0">
-                          <div className={`p-3 bg-base rounded-xl border ${
-                            position.healthFactor < 100
-                              ? 'border-error/30'
-                              : 'border-warning/30'
-                          }`}>
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-bold text-text-primary">Health</span>
-                              <span className={`text-lg font-bold ${
+                            ? 'bg-error/5 border-error/30'
+                            : 'bg-surface/70 border-warning/30'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Warning Icon */}
+                          <div
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                              position.healthFactor < 100 ? 'bg-error/20' : 'bg-warning/10'
+                            }`}
+                          >
+                            <AlertTriangle
+                              className={`w-6 h-6 ${
                                 position.healthFactor < 100 ? 'text-error' : 'text-warning'
-                              }`}>
-                                {position.healthFactor.toFixed(1)}%
-                              </span>
+                              }`}
+                            />
+                          </div>
+
+                          {/* Position Info */}
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <div className="text-xs text-text-tertiary mb-1">Position Owner</div>
+                              <div className="text-sm font-mono font-bold text-text-primary">
+                                {position.owner.slice(0, 4)}...{position.owner.slice(-4)}
+                              </div>
+                              <div className="text-xs text-text-tertiary mt-1">
+                                {position.collateral} collateral
+                              </div>
                             </div>
-                            <div className="h-1.5 bg-surface rounded-full overflow-hidden mb-2">
-                              <div
-                                className={`h-full transition-all ${
-                                  position.healthFactor < 100 ? 'bg-error' : 'bg-warning'
-                                }`}
-                                style={{ width: `${Math.min(position.healthFactor, 100)}%` }}
-                              />
+                            <div>
+                              <div className="text-xs text-text-tertiary mb-1">Collateral</div>
+                              <div className="text-sm font-bold text-text-primary">
+                                {formatNumber(position.collateralAmount, 4)} {position.collateral}
+                              </div>
+                              <div className="text-xs text-text-tertiary">
+                                {formatUSD(position.collateralValue)}
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between text-xs">
-                              <span className="text-text-tertiary">
-                                CR: {position.collateralRatio.toFixed(1)}%
-                              </span>
-                              <span className="text-success font-semibold">
-                                +8% bonus
-                              </span>
+                            <div>
+                              <div className="text-xs text-text-tertiary mb-1">Debt</div>
+                              <div className="text-sm font-bold text-text-primary">
+                                {formatNumber(position.debt, 2)} vUSD
+                              </div>
+                              <div className="text-xs text-text-tertiary">
+                                {formatUSD(position.debt)}
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Liquidate Button */}
-                        <Button
-                          size="sm"
-                          onClick={() => handleLiquidate(position)}
-                          disabled={
-                            position.healthFactor >= 100 ||
-                            liquidatingPosition === position.owner ||
-                            vusdBalance < position.debt ||
-                            stabilityPoolVusd < position.debt
-                          }
-                          className={`gap-2 shrink-0 ${
-                            position.healthFactor < 100 && vusdBalance >= position.debt && stabilityPoolVusd >= position.debt
-                              ? 'bg-error/20 text-error border border-error/40 hover:bg-error/30'
-                              : 'bg-warning/20 text-warning border border-warning/40 hover:bg-warning/30 opacity-50 cursor-not-allowed'
-                          }`}
-                        >
-                          {liquidatingPosition === position.owner ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                              Liquidating...
-                            </>
-                          ) : stabilityPoolVusd < position.debt ? (
-                            <>
-                              <Shield className="w-3.5 h-3.5" />
-                              Pool: {formatNumber(stabilityPoolVusd, 2)} vUSD
-                            </>
-                          ) : vusdBalance < position.debt ? (
-                            <>
-                              <Coins className="w-3.5 h-3.5" />
-                              Need {formatNumber(position.debt, 2)} vUSD
-                            </>
-                          ) : (
-                            <>
-                              <Flame className="w-3.5 h-3.5" />
-                              {position.healthFactor < 100 ? 'Liquidate Now' : 'Not Yet'}
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </Card>
-                  </motion.div>
+                          {/* Health Factor */}
+                          <div className="w-48 shrink-0">
+                            <div
+                              className={`p-3 bg-base rounded-xl border ${
+                                position.healthFactor < 100
+                                  ? 'border-error/30'
+                                  : 'border-warning/30'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold text-text-primary">Health</span>
+                                <span
+                                  className={`text-lg font-bold ${
+                                    position.healthFactor < 100 ? 'text-error' : 'text-warning'
+                                  }`}
+                                >
+                                  {position.healthFactor.toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="h-1.5 bg-surface rounded-full overflow-hidden mb-2">
+                                <div
+                                  className={`h-full transition-all ${
+                                    position.healthFactor < 100 ? 'bg-error' : 'bg-warning'
+                                  }`}
+                                  style={{ width: `${Math.min(position.healthFactor, 100)}%` }}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-text-tertiary">
+                                  CR: {position.collateralRatio.toFixed(1)}%
+                                </span>
+                                <span className="text-success font-semibold">+8% bonus</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Liquidate Button */}
+                          <Button
+                            size="sm"
+                            onClick={() => handleLiquidate(position)}
+                            disabled={
+                              position.healthFactor >= 100 ||
+                              liquidatingPosition === position.owner ||
+                              vusdBalance < position.debt ||
+                              stabilityPoolVusd < position.debt
+                            }
+                            className={`gap-2 shrink-0 ${
+                              position.healthFactor < 100 &&
+                              vusdBalance >= position.debt &&
+                              stabilityPoolVusd >= position.debt
+                                ? 'bg-error/20 text-error border border-error/40 hover:bg-error/30'
+                                : 'bg-warning/20 text-warning border border-warning/40 hover:bg-warning/30 opacity-50 cursor-not-allowed'
+                            }`}
+                          >
+                            {liquidatingPosition === position.owner ? (
+                              <>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                Liquidating...
+                              </>
+                            ) : stabilityPoolVusd < position.debt ? (
+                              <>
+                                <Shield className="w-3.5 h-3.5" />
+                                Pool: {formatNumber(stabilityPoolVusd, 2)} vUSD
+                              </>
+                            ) : vusdBalance < position.debt ? (
+                              <>
+                                <Coins className="w-3.5 h-3.5" />
+                                Need {formatNumber(position.debt, 2)} vUSD
+                              </>
+                            ) : (
+                              <>
+                                <Flame className="w-3.5 h-3.5" />
+                                {position.healthFactor < 100 ? 'Liquidate Now' : 'Not Yet'}
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </Card>
+                    </motion.div>
                   ))
                 )}
               </div>
@@ -559,7 +574,9 @@ export default function LiquidationsPage() {
                         <Coins className="w-6 h-6 text-success" />
                       </div>
                       <div>
-                        <div className="text-xs text-text-tertiary mb-1">Total Liquidation Bonus</div>
+                        <div className="text-xs text-text-tertiary mb-1">
+                          Total Liquidation Bonus
+                        </div>
                         <div className="text-2xl font-bold text-success">
                           {formatUSD(
                             filteredPositions
@@ -570,9 +587,12 @@ export default function LiquidationsPage() {
                       </div>
                     </div>
                     <div className="text-xs text-text-secondary">
-                      Liquidate {filteredPositions.filter(p => p.healthFactor < 100).length} position
-                      {filteredPositions.filter(p => p.healthFactor < 100).length !== 1 ? 's' : ''} to
-                      earn an 8% bonus on the debt repaid.
+                      Liquidate {filteredPositions.filter(p => p.healthFactor < 100).length}{' '}
+                      position
+                      {filteredPositions.filter(p => p.healthFactor < 100).length !== 1
+                        ? 's'
+                        : ''}{' '}
+                      to earn an 8% bonus on the debt repaid.
                     </div>
                   </Card>
                 </div>
@@ -588,7 +608,9 @@ export default function LiquidationsPage() {
                         <span className="text-xs font-bold text-primary">1</span>
                       </div>
                       <div>
-                        <div className="font-semibold text-text-primary mb-1">Monitor Positions</div>
+                        <div className="font-semibold text-text-primary mb-1">
+                          Monitor Positions
+                        </div>
                         <div className="text-sm text-text-secondary">
                           Watch for positions where health factor drops below 100% (CR &lt; 110%)
                         </div>
@@ -602,7 +624,7 @@ export default function LiquidationsPage() {
                       <div>
                         <div className="font-semibold text-text-primary mb-1">Repay Debt</div>
                         <div className="text-sm text-text-secondary">
-                          You repay the position's vUSD debt to liquidate it
+                          You repay the position&apos;s vUSD debt to liquidate it
                         </div>
                       </div>
                     </div>

@@ -143,9 +143,7 @@ export function useDialectNotifications(): UseDialectNotificationsReturn {
 
       // For now, fallback to our local database
       // In production, this would fetch from Dialect API with proper auth
-      const response = await fetch(
-        `/api/notifications?wallet=${address}&limit=50`
-      );
+      const response = await fetch(`/api/notifications?wallet=${address}&limit=50`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch notifications');
@@ -154,19 +152,25 @@ export function useDialectNotifications(): UseDialectNotificationsReturn {
       const data = await response.json();
 
       // Transform to Dialect notification format
-      const dialectNotifications: DialectNotification[] = (data.notifications || []).map((n: any) => ({
-        id: n.id,
-        title: n.title,
-        body: n.message,
-        timestamp: n.createdAt,
-        read: n.read,
-        data: n.metadata,
-        actions: n.link ? [{
-          type: 'link' as const,
-          label: 'View',
-          url: n.link,
-        }] : undefined,
-      }));
+      const dialectNotifications: DialectNotification[] = (data.notifications || []).map(
+        (n: any) => ({
+          id: n.id,
+          title: n.title,
+          body: n.message,
+          timestamp: n.createdAt,
+          read: n.read,
+          data: n.metadata,
+          actions: n.link
+            ? [
+                {
+                  type: 'link' as const,
+                  label: 'View',
+                  url: n.link,
+                },
+              ]
+            : undefined,
+        })
+      );
 
       setNotifications(dialectNotifications);
       setUnreadCount(data.unreadCount || 0);
@@ -186,9 +190,7 @@ export function useDialectNotifications(): UseDialectNotificationsReturn {
 
       try {
         // Update local state optimistically
-        setNotifications(prev =>
-          prev.map(n => (n.id === id ? { ...n, read: true } : n))
-        );
+        setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
         setUnreadCount(prev => Math.max(0, prev - 1));
 
         // Update via API

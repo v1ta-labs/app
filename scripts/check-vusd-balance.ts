@@ -16,10 +16,7 @@ async function main() {
   const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
   // Derive vUSD mint PDA
-  const [vusdMint] = PublicKey.findProgramAddressSync(
-    [Buffer.from(VUSD_MINT_SEED)],
-    PROGRAM_ID
-  );
+  const [vusdMint] = PublicKey.findProgramAddressSync([Buffer.from(VUSD_MINT_SEED)], PROGRAM_ID);
 
   console.log('vUSD Mint:', vusdMint.toBase58());
   console.log('User Wallet:', userWallet);

@@ -190,9 +190,7 @@ export default function LaunchingSoonPage() {
                     transition={{ delay: 1.2 + i * 0.1, duration: 0.4 }}
                   >
                     <Card className="p-4 bg-elevated/30 border-border/20 h-full">
-                      <h3 className="text-sm font-bold text-text-primary mb-2">
-                        {feature.title}
-                      </h3>
+                      <h3 className="text-sm font-bold text-text-primary mb-2">{feature.title}</h3>
                       <p className="text-xs text-text-tertiary">{feature.description}</p>
                     </Card>
                   </motion.div>
@@ -230,8 +228,7 @@ export default function LaunchingSoonPage() {
                   className="gap-2"
                   onClick={() => window.open('https://x.com/v1ta_fi', '_blank')}
                 >
-                  <Twitter className="w-4 h-4" />
-                  X
+                  <Twitter className="w-4 h-4" />X
                 </Button>
                 <Button
                   variant="outline"
@@ -355,7 +352,5 @@ function MysticalBackground() {
     };
   }, []);
 
-  return (
-    <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />
-  );
+  return <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none" />;
 }

@@ -60,7 +60,7 @@ async function main() {
       // Read debt (u64 at offset 40)
       const debtBuffer = accountInfo.data.slice(40, 48);
       const debt = Buffer.from(debtBuffer).readBigUInt64LE();
-      const debtVusd = Number(debt) / (10 ** PROTOCOL_PARAMS.VUSD_DECIMALS);
+      const debtVusd = Number(debt) / 10 ** PROTOCOL_PARAMS.VUSD_DECIMALS;
 
       console.log('📊 Position Data (decoded):');
       console.log('   Collateral:', collateralSol.toFixed(4), 'SOL');
@@ -73,7 +73,6 @@ async function main() {
         console.log('✅ Position looks valid with collateral and debt!');
       }
     }
-
   } catch (error) {
     console.error('❌ Error checking position:', error);
     process.exit(1);

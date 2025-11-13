@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
 
     if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Wallet address is required' }, { status: 400 });
     }
 
     try {
@@ -63,10 +60,7 @@ export async function POST(request: NextRequest) {
     const { walletAddress, type, title, message, link, metadata } = body;
 
     if (!walletAddress || !type || !title || !message) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const notification = await NotificationService.create({
@@ -81,9 +75,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(notification, { status: 201 });
   } catch (error) {
     console.error('Error creating notification:', error);
-    return NextResponse.json(
-      { error: 'Failed to create notification' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
   }
 }

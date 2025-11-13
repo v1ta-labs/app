@@ -195,7 +195,7 @@ select {
   }
 
   /* Make cards and modals more mobile-friendly */
-  [role="dialog"],
+  [role='dialog'],
   .modal {
     max-width: 95vw;
     max-height: 90vh;
@@ -223,7 +223,7 @@ select {
 
   /* Make buttons more touch-friendly */
   button,
-  [role="button"] {
+  [role='button'] {
     min-height: 44px;
     min-width: 44px;
   }
@@ -266,8 +266,8 @@ select {
   /* Larger touch targets */
   button,
   a,
-  [role="button"],
-  [role="link"] {
+  [role='button'],
+  [role='link'] {
     min-height: 44px;
     padding: 0.75rem 1rem;
   }

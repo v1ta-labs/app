@@ -52,8 +52,12 @@ export function HeroSection() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div>
-                  <div className="text-[9px] sm:text-[10px] text-text-tertiary mb-1 sm:mb-1.5">Total Value</div>
-                  <div className="text-lg sm:text-xl font-bold text-text-primary mb-0.5 sm:mb-1">{formatUSD(0)}</div>
+                  <div className="text-[9px] sm:text-[10px] text-text-tertiary mb-1 sm:mb-1.5">
+                    Total Value
+                  </div>
+                  <div className="text-lg sm:text-xl font-bold text-text-primary mb-0.5 sm:mb-1">
+                    {formatUSD(0)}
+                  </div>
                   <div className="flex items-center gap-1 text-success text-[9px] sm:text-[10px] font-semibold">
                     <TrendingUp className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
                     <span className="hidden sm:inline">+0% (24h)</span>

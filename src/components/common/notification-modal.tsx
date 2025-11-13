@@ -77,12 +77,18 @@ export function NotificationModal({ open, onOpenChange }: NotificationModalProps
               )}
               {/* Real-time connection indicator */}
               {isConnected ? (
-                <div className="flex items-center gap-1 text-[9px] text-success" title="Real-time updates active">
+                <div
+                  className="flex items-center gap-1 text-[9px] text-success"
+                  title="Real-time updates active"
+                >
                   <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
                   <span className="font-medium">Live</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1 text-[9px] text-text-tertiary" title="Reconnecting...">
+                <div
+                  className="flex items-center gap-1 text-[9px] text-text-tertiary"
+                  title="Reconnecting..."
+                >
                   <WifiOff className="w-2.5 h-2.5" />
                 </div>
               )}

@@ -14,10 +14,7 @@ export async function POST(request: Request) {
   try {
     if (!SANCTUM_API_KEY) {
       console.error('SANCTUM_API_KEY not configured');
-      return NextResponse.json(
-        { error: 'Gateway API key not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Gateway API key not configured' }, { status: 500 });
     }
 
     const { transaction, cluster = 'devnet' } = await request.json();
@@ -31,19 +28,16 @@ export async function POST(request: Request) {
 
     console.log('Sending transaction to Sanctum Gateway:', { cluster });
 
-    const response = await fetch(
-      `${SANCTUM_GATEWAY_BASE}/${cluster}?apiKey=${SANCTUM_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          method: 'buildGatewayTransaction',
-          params: [transaction], // Base64 encoded transaction
-        }),
-      }
-    );
+    const response = await fetch(`${SANCTUM_GATEWAY_BASE}/${cluster}?apiKey=${SANCTUM_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        method: 'buildGatewayTransaction',
+        params: [transaction], // Base64 encoded transaction
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
