@@ -555,7 +555,7 @@ export default function RedeemPage() {
               {/* No SOL Available Info */}
               {vaultBalance === 0 && (
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary mb-4">Why Can't I Redeem?</h2>
+                  <h2 className="text-xl font-bold text-text-primary mb-4">Why Can&apos;t I Redeem?</h2>
                   <Card className="p-6 backdrop-blur-xl bg-gradient-to-br from-warning/5 to-surface/70 border-warning/30">
                     <div className="space-y-4">
                       <div className="flex gap-3">

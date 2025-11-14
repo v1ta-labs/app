@@ -24,7 +24,7 @@ export function NotificationSettings() {
 
       if (success) {
         toast.success('Multi-channel notifications enabled!', {
-          description: "You'll receive alerts via push, email, and in-app",
+          description: "You&apos;ll receive alerts via push, email, and in-app",
         });
       } else {
         toast.error('Failed to enable notifications');
