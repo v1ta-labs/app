@@ -5,12 +5,14 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { AppLayout } from '@/components/layout';
 import { HeroSection } from '@/components/home/hero-section';
 import { MysticalBranches } from '@/components/home/mystical-branches';
+import { DarkModeAnnouncementModal } from '@/components/home/dark-mode-announcement-modal';
 import { BorrowInterface } from '@/components/borrow/borrow-interface';
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const borrowSectionRef = useRef<HTMLDivElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [showDarkModeModal, setShowDarkModeModal] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -69,6 +71,17 @@ export default function HomePage() {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       }, 100);
+    }
+  }, []);
+
+  // Show dark mode announcement modal on page load (with delay)
+  useEffect(() => {
+    const hasSeenModal = localStorage.getItem('darkModeAnnouncementDismissed');
+    if (!hasSeenModal) {
+      const timer = setTimeout(() => {
+        setShowDarkModeModal(true);
+      }, 2000); // Show after 2 seconds
+      return () => clearTimeout(timer);
     }
   }, []);
 
@@ -212,6 +225,12 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
         </motion.div>
+
+        {/* Dark Mode Announcement Modal */}
+        <DarkModeAnnouncementModal
+          open={showDarkModeModal}
+          onOpenChange={setShowDarkModeModal}
+        />
       </div>
     </AppLayout>
   );
