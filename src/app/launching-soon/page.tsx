@@ -348,7 +348,7 @@ export default function LaunchingSoonPage() {
                     }}
                   />
                   <Send className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                  <span className="relative z-10">Join Privacy Revolution</span>
+                  <span className="relative z-10">Talk us</span>
                 </Button>
 
                 <Button
