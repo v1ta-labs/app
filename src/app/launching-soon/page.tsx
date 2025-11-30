@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Github, BookOpen, Send, Zap, Layers, Binary, Calculator } from 'lucide-react';
+import { Github, BookOpen, Send, Zap, Layers, Binary, Calculator, Shield, Lock, EyeOff, Moon } from 'lucide-react';
 import { Logotype } from '@/components/ui/logotype';
 import { MysticalBranches } from '@/components/home/mystical-branches';
 
@@ -190,9 +190,9 @@ export default function LaunchingSoonPage() {
                     </span>
                   </div>
 
-                  <h1 className="text-6xl md:text-8xl font-bold leading-[0.9] tracking-tight mb-6">
+                  <h1 className="text-6xl md:text-8xl font-bold leading-[0.88] tracking-tight mb-6">
                     <motion.span
-                      className="block text-text-primary relative"
+                      className="block bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent relative"
                       animate={{
                         x: [0, -2, 2, 0],
                       }}
@@ -202,13 +202,13 @@ export default function LaunchingSoonPage() {
                         repeatDelay: 5,
                       }}
                     >
-                      Decentralized
+                      Privacy-Native
                       {/* Glitch layers */}
                       <motion.span
-                        className="absolute inset-0 text-primary/30"
+                        className="absolute inset-0 text-primary/40"
                         animate={{
                           x: [-2, 2, -2],
-                          opacity: [0, 0.5, 0],
+                          opacity: [0, 0.6, 0],
                         }}
                         transition={{
                           duration: 0.2,
@@ -216,7 +216,7 @@ export default function LaunchingSoonPage() {
                           repeatDelay: 5,
                         }}
                       >
-                        Decentralized
+                        Privacy-Native
                       </motion.span>
                     </motion.span>
                     <motion.span
@@ -234,10 +234,10 @@ export default function LaunchingSoonPage() {
                       Stablecoins.
                       {/* Glitch layers */}
                       <motion.span
-                        className="absolute inset-0 text-success/30"
+                        className="absolute inset-0 text-success/40"
                         animate={{
                           x: [2, -2, 2],
-                          opacity: [0, 0.5, 0],
+                          opacity: [0, 0.6, 0],
                         }}
                         transition={{
                           duration: 0.2,
@@ -261,7 +261,7 @@ export default function LaunchingSoonPage() {
                         delay: 0.2,
                       }}
                     >
-                      Redefined.
+                      Fortified.
                       {/* Glitch layers */}
                       <motion.span
                         className="absolute inset-0 text-primary/30"
@@ -276,16 +276,18 @@ export default function LaunchingSoonPage() {
                           delay: 0.2,
                         }}
                       >
-                        Redefined.
+                        Fortified.
                       </motion.span>
                     </motion.span>
                   </h1>
 
                   <p className="text-xl md:text-2xl text-text-secondary leading-relaxed max-w-2xl font-light">
-                    Borrow VUSD stablecoin with only{' '}
-                    <span className="text-primary font-medium">110% collateral</span>.
-                    No governance. No banks. Pure{' '}
-                    <span className="text-primary font-medium">on-chain mathematics</span>.
+                    Where your financial privacy meets{' '}
+                    <span className="text-primary font-medium">110% capital efficiency</span>.
+                    <span className="text-primary font-medium">Confidential positions</span>,{' '}
+                    <span className="text-primary font-medium">zero-knowledge transactions</span>.
+                    Truly{' '}
+                    <span className="text-primary font-medium">decentralized security</span>.
                   </p>
                 </div>
 
@@ -297,9 +299,9 @@ export default function LaunchingSoonPage() {
                   className="flex gap-8 pt-4"
                 >
                   {[
-                    { value: '110%', label: 'Collateral Ratio', icon: Calculator },
-                    { value: '<1s', label: 'Settlement', icon: Zap },
-                    { value: '100%', label: 'On-Chain', icon: Binary },
+                    { value: '110%', label: 'Capital Efficiency', icon: Calculator },
+                    { value: '0%', label: 'Privacy Risk', icon: EyeOff },
+                    { value: '100%', label: 'Decentralized', icon: Shield },
                   ].map((stat, i) => (
                     <motion.div
                       key={stat.label}
@@ -346,7 +348,7 @@ export default function LaunchingSoonPage() {
                     }}
                   />
                   <Send className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-                  <span className="relative z-10">Join the Community</span>
+                  <span className="relative z-10">Join Privacy Revolution</span>
                 </Button>
 
                 <Button
@@ -400,25 +402,25 @@ export default function LaunchingSoonPage() {
               <div className="grid gap-5">
                 {[
                   {
-                    icon: Layers,
-                    title: 'Capital Efficiency',
-                    description: '110% collateralization ratio vs 150-200% in legacy systems',
-                    metric: '1.8x more efficient',
+                    icon: Shield,
+                    title: 'Confidential Positions',
+                    description: 'Private collateral and debt with Umbra stealth addresses',
+                    metric: 'Zero-knowledge proofs',
+                    gradient: 'from-primary/15 via-primary/8 to-transparent',
+                  },
+                  {
+                    icon: Moon,
+                    title: 'Privacy-First Design',
+                    description: 'Built from ground up for financial privacy on Solana',
+                    metric: 'Private by default',
                     gradient: 'from-primary/10 via-primary/5 to-transparent',
                   },
                   {
-                    icon: Binary,
-                    title: 'Algorithmic Stability',
-                    description: 'Dual oracle pricing with 60s staleness detection',
-                    metric: 'Pyth + Switchboard',
-                    gradient: 'from-success/10 via-success/5 to-transparent',
-                  },
-                  {
-                    icon: Zap,
-                    title: 'Instant Redemption',
-                    description: 'On-chain arbitrage maintains $1 peg with mathematical precision',
-                    metric: 'Sub-second finality',
-                    gradient: 'from-primary/10 via-primary/5 to-transparent',
+                    icon: Lock,
+                    title: 'Uncompromising Security',
+                    description: 'On-chain cryptography with zero-trust architecture',
+                    metric: 'Open source code',
+                    gradient: 'from-primary/15 via-primary/8 to-transparent',
                   },
                 ].map((feature, i) => (
                   <FeatureCard key={feature.title} feature={feature} index={i} />
@@ -467,7 +469,7 @@ export default function LaunchingSoonPage() {
                     }}
                   />
                   <span className="text-sm font-mono text-text-secondary">
-                    Protocol Status: <span className="text-primary">Development</span>
+                    Privacy Mode: <span className="text-primary">Coming Soon</span>
                   </span>
                 </div>
 
@@ -488,7 +490,7 @@ export default function LaunchingSoonPage() {
             className="text-center mt-16"
           >
             <p className="text-text-tertiary font-serif text-lg italic">
-              "Money without masters"
+              "Your financial position, <span className="text-primary/60">your business</span>"
             </p>
           </motion.div>
         </motion.div>
@@ -587,25 +589,27 @@ function FeatureCard({
           <div className="space-y-2.5 mt-auto">
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-primary/70 uppercase tracking-wider">
-                Performance
+                Security Level
               </span>
               <span className="text-xs font-mono font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full border border-primary/30 group-hover:bg-primary/20 transition-all">
                 {feature.metric}
               </span>
             </div>
 
-            {/* Progress indicator */}
+            {/* Privacy indicator */}
             <div className="flex gap-1.5">
               {[...Array(4)].map((_, i) => (
                 <motion.div
                   key={i}
-                  className="h-1 flex-1 bg-primary/20 rounded-full"
+                  className={`h-1 flex-1 rounded-full ${
+                    i < 2 ? 'bg-primary/40' : 'bg-success/40'
+                  }`}
                   initial={{ scaleX: 0 }}
                   animate={
                     isHovered
                       ? {
                           scaleX: 1,
-                          backgroundColor: 'rgba(42, 73, 48, 0.5)',
+                          backgroundColor: i < 2 ? 'rgba(42, 73, 48, 0.6)' : 'rgba(34, 197, 94, 0.6)',
                         }
                       : { scaleX: 0 }
                   }
