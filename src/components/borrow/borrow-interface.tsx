@@ -17,6 +17,10 @@ import {
   Loader2,
   CheckCircle2,
   ExternalLink,
+  Shield,
+  Moon,
+  Eye,
+  Lock,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { V1TAClient, CollateralType as V1TACollateralType } from '@/lib/vita';
@@ -68,6 +72,9 @@ export function BorrowInterface() {
   const [showFeeTooltip, setShowFeeTooltip] = useState(false);
   const [solPrice, setSolPrice] = useState<number>(0);
   const [isPriceLoading, setIsPriceLoading] = useState(true);
+  const [privacyHint, setPrivacyHint] = useState(false);
+  const [secretMode, setSecretMode] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
   const [isTransacting, setIsTransacting] = useState(false);
   const [txError, setTxError] = useState<string | null>(null);
   const [userCollateral, setUserCollateral] = useState<number>(0);
@@ -118,13 +125,15 @@ export function BorrowInterface() {
 
   useEffect(() => {
     fetchBalance();
-    const interval = setInterval(fetchBalance, 10000); // Update every 10s
+    // Reduce frequency to prevent rate limiting
+    const interval = setInterval(fetchBalance, 30000); // Update every 30s instead of 10s
     return () => clearInterval(interval);
   }, [fetchBalance]);
 
   useEffect(() => {
     fetchPosition();
-    const interval = setInterval(fetchPosition, 10000); // Update every 10s
+    // Reduce frequency to prevent rate limiting
+    const interval = setInterval(fetchPosition, 30000); // Update every 30s instead of 10s
     return () => clearInterval(interval);
   }, [fetchPosition]);
 
@@ -154,7 +163,7 @@ export function BorrowInterface() {
     };
 
     fetchSolPrice();
-    const interval = setInterval(fetchSolPrice, 10000); // Update every 10s
+    const interval = setInterval(fetchSolPrice, 30000); // Update every 30s instead of 10s
 
     return () => clearInterval(interval);
   }, []);
@@ -357,11 +366,107 @@ export function BorrowInterface() {
         </motion.div>
       </div>
 
-      <motion.div
-        whileHover={{ scale: 1.01 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      >
-        <Card className="p-0 overflow-hidden backdrop-blur-xl bg-surface/70 border-border/50">
+      {/* Secret Mode Toggle */}
+      <div className="relative">
+        <motion.div
+          className="text-center mb-4 cursor-pointer"
+          onClick={() => {
+            setClickCount(prev => prev + 1);
+            if (clickCount >= 4) {
+              setSecretMode(!secretMode);
+              setClickCount(0);
+            }
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <AnimatePresence>
+            {clickCount > 0 && clickCount < 5 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-xs text-primary/60"
+              >
+                Click {5 - clickCount} more times to unlock privacy mode...
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Secret Mode Indicator */}
+        <AnimatePresence>
+          {secretMode && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="absolute -top-12 left-1/2 -translate-x-1/2 z-10"
+            >
+              <div className="flex items-center gap-2 px-3 py-1 bg-primary/90 backdrop-blur-sm rounded-full border border-primary/20 shadow-lg">
+                <Moon className="w-3 h-3 text-text-primary" />
+                <span className="text-xs text-text-primary font-medium">Privacy Mode Activated</span>
+                <Shield className="w-3 h-3 text-text-primary" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <div className="relative">
+        {/* Secret Mode Visual Effects */}
+        <AnimatePresence>
+          {secretMode && (
+            <>
+              {/* Floating privacy icons - reduced count and optimized */}
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={`secret-icon-${i}`}
+                  initial={{ opacity: 0 }}
+                  animate={{
+                    opacity: [0, 0.4, 0],
+                    scale: [0.8, 1.2, 0.8],
+                    rotate: [0, 180]
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    delay: i * 1.5,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute w-6 h-6 pointer-events-none"
+                  style={{
+                    top: `${Math.sin(i * 120) * 60 + 50}%`,
+                    left: `${Math.cos(i * 120) * 60 + 50}%`,
+                  }}
+                >
+                  <div className="w-full h-full flex items-center justify-center">
+                    {i % 2 === 0 ? (
+                      <Moon className="w-3 h-3 text-primary/30" />
+                    ) : (
+                      <Shield className="w-3 h-3 text-primary/20" />
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Privacy aura effect - simplified */}
+              <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent blur-xl opacity-60" />
+            </>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          whileHover={{ scale: 1.01 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          className={secretMode ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-base rounded-2xl' : ''}
+        >
+          <Card className={`p-0 overflow-hidden backdrop-blur-xl ${
+            secretMode
+              ? 'bg-surface/80 border-primary/50 shadow-2xl shadow-primary/20'
+              : 'bg-surface/70 border-border/50'
+          }`}>
           <div className="p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-text-secondary uppercase tracking-wide">
@@ -519,8 +624,9 @@ export function BorrowInterface() {
               </div>
             </>
           )}
-        </Card>
-      </motion.div>
+          </Card>
+        </motion.div>
+      </div>
 
       {txError && (
         <div className="p-3 bg-error/10 border border-error/30 rounded-xl flex items-start gap-2">
@@ -710,8 +816,30 @@ export function BorrowInterface() {
 
             <div className="pt-2 border-t border-border/30 flex justify-between">
               <span className="text-text-tertiary">Min Collateral Ratio:</span>
-              <span className="font-semibold text-text-primary">110%</span>
+              <motion.span
+                className="font-semibold text-text-primary cursor-help"
+                whileHover={{ scale: 1.05 }}
+                onHoverStart={() => setPrivacyHint(true)}
+                onHoverEnd={() => setTimeout(() => setPrivacyHint(false), 3000)}
+              >
+                110%
+              </motion.span>
             </div>
+
+            {/* Privacy Easter Egg */}
+            <AnimatePresence>
+              {privacyHint && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="pt-2 flex items-center gap-2 text-xs text-primary/70"
+                >
+                  <Shield className="w-3 h-3" />
+                  <span>+ Privacy coming soon</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="pt-2 border-t border-border/30 p-3 bg-base/50 rounded-xl">
               <div className="text-[10px] text-text-tertiary uppercase tracking-wide font-bold mb-1.5">

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppKitAccount } from '@reown/appkit/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SearchBar } from '@/components/ui/search-bar';
 import { WalletButton } from '@/components/ui/wallet-button';
 import { NotificationModal } from '@/components/common/notification-modal';
 import { Logotype } from '@/components/ui/logotype';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Moon, Shield, Eye, Zap } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Borrow', href: '/', scrollTo: 'borrow-section' },
@@ -23,6 +24,8 @@ export function Header() {
   const { isConnected } = useAppKitAccount();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoHovered, setLogoHovered] = useState(false);
+  const [privacyHovered, setPrivacyHovered] = useState<string | null>(null);
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: (typeof NAV_ITEMS)[0]) => {
     if (item.scrollTo) {
@@ -54,28 +57,85 @@ export function Header() {
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            {/* Logo */}
-            <Link href="/" className="flex items-center shrink-0">
+            {/* Logo with Easter Egg */}
+            <Link
+              href="/"
+              className="flex items-center shrink-0 relative"
+              onMouseEnter={() => setLogoHovered(true)}
+              onMouseLeave={() => setLogoHovered(false)}
+            >
               <Logotype size="sm" showSubheading={false} interactive={false} />
+
+              {/* Privacy Easter Egg - Appears on hover */}
+              <AnimatePresence>
+                {logoHovered && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute -top-12 left-0 flex items-center gap-1 px-3 py-1.5 bg-elevated/95 backdrop-blur-sm rounded-full border border-primary/20 shadow-lg z-[999] whitespace-nowrap"
+                  style={{ transform: 'translateX(-50%)' }}
+                  >
+                    <Moon className="w-3 h-3 text-primary" />
+                    <Shield className="w-3 h-3 text-primary/60" />
+                    <span className="text-xs text-primary font-medium">Privacy coming soon...</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Link>
 
             {/* Navigation - Desktop */}
-            <nav className="hidden lg:flex items-center gap-1 shrink-0">
+            <nav className="hidden lg:flex items-center gap-1 shrink-0 relative">
               {NAV_ITEMS.map(item => {
                 const isActive = pathname === item.href;
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={e => handleNavClick(e, item)}
-                    className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'bg-surface text-text-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface/50'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
+                  <div key={item.href} className="relative">
+                    <Link
+                      href={item.href}
+                      onClick={e => handleNavClick(e, item)}
+                      className={`px-4 py-2 rounded-[12px] text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-surface text-text-primary'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-surface/50'
+                      }`}
+                      onMouseEnter={() => setPrivacyHovered(item.label)}
+                      onMouseLeave={() => setPrivacyHovered(null)}
+                    >
+                      {item.label}
+                    </Link>
+
+                    {/* Easter eggs for specific nav items */}
+                    <AnimatePresence>
+                      {privacyHovered === item.label && item.label === 'Positions' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }}
+                          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-elevated/90 backdrop-blur-sm rounded-lg border border-primary/20 shadow-lg z-50 whitespace-nowrap"
+                        >
+                          <div className="flex items-center gap-1 text-xs text-primary">
+                            <Eye className="w-3 h-3" />
+                            <span>Soon to be private...</span>
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {privacyHovered === item.label && item.label === 'Borrow' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }}
+                          className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-elevated/90 backdrop-blur-sm rounded-lg border border-primary/20 shadow-lg z-50 whitespace-nowrap"
+                        >
+                          <div className="flex items-center gap-1 text-xs text-primary">
+                            <Zap className="w-3 h-3" />
+                            <span>110% CR + Privacy</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 );
               })}
             </nav>

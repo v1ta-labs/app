@@ -112,7 +112,7 @@ export function SearchBar() {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask V1ta AI anything..."
+          placeholder="What is v1ta Dark Mode..."
           className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none"
         />
         <div className="flex items-center gap-1 shrink-0">

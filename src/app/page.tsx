@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { AppLayout } from '@/components/layout';
 import { HeroSection } from '@/components/home/hero-section';
 import { MysticalBranches } from '@/components/home/mystical-branches';
+import { PrivacyEasterEggs } from '@/components/home/privacy-easter-eggs';
 import { DarkModeAnnouncementModal } from '@/components/home/dark-mode-announcement-modal';
 import { BorrowInterface } from '@/components/borrow/borrow-interface';
 
@@ -90,6 +91,9 @@ export default function HomePage() {
       <div ref={containerRef} className="relative">
         {/* Mystical Branches Background */}
         <MysticalBranches />
+
+        {/* Privacy Easter Eggs - Subtle hints throughout the page */}
+        <PrivacyEasterEggs />
 
         {/* Hero Section */}
         <div className="relative z-10">

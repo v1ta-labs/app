@@ -26,13 +26,21 @@ V1ta is a Solana-native, fully on-chain stablecoin protocol. It allows users to 
 - **Interest Rate**: 0% (zero recurring fees)
 - No ongoing interest payments on borrowed VUSD
 
-### 3. Instant Redemption
+### 3. Privacy-Native Design (V1TA Dark Mode)
+- **Coming Soon**: Confidential stablecoin minting and transactions
+- **Private Positions**: Hide collateral amounts and debt from public view
+- **Confidential Transfers**: Private VUSD transactions using zero-knowledge proofs
+- **Integration Partners**: Umbra Protocol, Magicblock PER, Token-2022, Arcium MXE
+- **Timeline**: Phased rollout starting Q1 2026
+- **User Benefits**: Protection from MEV, front-running, and competitive analysis
+
+### 4. Instant Redemption
 - Anyone can redeem VUSD for equivalent collateral value at any time
 - Creates natural arbitrage incentives to maintain $1 peg
 - On-chain redemption mechanism ensures price stability
 - **Liquidation Penalty**: 5%
 
-### 4. Speed & Performance
+### 5. Speed & Performance
 - Sub-second transaction finality
 - Minimal fees on Solana network
 - Real-time price updates from dual oracles
@@ -74,6 +82,13 @@ V1ta is a Solana-native, fully on-chain stablecoin protocol. It allows users to 
 - Mint VUSD against collateral (up to 110% ratio)
 - Pay one-time 0.5% borrow fee
 - No recurring interest
+
+### Privacy Features (Coming Soon)
+- **Private Positions**: Open CDPs without revealing collateral/debt amounts
+- **Confidential Transfers**: Send VUSD privately using zero-knowledge proofs
+- **Privacy Levels**: Choose between public, shielded, confidential, or private
+- **Institutional Use**: Private treasury operations without competitive exposure
+- **Whale Protection**: Large positions protected from MEV and front-running
 
 ### Redeem
 - Exchange VUSD for underlying collateral
@@ -161,6 +176,27 @@ A: VUSD is V1ta's decentralized stablecoin, pegged to $1 USD, backed by crypto c
 **Q: How do I borrow VUSD?**
 A: Connect wallet, deposit SOL/jitoSOL/mSOL, and mint VUSD at 110% collateral ratio.
 
+**Q: What is V1TA Dark Mode?**
+A: V1TA Dark Mode is our upcoming privacy feature suite that will enable confidential stablecoin minting and transactions. It allows users to hide their financial positions from public view.
+
+**Q: How will V1TA privacy work?**
+A: Through partnerships with Umbra Protocol (stealth addresses), Magicblock PER (hardware-secured execution), Token-2022 confidential transfers, and Arcium MXE. Users can choose privacy levels from transparent to fully private.
+
+**Q: When will privacy features launch?**
+A: Phased rollout starting Q1 2025. Umbra integration will be first (immediate), followed by Magicblock PER (Q1 2026), then Arcium MXE (Q1 2026).
+
+**Q: What is special about Umbra Protocol?**
+A: Umbra provides Solana's native financial privacy layer with stealth addresses that are cryptographically unlinkable. Each transaction uses a unique stealth address, making transactions untraceable while maintaining recoverability.
+
+**Q: How do Magicblock Private Ephemeral Rollups work?**
+A: Magicblock PER uses Intel TDX hardware security to create confidential execution environments. It provides hardware-secured privacy while maintaining Solana's speed and composable DeFi functionality.
+
+**Q: What makes Arcium's MXE different?**
+A: Arcium's Multi-Party Execution Environments (MXEs) are customizable privacy environments with configurable protocols, participants, and encryption. They support confidential SPL tokens and enterprise-grade multi-party computation.
+
+**Q: Why does V1TA need privacy?**
+A: Current DeFi is completely transparent - anyone can see your collateral, debt, and liquidation prices. This creates risks: whales become MEV targets, institutions can't use it for treasury operations, and competitors can track your moves.
+
 **Q: What happens if my collateral ratio drops below 110%?**
 A: Your position becomes eligible for liquidation. The stability pool will absorb your debt.
 
@@ -178,6 +214,12 @@ A: Yes, smart contracts are audited. Protocol is currently in devnet testing pha
 
 **Q: What is the Stability Pool?**
 A: A pool of VUSD deposits that absorbs liquidated debt and earns liquidation rewards.
+
+**Q: Will privacy be optional?**
+A: Yes! Users can choose their privacy level - from fully transparent (current behavior) to completely private positions.
+
+**Q: How does V1TA compare to other privacy DeFi?**
+A: V1TA combines unmatched capital efficiency (110% CR) with comprehensive privacy - a unique combination in the DeFi space.
 
 ## Status
 - **Current Phase**: Devnet Testing
